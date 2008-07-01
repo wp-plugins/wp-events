@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
-Tags: events, countdown
+Tags: events, countdown, admin, template, sidebar, page
 Requires at least: 2.5
 Tested up to: 2.5.1
 Stable tag: 1.1
@@ -15,6 +15,7 @@ Events allows you to list Events on a seperate page or in the sidebar, or both. 
 When you create or edit an event you can set it to be archived. So that it remains listed. Non-archived events are automatically deleted one day (24 hours) after they expire.
 
 **Features**
+
 * Easy installation
 * Widget for themes that support it
 * Separate page for events
@@ -34,13 +35,18 @@ When you create or edit an event you can set it to be archived. So that it remai
 * Management page
 * Set amount of events to show in the sidebar
 * Un-install option to remove the database table
-And more, see for yourself…
+
+And more, see for yourself...
 
 == Installation ==
 
+= Quick start =
+
 Basically you unzip the file and put it in the /plugins/ folder. Then you go to the plugins page and activate the plugin.
 
-For detailed instructions go to: [Here](http://meandmymac.net/plugins/events/)
+= Detailed guide =
+
+[Events install guide](http://meandmymac.net/plugins/events/#install)
 
 == Frequently Asked Questions ==
 
