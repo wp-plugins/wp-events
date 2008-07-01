@@ -42,10 +42,14 @@ And more, see for yourself...
 
 = Quick start =
 
-Basically you unzip the file and put it in the /plugins/ folder. Then you go to the plugins page and activate the plugin.
+1. Basically you unzip the file and put it in the /plugins/ folder.
+1. Then you go to the plugins page and activate the plugin.
+1. Add Events from the write > events panel and change options from the options > events panel
+1. Add this to the sidebar `<?php if(function_exists(events_sidebar)) { ?>
+<li><?php echo events_sidebar(); ?></li>
+<?php } ?>`
 
-= Detailed guide =
-
+= Detailed installation guide =
 [Events install guide](http://meandmymac.net/plugins/events/#install)
 
 == Frequently Asked Questions ==
@@ -57,3 +61,5 @@ Visit here for the FAQ and support:
 
 1. The screen where you add events
 2. Several events listed on a page
+
+[More screenshots](http://meandmymac.net/plugins/events/#screens)
