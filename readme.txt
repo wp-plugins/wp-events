@@ -15,25 +15,25 @@ Events allows you to list Events on a seperate page or in the sidebar, or both. 
 When you create or edit an event you can set it to be archived. So that it remains listed. Non-archived events are automatically deleted one day (24 hours) after they expire.
 
 **Features**
-- Easy installation
-- Widget for themes that support it
-- Separate page for events
-- Completely customizable layout
-- Multi language
-- Link events to pages/posts
-- Set a start and end time (duration) for events
-- Show events in your sidebar
-- Archive events
-- Edit existing events
-- Auto remove old, non-archived events
-- Unlimited dateformats to show events dates
-- Options page
-- Set a date and time to the minute
-- Set a message to show before and another one to show after the event occurs
-- User level restriction
-- Management page
-- Set amount of events to show in the sidebar
-- Un-install option to remove the database table
+* Easy installation
+* Widget for themes that support it
+* Separate page for events
+* Completely customizable layout
+* Multi language
+* Link events to pages/posts
+* Set a start and end time (duration) for events
+* Show events in your sidebar
+* Archive events
+* Edit existing events
+* Auto remove old, non-archived events
+* Unlimited dateformats to show events dates
+* Options page
+* Set a date and time to the minute
+* Set a message to show before and another one to show after the event occurs
+* User level restriction
+* Management page
+* Set amount of events to show in the sidebar
+* Un-install option to remove the database table
 And more, see for yourself…
 
 == Installation ==
