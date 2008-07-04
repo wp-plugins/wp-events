@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: This plugin enables the user to show a list of events with a static countdown to date.
 Author: Arnan de Gans
-Version: 1.1
+Version: 1.1.1
 Author URI: http://meandmymac.net/
 */
 
@@ -194,11 +194,11 @@ function events_add_page() {
 				</tr>
 		      	<tr>
 			        <th scope="row">Title:</th>
-			        <td colspan="3"><input name="events_title" type="text" size="40" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" /> <em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+			        <td colspan="3"><input name="events_title" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 		      	</tr>
 		      	<tr>
-			        <th scope="row">Event:</th>
-			        <td colspan="3"><input name="events_pre_event" type="text" size="40" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->pre_message;?>" /> <em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+			        <th scope="row">Event description:</th>
+			        <td colspan="3"><textarea name="events_pre_event" cols="50" rows="4"><?php echo $edit_event->pre_message;?></textarea><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 		      	</tr>
 		      	<tr>
 			        <th scope="row">Start DD/MM/YYYY:</th>
@@ -235,12 +235,12 @@ function events_add_page() {
 					</select></td>
 				</tr>
 		      	<tr>
-			        <th scope="row">After (shows after the event, optional):</th>
-			        <td colspan="3"><input name="events_post_event" type="text" size="40" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->post_message;?>" /> <em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+			        <th scope="row">Message when event ends (optional):</th>
+			        <td colspan="3"><input name="events_post_event" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->post_message;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 		      	</tr>
 		      	<tr>
 			        <th scope="row">Link to page (optional):</th>
-			        <td colspan="3"><input name="events_link" type="text" size="40" maxlength="10000" value="<?php echo $edit_event->link;?>" /> <em>Include full url and http://, this can be any page.</em></td>
+			        <td colspan="3"><input name="events_link" type="text" size="52 " maxlength="10000" value="<?php echo $edit_event->link;?>" /><br /><em>Include full url and http://, this can be any page.</em></td>
 		      	</tr>
 	    	</table>
 	    	

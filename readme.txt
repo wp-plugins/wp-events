@@ -4,7 +4,7 @@ Donate link: http://meandmymac.net/donate/
 Tags: events, countdown, admin, template, sidebar, page
 Requires at least: 2.5
 Tested up to: 2.5.1
-Stable tag: 1.1
+Stable tag: 1.1.1
 
 Create a list with events/appointments/concerts/future happenings and show them on your site.
 
