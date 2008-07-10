@@ -15,6 +15,7 @@ Events allows you to list Events on a seperate page or in the sidebar, or both. 
 When you create or edit an event you can set it to be archived. So that it remains listed. Non-archived events are automatically deleted one day (24 hours) after they expire.
 
 **Features**
+
 * Easy installation
 * Widget for themes that support it
 * Separate page for events
