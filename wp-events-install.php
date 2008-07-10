@@ -18,6 +18,7 @@ function events_mysql_install() {
 	$sql = "CREATE TABLE ".$table_name." (
   		id mediumint(8) unsigned NOT NULL auto_increment,
   		title longtext NOT NULL,
+  		title_link varchar(3) NOT NULL default 'N',
   		pre_message longtext NOT NULL,
   		post_message longtext NOT NULL,
   		link longtext NOT NULL,
