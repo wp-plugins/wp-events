@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: This plugin enables the user to show a list of events with a static countdown to date.
 Author: Arnan de Gans
-Version: 1.1.1
+Version: 1.2
 Author URI: http://meandmymac.net/
 */
 
@@ -194,7 +194,7 @@ function events_add_page() {
 				</tr>
 		      	<tr>
 			        <th scope="row">Title:</th>
-			        <td colspan="3"><input name="events_title" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+			        <td colspan="3"><input name="events_title" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" /> <input type="checkbox" name="events_title_link" <?php if($edit_event->title_link == 'Y') { ?>checked="checked" <?php } ?>/> Make this a link.<br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 		      	</tr>
 		      	<tr>
 			        <th scope="row">Event description:</th>
@@ -245,7 +245,7 @@ function events_add_page() {
 	    	</table>
 	    	
 	    	<p class="submit">
-				<input type="submit" name="Submit" value="Save event &raquo;" />
+				<input type="submit" name="Submit" value="Save event &raquo;" /> <span style="float: right;"><?php if($event_edit_id) { ?><a href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events&amp;delete_event='.$edit_event->id; ?>" style="color: #f00;" onclick="return confirm('Are you sure you want to delete this event?')">Delete event</a><?php } ?></span>
 	    	</p>
 
 	  	</form>
@@ -415,7 +415,7 @@ function events_options_page() {
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="sidebar_template" cols="50" rows="4"><?php echo stripslashes($events_config['sidebar_template']); ?></textarea><br /><em>Options: %author% %title% %event% %starttime% %date% %link%</em></td>
+			        <td><textarea name="sidebar_template" cols="50" rows="4"><?php echo stripslashes($events_config['sidebar_template']); ?></textarea><br /><em>Options: %title% %event% %link% %starttime% %date% %author%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>

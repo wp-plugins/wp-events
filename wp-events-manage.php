@@ -18,6 +18,7 @@ function events_insert_input() {
 	$eventmsg 			= 'Passed event';
 	$author 			= $_POST['events_username'];
 	$title	 			= htmlspecialchars(trim($_POST['events_title'], "\t\n "), ENT_QUOTES);
+	$title_link	 		= $_POST['events_title_link'];
 	$pre_event 			= htmlspecialchars(trim($_POST['events_pre_event'], "\t\n "), ENT_QUOTES);
 	$post_event 		= htmlspecialchars(trim($_POST['events_post_event'], "\t\n "), ENT_QUOTES);
 	$link		 		= htmlspecialchars(trim($_POST['events_link'], "\t\n "), ENT_QUOTES);
@@ -52,18 +53,24 @@ function events_insert_input() {
 			$post_event = $eventmsg;
 		}
 		
+		if(isset($title_link)) {
+			$title_link = 'Y';
+		} else {
+			$title_link = 'N';
+		}
+		
 		/* Check if you need to update or insert a new record */
 		if(strlen($event_id) != 0) {
 			/* Update an existing event */
 			$postquery = "UPDATE ".$wpdb->prefix."events SET
-			title = '$title', pre_message = '$pre_event', post_message = '$post_event', link = '$link', thetime = '$startdate', theend = '$enddate', priority = '$priority', archive = '$archive', author = '$author'
+			title = '$title', title_link = '$title_link', pre_message = '$pre_event', post_message = '$post_event', link = '$link', thetime = '$startdate', theend = '$enddate', priority = '$priority', archive = '$archive', author = '$author'
 			WHERE id = '$event_id'";
 			$action = "update";
 		} else {
 			/* New event */
 			$postquery = "INSERT INTO ".$wpdb->prefix."events
-			(title, pre_message, post_message, link, thetime, theend, author, priority, archive)
-			VALUES ('$title', '$pre_event', '$post_event', '$link', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
+			(title, title_link, pre_message, post_message, link, thetime, theend, author, priority, archive)
+			VALUES ('$title', '$title_link', '$pre_event', '$post_event', '$link', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
 			$action = "new";
 		}
 		if($wpdb->query($postquery) !== FALSE) {
@@ -100,7 +107,7 @@ function events_clear_old() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_request_delete($del_archive = 0) {
-	global $userdata, $wpdb, $events_config;
+	global $wpdb, $events_config;
 
 	$event_ids = $_POST['eventcheck'];
 	/* Check if multiple events are checked */

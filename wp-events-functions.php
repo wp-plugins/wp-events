@@ -15,6 +15,7 @@ function events_countdown($time_event, $message) {
 	global $events_config;
 
   	$timezone = date("U") . $events_config['timezone'];
+  	//$timezone = date("U") + (get_option('gmt_offset') * 3600);
   	$difference = $time_event - $timezone;
   	if ($difference < 0) $difference = 0;
 
@@ -55,6 +56,7 @@ function events_archive($time_event, $message) {
 	global $events_config;
 
   	$timezone = date("U") . $events_config['timezone'];
+  	//$timezone = date("U") + (get_option('gmt_offset') * 3600);
   	$difference = $timezone - $time_event;
   	if ($difference < 0) $difference = 0;
 
@@ -93,7 +95,8 @@ function events_archive($time_event, $message) {
 function events_duration($event_start, $event_end) {
 	global $events_config;
 
-  	$timezone = $event_start . $events_config['timezone'];
+//  	$timezone = date("U") . $events_config['timezone'];
+  	$timezone = date("U") . get_option('gmt_offset');
   	$difference = $event_end - $timezone;
   	if ($difference < 0) $difference = 0;
 
@@ -139,15 +142,16 @@ function events_sidebar() {
 	$output_sidebar = stripslashes(html_entity_decode($sidebar_header));
 	if($events_config['order']){
 		/* Fetch events */
-		$SQL = "SELECT id, title, pre_message, post_message, link, thetime, theend, author FROM ".$wpdb->prefix."events WHERE priority = 'yes' AND thetime > ".date("U")." ORDER BY ".$events_config['order']." LIMIT ".$events_config['amount'];
+		$SQL = "SELECT * FROM ".$wpdb->prefix."events WHERE priority = 'yes' AND thetime > ".date("U")." ORDER BY ".$events_config['order']." LIMIT ".$events_config['amount'];
 		$events = $wpdb->get_results($SQL);
 		/* Start processing data */
-		if(count($output_sidebar) == 0) {
+		if(count($events) == 0) {
 			$output_sidebar .= '<em>'.$events_config['language_noevents'].'</em>';
 		} else {
 			foreach($events as $event) {
 				/* Build event output */
 				$sidebar_template = $events_config['sidebar_template'];
+				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$sidebar_template = str_replace('%title%', substr($event->title, 0 , $events_config['sidelength']), $sidebar_template);
 				$sidebar_template = str_replace('%event%', substr($event->pre_message, 0 , $events_config['sidelength']), $sidebar_template);
 				if(strlen($event->link) > 0) { $sidebar_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_config['language_pagelink'].'</a>', $sidebar_template); }
@@ -184,7 +188,7 @@ function events_page($content) {
 	$output_page = stripslashes(html_entity_decode($page_header));
 	if($events_config['order']){
 		/* Current events */
-		$SQL = "SELECT id, title, pre_message, post_message, link, thetime, theend, author FROM ".$wpdb->prefix."events WHERE thetime > ".date("U")." ORDER BY ".$events_config['order'];
+		$SQL = "SELECT * FROM ".$wpdb->prefix."events WHERE thetime > ".date("U")." ORDER BY ".$events_config['order'];
 		$events = $wpdb->get_results($SQL);
 		/* Start processing data */
 		if ( count($events) == 0 ) {
@@ -193,6 +197,7 @@ function events_page($content) {
 			foreach ( $events as $event ) {
 				/* Build event output */
 				$page_template = $events_config['page_template'];
+				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$page_template = str_replace('%title%', $event->title, $page_template);
 				$page_template = str_replace('%event%', $event->pre_message, $page_template);
 				$page_template = str_replace('%after%', $event->post_message, $page_template);
@@ -233,25 +238,26 @@ function events_page_archive($content) {
 	$output_archive = stripslashes(html_entity_decode($archive_header));
 	if($events_config['order_archive']){
 		/* Archived events */
-		$arSQL = "SELECT id, title, pre_message, post_message, link, thetime, theend, author FROM ".$wpdb->prefix."events WHERE archive='yes' AND thetime < ".date("U")." ORDER BY ".$events_config['order_archive'];
-		$archives = $wpdb->get_results($arSQL);
+		$arSQL = "SELECT * FROM ".$wpdb->prefix."events WHERE archive='yes' AND thetime < ".date("U")." ORDER BY ".$events_config['order_archive'];
+		$events = $wpdb->get_results($arSQL);
 		/* Start processing data */
-		if ( count($archives) == 0 ) {
+		if ( count($events) == 0 ) {
 			$output_archive .= '<em>'.$events_config['language_noarchive'].'</em>';
 		} else {
-			foreach ( $archives as $archive ) {
+			foreach ( $events as $event ) {
 				/* Build event output */
 				$archive_template = $events_config['archive_template'];
-				$archive_template = str_replace('%title%', $archive->title, $archive_template);
-				$archive_template = str_replace('%event%', $archive->pre_message, $archive_template);
-				$archive_template = str_replace('%after%', $archive->post_message, $archive_template);
-				if(strlen($archive->link) > 0) { $archive_template = str_replace('%link%', '<a href="'.$archive->link.'" target="'.$events_config['linktarget'].'">'.$events_config['language_pagelink'].'</a>', $archive_template); }
+				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
+				$archive_template = str_replace('%title%', $event->title, $archive_template);
+				$archive_template = str_replace('%event%', $event->pre_message, $archive_template);
+				$archive_template = str_replace('%after%', $event->post_message, $archive_template);
+				if(strlen($archive->link) > 0) { $archive_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_config['language_pagelink'].'</a>', $archive_template); }
 				if(strlen($archive->link) == 0) { $archive_template = str_replace('%link%', '', $archive_template); }
-				$archive_template = str_replace('%starttime%', events_archive($archive->thetime, $archive->post_message), $archive_template);
-				$archive_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $archive->theend)), $archive_template);
-				$archive_template = str_replace('%duration%', events_duration($archive->thetime, $archive->theend), $archive_template);
-				$archive_template = str_replace('%date%', utf8_encode(strftime($events_config['dateformat'], $archive->thetime)), $archive_template);
-				$archive_template = str_replace('%author%', $archive->author, $archive_template);
+				$archive_template = str_replace('%starttime%', events_archive($archive->thetime, $event->post_message), $archive_template);
+				$archive_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $archive_template);
+				$archive_template = str_replace('%duration%', events_duration($event->thetime, $archive->theend), $archive_template);
+				$archive_template = str_replace('%date%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $archive_template);
+				$archive_template = str_replace('%author%', $event->author, $archive_template);
 				
 				$output_archive .= stripslashes(html_entity_decode($archive_template));
 			}
@@ -285,24 +291,25 @@ function events_daily($content) {
 		$daystart = date("U", mktime(0, 0, 0, date("m"),   date("d"),   date("Y")));
 		$dayend = $daystart + 86400;
 		$toSQL = "SELECT id, title, pre_message, post_message, link, thetime, theend, author FROM ".$wpdb->prefix."events WHERE thetime > ".$daystart." AND thetime < ".$dayend." ORDER BY ".$events_config['order'];
-		$dailies = $wpdb->get_results($toSQL);
+		$events = $wpdb->get_results($toSQL);
 		// Start processing data
 		if ( count($dailies) == 0 ) {
 			$output_daily .= '<em>'.$events_config['language_nodaily'].'</em>';
 		} else {
-			foreach ( $dailies as $daily ) {
+			foreach ( $events as $event ) {
 				// Build event output
 				$daily_template = $events_config['daily_template'];
-				$daily_template = str_replace('%title%', $daily->title, $daily_template);
-				$daily_template = str_replace('%event%', $daily->pre_message, $daily_template);
-				$daily_template = str_replace('%after%', $daily->post_message, $daily_template);
-				if(strlen($daily->link) > 0) { $daily_template = str_replace('%link%', '<a href="'.$daily->link.'" target="'.$events_config['linktarget'].'">'.$events_config['language_pagelink'].'</a>', $daily_template); }
+				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
+				$daily_template = str_replace('%title%', $event->title, $daily_template);
+				$daily_template = str_replace('%event%', $event->pre_message, $daily_template);
+				$daily_template = str_replace('%after%', $event->post_message, $daily_template);
+				if(strlen($daily->link) > 0) { $daily_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_config['language_pagelink'].'</a>', $daily_template); }
 				if(strlen($daily->link) == 0) { $daily_template = str_replace('%link%', '', $daily_template); }
-				$daily_template = str_replace('%starttime%', events_countdown($daily->thetime, $daily->post_message), $daily_template);
-				$daily_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $daily->theend)), $daily_template);
-				$daily_template = str_replace('%duration%', events_duration($daily->thetime, $daily->theend), $daily_template);
-				$daily_template = str_replace('%date%', utf8_encode(strftime($events_config['dateformat'], $daily->thetime)), $daily_template);
-				$daily_template = str_replace('%author%', $daily->author, $daily_template);
+				$daily_template = str_replace('%starttime%', events_countdown($event->thetime, $event->post_message), $daily_template);
+				$daily_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $daily_template);
+				$daily_template = str_replace('%duration%', events_duration($event->thetime, $event->theend), $daily_template);
+				$daily_template = str_replace('%date%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $daily_template);
+				$daily_template = str_replace('%author%', $event->author, $daily_template);
 				
 				$output_daily .= stripslashes(html_entity_decode($daily_template));
 			}
