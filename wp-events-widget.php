@@ -1,13 +1,11 @@
 <?php
-/*
-Plugin Name: Events Widget 
-Plugin URI: http://meandmymac.net/plugins/events/
-Description: Adds a sidebar widget to list events from the Events plugin.
-Author: Ulisse Perusin <uli.peru@gmail.com>
-Version: 1.1
-Author URI: http://ulisse.wordpress.com
-*/
+/*-------------------------------------------------------------
+ Name:      widget_wp_events_init
 
+ Purpose:   Events widget for the sidebar
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
 function widget_wp_events_init() {
 
 	if ( !function_exists('register_sidebar_widget') )
@@ -24,9 +22,7 @@ function widget_wp_events_init() {
 		echo $after_widget;
 	}
 
-	register_sidebar_widget(array('Events Widget', 'widgets'), 'widget_wp_events');
+	$widget_ops = array('classname' => 'widget_wp_events', 'description' => "Options are found on the 'settings > Event' panel!" );
+	wp_register_sidebar_widget('Events', 'Events', 'widget_wp_events', $widget_ops);
 }
-
-add_action('widgets_init', 'widget_wp_events_init');
-
 ?>
