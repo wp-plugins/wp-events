@@ -84,6 +84,8 @@ function events_plugin_uninstall() {
 
 	// Delete Option
 	delete_option('events_config');
+	delete_option('events_template');
+	delete_option('events_language');
 
 	// Deactivate Plugin
 	$current = get_settings('active_plugins');
