@@ -255,7 +255,7 @@ function events_page_archive($content) {
 				$archive_template = str_replace('%event%', $event->pre_message, $archive_template);
 				$archive_template = str_replace('%after%', $event->post_message, $archive_template);
 				if(strlen($event->link) > 0) { $archive_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $archive_template); }
-				if(strlen($archive->link) == 0) { $archive_template = str_replace('%link%', '', $archive_template); }
+				if(strlen($event->link) == 0) { $archive_template = str_replace('%link%', '', $archive_template); }
 				$archive_template = str_replace('%starttime%', events_archive($archive->thetime, $event->post_message), $archive_template);
 				$archive_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $archive_template);
 				$archive_template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $archive_template);
@@ -309,7 +309,7 @@ function events_daily($content) {
 				$daily_template = str_replace('%event%', $event->pre_message, $daily_template);
 				$daily_template = str_replace('%after%', $event->post_message, $daily_template);
 				if(strlen($event->link) > 0) { $daily_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $daily_template); }
-				if(strlen($daily->link) == 0) { $daily_template = str_replace('%link%', '', $daily_template); }
+				if(strlen($event->link) == 0) { $daily_template = str_replace('%link%', '', $daily_template); }
 				$daily_template = str_replace('%starttime%', events_countdown($event->thetime, $event->post_message), $daily_template);
 				$daily_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $daily_template);
 				$daily_template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $daily_template);
