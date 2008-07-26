@@ -22,7 +22,7 @@ function widget_wp_events_init() {
 		echo $after_widget;
 	}
 
-	$widget_ops = array('classname' => 'widget_wp_events', 'description' => "Options are found on the 'settings > Event' panel!" );
+	$widget_ops = array('classname' => 'widget_wp_events', 'description' => "Options are found on the 'settings > Events' panel!" );
 	wp_register_sidebar_widget('Events', 'Events', 'widget_wp_events', $widget_ops);
 }
 ?>

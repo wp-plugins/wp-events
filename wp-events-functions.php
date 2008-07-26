@@ -48,7 +48,7 @@ function events_countdown($time_event, $message) {
  Name:      events_archive
 
  Purpose:   Calculates the time since the event
- Receive:   $time_event
+ Receive:   $time_event, $message
  Return:	$output_archive
 -------------------------------------------------------------*/
 function events_archive($time_event, $message) {
@@ -87,7 +87,7 @@ function events_archive($time_event, $message) {
  Name:      events_duration
 
  Purpose:   Calculates the duration of the event
- Receive:   $event_start, $event_end
+ Receive:   $event_start, $event_end, $allday
  Return:	$output_duration
 -------------------------------------------------------------*/
 function events_duration($event_start, $event_end, $allday) {
@@ -128,7 +128,7 @@ function events_duration($event_start, $event_end, $allday) {
 /*-------------------------------------------------------------
  Name:      events_sidebar
 
- Purpose:   Show events in the sidebar
+ Purpose:   Show events in the sidebar, also used for widget
  Receive:   -none-
  Return:	$output_sidebar
 -------------------------------------------------------------*/
@@ -176,11 +176,11 @@ function events_sidebar() {
 /*-------------------------------------------------------------
  Name:      events_page
 
- Purpose:   Create list of events for the template
- Receive:   $content
+ Purpose:   Create list of events for the template using shortcodes
+ Receive:   $atts, $content
  Return:	$output_page
 -------------------------------------------------------------*/
-function events_page($content) {
+function events_page($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
 	$page_header = $events_template['page_h_template'];
@@ -221,18 +221,17 @@ function events_page($content) {
 	}
 	$output_page .= stripslashes(html_entity_decode($page_footer));
 	
-	$content = preg_replace("/\[events_list\]/is", $output_page, $content);
-	return $content;
+	return $output_page;
 }
 
 /*-------------------------------------------------------------
  Name:      events_page_archive
 
- Purpose:   Create list of archived events for the template
- Receive:   $content
+ Purpose:   Create list of archived events for the template using shortcodes
+ Receive:   $atts, $content
  Return:	$output_archive
 -------------------------------------------------------------*/
-function events_page_archive($content) {
+function events_page_archive($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
 	$archive_header = $events_template['archive_h_template'];
@@ -273,18 +272,17 @@ function events_page_archive($content) {
 	}
 	$output_archive .= stripslashes(html_entity_decode($archive_footer));
 	
-	$content = preg_replace("/\[events_archive\]/is", $output_archive, $content);
-	return $content;
+	return $output_archive;
 }
 
 /*-------------------------------------------------------------
  Name:      events_daily
 
- Purpose:   Create list of events for today on the template
- Receive:   $content
+ Purpose:   Create list of events for today on the template using shortcodes
+ Receive:   $atts, $content
  Return:	$output_daily
 -------------------------------------------------------------*/
-function events_daily($content) {
+function events_daily($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
 	$daily_header = $events_template['daily_h_template'];
@@ -327,8 +325,7 @@ function events_daily($content) {
 	}
 	$output_daily .= stripslashes(html_entity_decode($daily_footer));
 	
-	$content = preg_replace("/\[events_today\]/is", $output_daily, $content);
-	return $content;
+	return $output_daily;
 }
 
 ?>

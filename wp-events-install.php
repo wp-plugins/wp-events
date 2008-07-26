@@ -27,7 +27,7 @@ function events_mysql_install() {
   		thetime int(15) NOT NULL default '0',
   		theend int(15) NOT NULL default '0',
   		author varchar(60) NOT NULL default '',
-  		priority varchar(4) NOT NULL default 'Low',
+  		priority varchar(4) NOT NULL default 'no',
   		archive varchar(4) NOT NULL default 'no',
   		PRIMARY KEY  (`id`)
 		);";
