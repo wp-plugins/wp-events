@@ -1,9 +1,4 @@
 <?php
-#-------------------------------------------------------------
-# DO NOT REMOVE ME!! THIS FILE IS NEEDED FOR THE PLUGIN!
-# I HANDLE THE CALCULATION OF DATES AND OUTPUT OF THE PLUGIN!
-#-------------------------------------------------------------
-
 /*-------------------------------------------------------------
  Name:      events_countdown
 
@@ -45,13 +40,13 @@ function events_countdown($time_event, $message) {
 }
 
 /*-------------------------------------------------------------
- Name:      events_archive
+ Name:      events_countup
 
  Purpose:   Calculates the time since the event
  Receive:   $time_event, $message
  Return:	$output_archive
 -------------------------------------------------------------*/
-function events_archive($time_event, $message) {
+function events_countup($time_event, $message) {
 	global $events_config, $events_language;
 
   	$timezone = date("U") . $events_config['timezone'];
@@ -137,11 +132,10 @@ function events_sidebar() {
 
 	$sidebar_header = $events_template['sidebar_h_template'];
 	$sidebar_footer = $events_template['sidebar_f_template'];
-	$sidebar_header = str_replace('%sidebar_title%', $events_language['language_s_title'], $sidebar_header);
 	$output_sidebar = stripslashes(html_entity_decode($sidebar_header));
 	if($events_config['order']){
 		/* Fetch events */
-		$SQL = "SELECT * FROM ".$wpdb->prefix."events WHERE priority = 'yes' AND thetime > ".date("U")." ORDER BY ".$events_config['order']." LIMIT ".$events_config['amount'];
+		$SQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `priority` = 'yes' AND `thetime` > ".date("U")." ORDER BY ".$events_config['order']." LIMIT ".$events_config['amount'];
 		$events = $wpdb->get_results($SQL);
 		/* Start processing data */
 		if(count($events) == 0) {
@@ -182,14 +176,19 @@ function events_sidebar() {
 -------------------------------------------------------------*/
 function events_page($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
-
+	
+	if(empty($atts['amount'])) $amount = ""; 
+		else $amount = " LIMIT $atts[amount]";
+		
+	if(empty($atts['order'])) $order = $events_config['order']; 
+		else $amount = $atts['order'];
+		
 	$page_header = $events_template['page_h_template'];
 	$page_footer = $events_template['page_f_template'];
-	$page_header = str_replace('%page_title%', $events_language['language_p_title'], $page_header);
 	$output_page = stripslashes(html_entity_decode($page_header));
 	if($events_config['order']){
 		/* Current events */
-		$SQL = "SELECT * FROM ".$wpdb->prefix."events WHERE thetime > ".date("U")." ORDER BY ".$events_config['order'];
+		$SQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` > ".date('U')." ORDER BY $order$amount";
 		$events = $wpdb->get_results($SQL);
 		/* Start processing data */
 		if ( count($events) == 0 ) {
@@ -225,22 +224,27 @@ function events_page($atts, $content = null) {
 }
 
 /*-------------------------------------------------------------
- Name:      events_page_archive
+ Name:      events_archive
 
  Purpose:   Create list of archived events for the template using shortcodes
  Receive:   $atts, $content
  Return:	$output_archive
 -------------------------------------------------------------*/
-function events_page_archive($atts, $content = null) {
+function events_archive($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
+	if(empty($atts['amount'])) $amount = ""; 
+		else $amount = " LIMIT $atts[amount]";
+		
+	if(empty($atts['order'])) $order = $events_config['order_archive']; 
+		else $amount = $atts['order'];
+		
 	$archive_header = $events_template['archive_h_template'];
 	$archive_footer = $events_template['archive_f_template'];
-	$archive_header = str_replace('%archive_title%', $events_language['language_a_title'], $archive_header);
 	$output_archive = stripslashes(html_entity_decode($archive_header));
 	if($events_config['order_archive']){
 		/* Archived events */
-		$arSQL = "SELECT * FROM ".$wpdb->prefix."events WHERE archive='yes' AND thetime < ".date("U")." ORDER BY ".$events_config['order_archive'];
+		$arSQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `archive` = 'yes' AND `thetime` < ".date('U')." ORDER BY $order$amount";
 		$events = $wpdb->get_results($arSQL);
 		/* Start processing data */
 		if ( count($events) == 0 ) {
@@ -248,22 +252,22 @@ function events_page_archive($atts, $content = null) {
 		} else {
 			foreach ( $events as $event ) {
 				/* Build event output */
-				$archive_template = $events_template['archive_template'];
+				$page_template = $events_template['archive_template'];
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
-				$archive_template = str_replace('%title%', $event->title, $archive_template);
-				$archive_template = str_replace('%event%', $event->pre_message, $archive_template);
-				$archive_template = str_replace('%after%', $event->post_message, $archive_template);
-				if(strlen($event->link) > 0) { $archive_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $archive_template); }
-				if(strlen($event->link) == 0) { $archive_template = str_replace('%link%', '', $archive_template); }
-				$archive_template = str_replace('%starttime%', events_archive($archive->thetime, $event->post_message), $archive_template);
-				$archive_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $archive_template);
-				$archive_template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $archive_template);
-				$archive_template = str_replace('%date%', str_replace('00:00', '', utf8_encode(strftime($events_config['dateformat'], $event->thetime))), $archive_template);
-				$archive_template = str_replace('%author%', $event->author, $archive_template);
-				if(strlen($event->location) != 0) { $archive_template = str_replace('%location%', $events_template['location_seperator'].$event->location, $archive_template); }
-				if(strlen($event->location) == 0) { $archive_template = str_replace('%location%', '', $archive_template); }
+				$page_template = str_replace('%title%', $event->title, $page_template);
+				$page_template = str_replace('%event%', $event->pre_message, $page_template);
+				$page_template = str_replace('%after%', $event->post_message, $page_template);
+				if(strlen($event->link) > 0) { $page_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $page_template); }
+				if(strlen($event->link) == 0) { $page_template = str_replace('%link%', '', $page_template); }
+				$page_template = str_replace('%starttime%', events_countup($archive->thetime, $event->post_message), $page_template);
+				$page_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $page_template);
+				$page_template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $page_template);
+				$page_template = str_replace('%date%', str_replace('00:00', '', utf8_encode(strftime($events_config['dateformat'], $event->thetime))), $page_template);
+				$page_template = str_replace('%author%', $event->author, $page_template);
+				if(strlen($event->location) != 0) { $page_template = str_replace('%location%', $events_template['location_seperator'].$event->location, $page_template); }
+				if(strlen($event->location) == 0) { $page_template = str_replace('%location%', '', $page_template); }
 				
-				$output_archive .= stripslashes(html_entity_decode($archive_template));
+				$output_archive .= stripslashes(html_entity_decode($page_template));
 			}
 		}
 	} else {
@@ -276,47 +280,52 @@ function events_page_archive($atts, $content = null) {
 }
 
 /*-------------------------------------------------------------
- Name:      events_daily
+ Name:      events_today
 
  Purpose:   Create list of events for today on the template using shortcodes
  Receive:   $atts, $content
  Return:	$output_daily
 -------------------------------------------------------------*/
-function events_daily($atts, $content = null) {
+function events_today($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
+	if(empty($atts['amount'])) $amount = ""; 
+		else $amount = " LIMIT $atts[amount]";
+		
+	if(empty($atts['order'])) $order = $events_config['order']; 
+		else $amount = $atts['order'];
+		
 	$daily_header = $events_template['daily_h_template'];
 	$daily_footer = $events_template['daily_f_template'];
-	$daily_header = str_replace('%daily_title%', $events_language['language_d_title'], $daily_header);
 	$output_daily = stripslashes(html_entity_decode($daily_header));
 	if($events_config['order']){
 		// Todays events
 		$daystart = date("U", mktime(0, 0, 0, date("m"),   date("d"),   date("Y")));
 		$dayend = $daystart + 86400;
-		$toSQL = "SELECT id, title, location, pre_message, post_message, link, thetime, theend, author FROM ".$wpdb->prefix."events WHERE thetime > ".$daystart." AND thetime < ".$dayend." ORDER BY ".$events_config['order'];
+		$toSQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` >= ".$daystart." AND `thetime` <= ".$dayend." ORDER BY $order$amount";
 		$events = $wpdb->get_results($toSQL);
 		// Start processing data
-		if ( count($dailies) == 0 ) {
+		if ( count($events) == 0 ) {
 			$output_daily .= '<em>'.$events_language['language_nodaily'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
 				// Build event output
-				$daily_template = $events_template['daily_template'];
+				$page_template = $events_template['daily_template'];
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
-				$daily_template = str_replace('%title%', $event->title, $daily_template);
-				$daily_template = str_replace('%event%', $event->pre_message, $daily_template);
-				$daily_template = str_replace('%after%', $event->post_message, $daily_template);
-				if(strlen($event->link) > 0) { $daily_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $daily_template); }
-				if(strlen($event->link) == 0) { $daily_template = str_replace('%link%', '', $daily_template); }
-				$daily_template = str_replace('%starttime%', events_countdown($event->thetime, $event->post_message), $daily_template);
-				$daily_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $daily_template);
-				$daily_template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $daily_template);
-				$daily_template = str_replace('%date%', str_replace('00:00', '', utf8_encode(strftime($events_config['dateformat'], $event->thetime))), $daily_template);
-				$daily_template = str_replace('%author%', $event->author, $daily_template);
-				if(strlen($event->location) != 0) { $daily_template = str_replace('%location%', $events_template['location_seperator'].$event->location, $daily_template); }
-				if(strlen($event->location) == 0) { $daily_template = str_replace('%location%', '', $daily_template); }
+				$page_template = str_replace('%title%', $event->title, $page_template);
+				$page_template = str_replace('%event%', $event->pre_message, $page_template);
+				$page_template = str_replace('%after%', $event->post_message, $page_template);
+				if(strlen($event->link) > 0) { $page_template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $page_template); }
+				if(strlen($event->link) == 0) { $page_template = str_replace('%link%', '', $page_template); }
+				$page_template = str_replace('%starttime%', events_countdown($event->thetime, $event->post_message), $page_template);
+				$page_template = str_replace('%endtime%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->theend)), $page_template);
+				$page_template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $page_template);
+				$page_template = str_replace('%date%', str_replace('00:00', '', utf8_encode(strftime($events_config['dateformat'], $event->thetime))), $page_template);
+				$page_template = str_replace('%author%', $event->author, $page_template);
+				if(strlen($event->location) != 0) { $page_template = str_replace('%location%', $events_template['location_seperator'].$event->location, $page_template); }
+				if(strlen($event->location) == 0) { $page_template = str_replace('%location%', '', $page_template); }
 				
-				$output_daily .= stripslashes(html_entity_decode($daily_template));
+				$output_daily .= stripslashes(html_entity_decode($page_template));
 			}
 		}
 	} else {

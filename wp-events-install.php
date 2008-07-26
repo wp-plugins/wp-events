@@ -1,9 +1,4 @@
 <?php
-#-------------------------------------------------------------
-# DO NOT REMOVE ME!! THIS FILE IS NEEDED FOR THE PLUGIN!
-# I HANDLE THE INSTALLATION AND DELETION OF THE PLUGIN!
-#-------------------------------------------------------------
-
 /*-------------------------------------------------------------
  Name:      events_mysql_install
 
@@ -15,20 +10,20 @@ function events_mysql_install() {
 	global $wpdb;
 
 	$table_name = $wpdb->prefix . "events";
-	$sql = "CREATE TABLE ".$table_name." (
-  		id mediumint(8) unsigned NOT NULL auto_increment,
-  		title longtext NOT NULL,
-  		title_link varchar(3) NOT NULL default 'N',
-  		location varchar(255) NOT NULL,
-  		pre_message longtext NOT NULL,
-  		post_message longtext NOT NULL,
-  		link longtext NOT NULL,
-  		allday varchar(3) NOT NULL default 'N',
-  		thetime int(15) NOT NULL default '0',
-  		theend int(15) NOT NULL default '0',
-  		author varchar(60) NOT NULL default '',
-  		priority varchar(4) NOT NULL default 'no',
-  		archive varchar(4) NOT NULL default 'no',
+	$sql = "CREATE TABLE `".$table_name."` (
+  		`id` mediumint(8) unsigned NOT NULL auto_increment,
+  		`title` longtext NOT NULL,
+  		`title_link` varchar(3) NOT NULL default 'N',
+  		`location` varchar(255) NOT NULL,
+  		`pre_message` longtext NOT NULL,
+  		`post_message` longtext NOT NULL,
+  		`link` longtext NOT NULL,
+  		`allday` varchar(3) NOT NULL default 'N',
+  		`thetime` int(15) NOT NULL default '0',
+  		`theend` int(15) NOT NULL default '0',
+  		`author` varchar(60) NOT NULL default '',
+  		`priority` varchar(4) NOT NULL default 'no',
+  		`archive` varchar(4) NOT NULL default 'no',
   		PRIMARY KEY  (`id`)
 		);";
 
@@ -79,7 +74,7 @@ function events_plugin_uninstall() {
 	global $wpdb;
 
 	// Drop MySQL Tables
-	$SQL = "DROP TABLE ".$wpdb->prefix."events";
+	$SQL = "DROP TABLE `".$wpdb->prefix."events`";
 	mysql_query($SQL) or die("An unexpected error occured.<br />".mysql_error());
 
 	// Delete Option

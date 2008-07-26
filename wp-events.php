@@ -23,8 +23,8 @@ events_check_config();
 if(events_mysql_table_exists()) {
 	// Add filters for adding the tags in the WP page/post field
 	add_shortcode('events_list', 'events_page');
-	add_shortcode('events_today', 'events_daily');
-	add_shortcode('events_archive', 'events_page_archive');
+	add_shortcode('events_today', 'events_today');
+	add_shortcode('events_archive', 'events_archive');
 
 	events_clear_old(); // Remove non archived old events
 
@@ -87,7 +87,11 @@ function events_manage_page() {
 	global $wpdb, $userdata, $events_config;
 
 	$action = $_GET['action'];
-	if(isset($_POST['order'])) { $order = $_POST['order']; } else { $order = 'thetime ASC'; }
+	if(isset($_POST['order'])) { 
+		$order = $_POST['order']; 
+	} else { 
+		$order = 'thetime ASC'; 
+	}
 	
 	if ($action == 'deleted') { ?>
 		<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
@@ -99,7 +103,7 @@ function events_manage_page() {
 
 	<div class="wrap">
 		<h2>Manage Events (<a href="post-new.php?page=wp-events.php">add new</a>)</h2>
-		<?php $events = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events ORDER BY ".$order); ?>
+		<?php $events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` ORDER BY $order"); ?>
 
 		<form name="events" id="post" method="post" action="edit.php?page=wp-events.php">
 			<div class="tablenav">
@@ -186,7 +190,7 @@ function events_add_page() {
 		<?php } else { ?>
 		<h2>Edit event</h2>
 		<?php
-		$SQL = "SELECT * FROM ".$wpdb->prefix."events WHERE id = ".$event_edit_id;
+		$SQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `id` = $event_edit_id";
 		$edit_event = $wpdb->get_row($SQL);
 		list($sday, $smonth, $syear, $shour, $sminute) = split(" ", date("d m Y H i", $edit_event->thetime));
 		list($eday, $emonth, $eyear, $ehour, $eminute) = split(" ", date("d m Y H i", $edit_event->theend)); ?>
@@ -531,22 +535,6 @@ function events_options_page() {
 					<td colspan="2" bgcolor="#DDD">Here you set the language of the plugin. Change the fields below to match your language.
 				</tr>
 		      	<tr valign="top">
-			        <th scope="row">Sidebar title:</th>
-			        <td><input name="events_language_s_title" type="text" value="<?php echo $events_language['language_s_title'];?>" size="45" /> (default: Highlighted Events)</td>
-		      	</tr>
-		      	<tr valign="top">
-			        <th scope="row">Page title:</th>
-			        <td><input name="events_language_p_title" type="text" value="<?php echo $events_language['language_p_title'];?>" size="45" /> (default: Important Events)</td>
-		      	</tr>
-		      	<tr valign="top">
-			        <th scope="row">Archive title:</th>
-			        <td><input name="events_language_a_title" type="text" value="<?php echo $events_language['language_a_title'];?>" size="45" /> (default: Archive)</td>
-		      	</tr>
-		      	<tr valign="top">
-			        <th scope="row">Daily title:</th>
-			        <td><input name="events_language_d_title" type="text" value="<?php echo $events_language['language_d_title'];?>" size="45" /> (default: Todays Events)</td>
-		      	</tr>
-		      	<tr valign="top">
 			        <th scope="row">Today:</th>
 			        <td><input name="events_language_today" type="text" value="<?php echo $events_language['language_today'];?>" size="45" /> (default: today)</td>
 		      	</tr>
@@ -692,135 +680,5 @@ function events_options_page() {
 	  	</form>
 	</div>
 <?php
-}	
-
-/*-------------------------------------------------------------
- Name:      events_check_config
-
- Purpose:   Create or update the options
- Receive:   -none-
- Return:    -none-
--------------------------------------------------------------*/
-function events_check_config() {
-	if ( !$option = get_option('events_config') ) {
-		// Default Options
-		$option['length'] 					= 1000;
-		$option['sidelength'] 				= 120;
-		$option['linktarget']				= '_blank';
-		$option['amount'] 					= 2;
-		$option['minlevel'] 				= 7;
-		$option['managelevel'] 				= 10;
-		$option['custom_date_page']			= 'no';
-		$option['custom_date_sidebar']		= 'no';
-		$option['dateformat'] 				= '%d %b %Y';
-		$option['dateformat_sidebar']		= '%d %b %Y %H:%M';
-		$option['timezone']					= '+0';
-		$option['order'] 					= 'thetime ASC';
-		$option['order_archive'] 			= 'thetime DESC';
-		$option['localization'] 			= 'en_EN';
-		update_option('events_config', $option);
-		
-		$template['sidebar_template'] 		= '<li>%title% %link% on %date%<br />%starttime%</li>';
-		$template['sidebar_h_template'] 	= '<h2>%sidebar_title%</h2><ul>';
-		$template['sidebar_f_template'] 	= '</ul>';
-		$template['page_template'] 			= '<p><strong>%title%</strong>, %event% on %date%<br />%starttime%<br />Duration: %duration%<br />%link%</p>';
-		$template['page_h_template'] 		= '<h2>%page_title%</h2>';
-		$template['page_f_template'] 		= '';
-		$template['archive_template'] 		= '<p><strong>%title%</strong>, %after% on %date%<br />%starttime%<br />%endtime%<br />%link%</p>';
-		$template['archive_h_template'] 	= '<h2>%archive_title%</h2>';
-		$template['archive_f_template'] 	= '';
-		$template['daily_template'] 		= '<p>%title% %event% - %starttime% %link%</p>';
-		$template['daily_h_template'] 		= '<h2>%daily_title%</h2>';
-		$template['daily_f_template'] 		= '';
-		$template['location_seperator']		= '@ ';
-		update_option('events_template', $template);
-
-		$language['language_s_title'] 		= 'Highlighted events';
-		$language['language_p_title'] 		= 'Important events';
-		$language['language_a_title'] 		= 'Archive';
-		$language['language_d_title'] 		= 'Todays events';
-		$language['language_today'] 		= 'today';
-		$language['language_hours'] 		= 'hours';
-		$language['language_minutes'] 		= 'minutes';
-		$language['language_day'] 			= 'day';
-		$language['language_days'] 			= 'days';
-		$language['language_and'] 			= 'and';
-		$language['language_on'] 			= 'on';
-		$language['language_in'] 			= 'in';
-		$language['language_ago'] 			= 'ago';
-		$language['language_sidelink']		= 'more &raquo;';
-		$language['language_pagelink']		= 'More information &raquo;';
-		$language['language_noevents'] 		= 'No events to show';
-		$language['language_nodaily'] 		= 'No events today';
-		$language['language_noarchive'] 	= 'No events in the archive';
-		$language['language_e_config'] 		= 'A configuration error has occured';
-		$language['language_noduration'] 	= 'No duration!';
-		$language['language_allday'] 		= 'All-day event!';
-		update_option('events_language', $language);
-	}
-}
-
-/*-------------------------------------------------------------
- Name:      events_options_submit
-
- Purpose:   Save options
- Receive:   $_POST
- Return:    -none-
--------------------------------------------------------------*/
-function events_options_submit() {
-	//options page
-	$option['length'] 					= trim($_POST['events_length'], "\t\n ");
-	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
-	$option['amount'] 					= trim($_POST['events_amount'], "\t\n ");
-	$option['minlevel'] 				= $_POST['events_minlevel'];
-	$option['managelevel'] 				= $_POST['events_managelevel'];
-	$option['custom_date_page'] 		= $_POST['events_custom_date_page'];
-	$option['custom_date_sidebar']		= $_POST['events_custom_date_sidebar'];
-	$option['dateformat'] 				= htmlspecialchars(trim($_POST['events_dateformat'], "\t\n "), ENT_QUOTES);
-	$option['dateformat_sidebar']		= htmlspecialchars(trim($_POST['events_dateformat_sidebar'], "\t\n "), ENT_QUOTES);
-	$option['timezone'] 				= $_POST['events_timezone'];
-	$option['order']	 				= $_POST['events_order'];
-	$option['order_archive'] 			= $_POST['events_order_archive'];
-	$option['linktarget'] 				= $_POST['events_linktarget'];
-	$option['localization'] 			= htmlspecialchars(trim($_POST['events_localization'], "\t\n "), ENT_QUOTES);
-	update_option('events_config', $option);
-	
-	$template['sidebar_template'] 		= htmlspecialchars(trim($_POST['sidebar_template'], "\t\n "), ENT_QUOTES);
-	$template['sidebar_h_template'] 	= htmlspecialchars(trim($_POST['sidebar_h_template'], "\t\n "), ENT_QUOTES);
-	$template['sidebar_f_template'] 	= htmlspecialchars(trim($_POST['sidebar_f_template'], "\t\n "), ENT_QUOTES);
-	$template['page_template'] 			= htmlspecialchars(trim($_POST['page_template'], "\t\n "), ENT_QUOTES);
-	$template['page_h_template'] 		= htmlspecialchars(trim($_POST['page_h_template'], "\t\n "), ENT_QUOTES);
-	$template['page_f_template'] 		= htmlspecialchars(trim($_POST['page_f_template'], "\t\n "), ENT_QUOTES);
-	$template['archive_template'] 		= htmlspecialchars(trim($_POST['archive_template'], "\t\n "), ENT_QUOTES);
-	$template['archive_h_template'] 	= htmlspecialchars(trim($_POST['archive_h_template'], "\t\n "), ENT_QUOTES);
-	$template['archive_f_template'] 	= htmlspecialchars(trim($_POST['archive_f_template'], "\t\n "), ENT_QUOTES);
-	$template['daily_template']	 		= htmlspecialchars(trim($_POST['daily_template'], "\t\n "), ENT_QUOTES);
-	$template['daily_h_template'] 		= htmlspecialchars(trim($_POST['daily_h_template'], "\t\n "), ENT_QUOTES);
-	$template['daily_f_template'] 		= htmlspecialchars(trim($_POST['daily_f_template'], "\t\n "), ENT_QUOTES);
-	$template['location_seperator']		= htmlspecialchars(trim($_POST['location_seperator'], "\t\n"), ENT_QUOTES); // Note, spaces are not filtered
-	update_option('events_template', $template);
-	
-	$language['language_s_title'] 		= htmlspecialchars(trim($_POST['events_language_s_title'], "\t\n "), ENT_QUOTES);
-	$language['language_p_title'] 		= htmlspecialchars(trim($_POST['events_language_p_title'], "\t\n "), ENT_QUOTES);
-	$language['language_a_title'] 		= htmlspecialchars(trim($_POST['events_language_a_title'], "\t\n "), ENT_QUOTES);
-	$language['language_d_title']		= htmlspecialchars(trim($_POST['events_language_d_title'], "\t\n "), ENT_QUOTES);
-	$language['language_today'] 		= htmlspecialchars(trim($_POST['events_language_today'], "\t\n "), ENT_QUOTES);
-	$language['language_hours'] 		= htmlspecialchars(trim($_POST['events_language_hours'], "\t\n "), ENT_QUOTES);
-	$language['language_minutes'] 		= htmlspecialchars(trim($_POST['events_language_minutes'], "\t\n "), ENT_QUOTES);
-	$language['language_day'] 			= htmlspecialchars(trim($_POST['events_language_day'], "\t\n "), ENT_QUOTES);
-	$language['language_days'] 			= htmlspecialchars(trim($_POST['events_language_days'], "\t\n "), ENT_QUOTES);
-	$language['language_and'] 			= htmlspecialchars(trim($_POST['events_language_and'], "\t\n "), ENT_QUOTES);
-	$language['language_on'] 			= htmlspecialchars(trim($_POST['events_language_on'], "\t\n "), ENT_QUOTES);
-	$language['language_in'] 			= htmlspecialchars(trim($_POST['events_language_in'], "\t\n "), ENT_QUOTES);
-	$language['language_ago'] 			= htmlspecialchars(trim($_POST['events_language_ago'], "\t\n "), ENT_QUOTES);
-	$language['language_sidelink']		= htmlspecialchars(trim($_POST['events_language_sidelink'], "\t\n "), ENT_QUOTES);
-	$language['language_pagelink'] 		= htmlspecialchars(trim($_POST['events_language_pagelink'], "\t\n "), ENT_QUOTES);
-	$language['language_noevents']		= htmlspecialchars(trim($_POST['events_language_noevents'], "\t\n "), ENT_QUOTES);
-	$language['language_nodaily']		= htmlspecialchars(trim($_POST['events_language_nodaily'], "\t\n "), ENT_QUOTES);
-	$language['language_noarchive'] 	= htmlspecialchars(trim($_POST['events_language_noarchive'], "\t\n "), ENT_QUOTES);
-	$language['language_e_config'] 		= htmlspecialchars(trim($_POST['events_language_e_config'], "\t\n "), ENT_QUOTES);
-	$language['language_noduration'] 	= htmlspecialchars(trim($_POST['events_language_noduration'], "\t\n "), ENT_QUOTES);
-	$language['language_allday'] 		= htmlspecialchars(trim($_POST['events_language_allday'], "\t\n "), ENT_QUOTES);
-	update_option('events_language', $language);
 }
 ?>

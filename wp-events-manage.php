@@ -1,9 +1,4 @@
 <?php
-#-------------------------------------------------------------
-# DO NOT REMOVE ME!! THIS FILE IS NEEDED FOR THE PLUGIN!
-# I HANDLE THE MANAGEMENT OF THE EVENTS!
-#-------------------------------------------------------------
-
 /*-------------------------------------------------------------
  Name:      events_insert_input
 
@@ -69,21 +64,20 @@ function events_insert_input() {
 		if(isset($allday)) {
 			$allday = 'Y';			
 		} else {
-			// Or there is just no link
 			$allday = 'N';
 		}
 		
 		/* Check if you need to update or insert a new record */
 		if(strlen($event_id) != 0) {
 			/* Update an existing event */
-			$postquery = "UPDATE ".$wpdb->prefix."events SET
-			title = '$title', title_link = '$title_link', location = '$location', pre_message = '$pre_event', post_message = '$post_event', link = '$link', allday = '$allday', thetime = '$startdate', theend = '$enddate', priority = '$priority', archive = '$archive', author = '$author'
-			WHERE id = '$event_id'";
+			$postquery = "UPDATE `".$wpdb->prefix."events` SET
+			`title` = '$title', `title_link` = '$title_link', `location` = '$location', `pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', `thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', `author` = '$author'
+			WHERE `id` = '$event_id'";
 			$action = "update";
 		} else {
 			/* New event */
-			$postquery = "INSERT INTO ".$wpdb->prefix."events
-			(title, title_link, location, pre_message, post_message, link, allday, thetime, theend, author, priority, archive)
+			$postquery = "INSERT INTO `".$wpdb->prefix."events`
+			(`title`, `title_link`, `location`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
 			VALUES ('$title', '$title_link', '$location', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
 			$action = "new";
 		}
@@ -110,7 +104,7 @@ function events_clear_old() {
 	global $wpdb;
 
 	$removeme = date("U") - 86400;
-	$wpdb->query("DELETE FROM ".$wpdb->prefix."events WHERE thetime < ".$removeme." AND archive = 'no'");
+	$wpdb->query("DELETE FROM `".$wpdb->prefix."events` WHERE `thetime` < ".$removeme." AND `archive` = 'no'");
 }
 
 /*-------------------------------------------------------------
@@ -150,21 +144,21 @@ function events_delete_eventid ($event_id) {
 
 	if($event_id > 0) {
 		$SQL = "SELECT
-		".$wpdb->prefix."events.id,
-		".$wpdb->prefix."events.author,
-		".$wpdb->prefix."users.display_name as display_name
+		`".$wpdb->prefix."events.id`,
+		`".$wpdb->prefix."events.author`,
+		`".$wpdb->prefix."users.display_name` as `display_name`
 		FROM
-		".$wpdb->prefix."events,
-		".$wpdb->prefix."users
+		`".$wpdb->prefix."events`,
+		`".$wpdb->prefix."users`
 		WHERE
-		".$wpdb->prefix."events.id = '$event_id'
+		`".$wpdb->prefix."events.id` = '$event_id'
 		AND
-		".$wpdb->prefix."users.display_name = ".$wpdb->prefix."events.author";
+		`".$wpdb->prefix."users.display_name` = ".$wpdb->prefix."events.author";
 
 		$event = $wpdb->get_row($SQL);
 
 		if ( $userdata->user_level >= $events_config['managelevel'] OR $event->display_name == $event->author ) {
-			$SQL = "DELETE FROM ".$wpdb->prefix."events WHERE id = $event_id";
+			$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $event_id";
 			if($wpdb->query($SQL) == FALSE) {
 				die(mysql_error());
 			}
@@ -173,6 +167,128 @@ function events_delete_eventid ($event_id) {
 			exit;
 		}
 	}
+}
+
+/*-------------------------------------------------------------
+ Name:      events_check_config
+
+ Purpose:   Create or update the options
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_check_config() {
+	if ( !$option = get_option('events_config') ) {
+		// Default Options
+		$option['length'] 					= 1000;
+		$option['sidelength'] 				= 120;
+		$option['linktarget']				= '_blank';
+		$option['amount'] 					= 2;
+		$option['minlevel'] 				= 7;
+		$option['managelevel'] 				= 10;
+		$option['custom_date_page']			= 'no';
+		$option['custom_date_sidebar']		= 'no';
+		$option['dateformat'] 				= '%d %b %Y';
+		$option['dateformat_sidebar']		= '%d %b %Y %H:%M';
+		$option['timezone']					= '+0';
+		$option['order'] 					= 'thetime ASC';
+		$option['order_archive'] 			= 'thetime DESC';
+		$option['localization'] 			= 'en_EN';
+		update_option('events_config', $option);
+		
+		$template['sidebar_template'] 		= '<li>%title% %link% on %date%<br />%starttime%</li>';
+		$template['sidebar_h_template'] 	= '<h2>Highlighted events</h2><ul>';
+		$template['sidebar_f_template'] 	= '</ul>';
+		$template['page_template'] 			= '<p><strong>%title%</strong>, %event% on %date%<br />%starttime%<br />Duration: %duration%<br />%link%</p>';
+		$template['page_h_template'] 		= '<h2>Important events</h2>';
+		$template['page_f_template'] 		= '';
+		$template['archive_template'] 		= '<p><strong>%title%</strong>, %after% on %date%<br />%starttime%<br />%endtime%<br />%link%</p>';
+		$template['archive_h_template'] 	= '<h2>Archive</h2>';
+		$template['archive_f_template'] 	= '';
+		$template['daily_template'] 		= '<p>%title% %event% - %starttime% %link%</p>';
+		$template['daily_h_template'] 		= '<h2>Todays events</h2>';
+		$template['daily_f_template'] 		= '';
+		$template['location_seperator']		= '@ ';
+		update_option('events_template', $template);
+
+		$language['language_today'] 		= 'today';
+		$language['language_hours'] 		= 'hours';
+		$language['language_minutes'] 		= 'minutes';
+		$language['language_day'] 			= 'day';
+		$language['language_days'] 			= 'days';
+		$language['language_and'] 			= 'and';
+		$language['language_on'] 			= 'on';
+		$language['language_in'] 			= 'in';
+		$language['language_ago'] 			= 'ago';
+		$language['language_sidelink']		= 'more &raquo;';
+		$language['language_pagelink']		= 'More information &raquo;';
+		$language['language_noevents'] 		= 'No events to show';
+		$language['language_nodaily'] 		= 'No events today';
+		$language['language_noarchive'] 	= 'No events in the archive';
+		$language['language_e_config'] 		= 'A configuration error has occured';
+		$language['language_noduration'] 	= 'No duration!';
+		$language['language_allday'] 		= 'All-day event!';
+		update_option('events_language', $language);
+	}
+}
+
+/*-------------------------------------------------------------
+ Name:      events_options_submit
+
+ Purpose:   Save options
+ Receive:   $_POST
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_options_submit() {
+	//options page
+	$option['length'] 					= trim($_POST['events_length'], "\t\n ");
+	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
+	$option['amount'] 					= trim($_POST['events_amount'], "\t\n ");
+	$option['minlevel'] 				= $_POST['events_minlevel'];
+	$option['managelevel'] 				= $_POST['events_managelevel'];
+	$option['custom_date_page'] 		= $_POST['events_custom_date_page'];
+	$option['custom_date_sidebar']		= $_POST['events_custom_date_sidebar'];
+	$option['dateformat'] 				= htmlspecialchars(trim($_POST['events_dateformat'], "\t\n "), ENT_QUOTES);
+	$option['dateformat_sidebar']		= htmlspecialchars(trim($_POST['events_dateformat_sidebar'], "\t\n "), ENT_QUOTES);
+	$option['timezone'] 				= $_POST['events_timezone'];
+	$option['order']	 				= $_POST['events_order'];
+	$option['order_archive'] 			= $_POST['events_order_archive'];
+	$option['linktarget'] 				= $_POST['events_linktarget'];
+	$option['localization'] 			= htmlspecialchars(trim($_POST['events_localization'], "\t\n "), ENT_QUOTES);
+	update_option('events_config', $option);
+	
+	$template['sidebar_template'] 		= htmlspecialchars(trim($_POST['sidebar_template'], "\t\n "), ENT_QUOTES);
+	$template['sidebar_h_template'] 	= htmlspecialchars(trim($_POST['sidebar_h_template'], "\t\n "), ENT_QUOTES);
+	$template['sidebar_f_template'] 	= htmlspecialchars(trim($_POST['sidebar_f_template'], "\t\n "), ENT_QUOTES);
+	$template['page_template'] 			= htmlspecialchars(trim($_POST['page_template'], "\t\n "), ENT_QUOTES);
+	$template['page_h_template'] 		= htmlspecialchars(trim($_POST['page_h_template'], "\t\n "), ENT_QUOTES);
+	$template['page_f_template'] 		= htmlspecialchars(trim($_POST['page_f_template'], "\t\n "), ENT_QUOTES);
+	$template['archive_template'] 		= htmlspecialchars(trim($_POST['archive_template'], "\t\n "), ENT_QUOTES);
+	$template['archive_h_template'] 	= htmlspecialchars(trim($_POST['archive_h_template'], "\t\n "), ENT_QUOTES);
+	$template['archive_f_template'] 	= htmlspecialchars(trim($_POST['archive_f_template'], "\t\n "), ENT_QUOTES);
+	$template['daily_template']	 		= htmlspecialchars(trim($_POST['daily_template'], "\t\n "), ENT_QUOTES);
+	$template['daily_h_template'] 		= htmlspecialchars(trim($_POST['daily_h_template'], "\t\n "), ENT_QUOTES);
+	$template['daily_f_template'] 		= htmlspecialchars(trim($_POST['daily_f_template'], "\t\n "), ENT_QUOTES);
+	$template['location_seperator']		= htmlspecialchars(trim($_POST['location_seperator'], "\t\n"), ENT_QUOTES); // Note, spaces are not filtered
+	update_option('events_template', $template);
+	
+	$language['language_today'] 		= htmlspecialchars(trim($_POST['events_language_today'], "\t\n "), ENT_QUOTES);
+	$language['language_hours'] 		= htmlspecialchars(trim($_POST['events_language_hours'], "\t\n "), ENT_QUOTES);
+	$language['language_minutes'] 		= htmlspecialchars(trim($_POST['events_language_minutes'], "\t\n "), ENT_QUOTES);
+	$language['language_day'] 			= htmlspecialchars(trim($_POST['events_language_day'], "\t\n "), ENT_QUOTES);
+	$language['language_days'] 			= htmlspecialchars(trim($_POST['events_language_days'], "\t\n "), ENT_QUOTES);
+	$language['language_and'] 			= htmlspecialchars(trim($_POST['events_language_and'], "\t\n "), ENT_QUOTES);
+	$language['language_on'] 			= htmlspecialchars(trim($_POST['events_language_on'], "\t\n "), ENT_QUOTES);
+	$language['language_in'] 			= htmlspecialchars(trim($_POST['events_language_in'], "\t\n "), ENT_QUOTES);
+	$language['language_ago'] 			= htmlspecialchars(trim($_POST['events_language_ago'], "\t\n "), ENT_QUOTES);
+	$language['language_sidelink']		= htmlspecialchars(trim($_POST['events_language_sidelink'], "\t\n "), ENT_QUOTES);
+	$language['language_pagelink'] 		= htmlspecialchars(trim($_POST['events_language_pagelink'], "\t\n "), ENT_QUOTES);
+	$language['language_noevents']		= htmlspecialchars(trim($_POST['events_language_noevents'], "\t\n "), ENT_QUOTES);
+	$language['language_nodaily']		= htmlspecialchars(trim($_POST['events_language_nodaily'], "\t\n "), ENT_QUOTES);
+	$language['language_noarchive'] 	= htmlspecialchars(trim($_POST['events_language_noarchive'], "\t\n "), ENT_QUOTES);
+	$language['language_e_config'] 		= htmlspecialchars(trim($_POST['events_language_e_config'], "\t\n "), ENT_QUOTES);
+	$language['language_noduration'] 	= htmlspecialchars(trim($_POST['events_language_noduration'], "\t\n "), ENT_QUOTES);
+	$language['language_allday'] 		= htmlspecialchars(trim($_POST['events_language_allday'], "\t\n "), ENT_QUOTES);
+	update_option('events_language', $language);
 }
 
 /*-------------------------------------------------------------

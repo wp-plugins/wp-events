@@ -4,7 +4,7 @@ Donate link: http://meandmymac.net/donate/
 Tags: events, countdown
 Requires at least: 2.5
 Tested up to: 2.6
-Stable tag: 1.3
+Stable tag: 1.4
 
 Create a list with events/appointments/concerts/future happenings and show them on your site.
 
