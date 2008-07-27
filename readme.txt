@@ -53,7 +53,7 @@ For upgrading **ALWAYS** review the details on [the plugin page](http://meandmym
 **A:** By default no! Not for any plugin. In specifics, Events sometimes receives a new version of the database and thus cannot automatically upgrade, some things are to be done manually for your own safety!
 
 **Visit here for the FAQ and support:**
-[Events support page](http://meandmymac.net/contact-and-support/events/#screens)
+[Events support page](http://forum.at.meandmymac.net/)
 
 == Screenshots ==
 
