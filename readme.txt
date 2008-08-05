@@ -4,7 +4,7 @@ Donate link: http://meandmymac.net/donate/
 Tags: events, countdown
 Requires at least: 2.5
 Tested up to: 2.6
-Stable tag: 1.4
+Stable tag: 1.5
 
 Create a list with events/appointments/concerts/future happenings and show them on your site.
 
@@ -53,7 +53,7 @@ For upgrading **ALWAYS** review the details on [the plugin page](http://meandmym
 **A:** By default no! Not for any plugin. In specifics, Events sometimes receives a new version of the database and thus cannot automatically upgrade, some things are to be done manually for your own safety!
 
 **Visit here for the FAQ and support:**
-[Events support page](http://forum.at.meandmymac.net/)
+[Here!](http://forum.at.meandmymac.net/)
 
 == Screenshots ==
 

@@ -16,7 +16,7 @@ function widget_wp_events_init() {
 	function widget_wp_events($args) {
 		extract($args);
 
-		echo $before_widget . $before_title . $after_title;
+		echo $before_widget;
 		$url_parts = parse_url(get_bloginfo('home'));
 		echo events_sidebar();
 		echo $after_widget;

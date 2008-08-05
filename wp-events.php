@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.4
+Version: 1.5
 Author URI: http://meandmymac.net/
 */
 
@@ -20,7 +20,7 @@ events_check_config();
 #---------------------------------------------------
 # Only proceed with the plugin if MySQL Tables are setup properly
 #---------------------------------------------------
-if(events_mysql_table_exists()) {
+if(events_mysql_install()) {
 	// Add filters for adding the tags in the WP page/post field
 	add_shortcode('events_list', 'events_page');
 	add_shortcode('events_today', 'events_today');
@@ -35,8 +35,12 @@ if(events_mysql_table_exists()) {
 		add_action('init', 'events_insert_input'); //Save event
 	}
 
-	if(isset($_GET['delete_event']) OR isset($_POST['delete_multiple'])) {
-		add_action('init', 'events_request_delete'); //Delete event
+	if(isset($_POST['add_category_submit'])) {
+		add_action('init', 'events_create_category'); //Add a category
+	}
+
+	if(isset($_POST['delete_event']) OR isset($_POST['delete_categories'])) {
+		add_action('init', 'events_request_delete'); //Delete events/categories
 	}
 
 	if(isset($_POST['events_submit_options'])) {
@@ -47,18 +51,11 @@ if(events_mysql_table_exists()) {
 		add_action('init', 'events_plugin_uninstall'); //Uninstall
 	}
 	
-	if(isset($_POST['event_upgrade'])) {
-		add_action('init', 'events_mysql_upgrade'); //Upgrade DB
-	}
-
 	// Load Options
 	$events_config = get_option('events_config');
 	$events_template = get_option('events_template');
 	$events_language = get_option('events_language');
 	setlocale(LC_TIME, $events_config['localization']);	
-} else {
-	// Install table if not existing
-	events_mysql_install();
 }
 
 /*-------------------------------------------------------------
@@ -91,25 +88,33 @@ function events_manage_page() {
 		$order = $_POST['order']; 
 	} else { 
 		$order = 'thetime ASC'; 
-	}
+	} 
+	if(isset($_POST['catorder'])) { 
+		$catorder = $_POST['catorder']; 
+	} else { 
+		$catorder = 'id ASC'; 
+	} ?>
 	
-	if ($action == 'deleted') { ?>
-		<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
+	<?php if ($action == 'deleted') { ?>
+		<div id="message" class="updated fade"><p>Event/Category <strong>deleted</strong></p></div>
 	<?php } else if ($action == 'updated') { ?>
 		<div id="message" class="updated fade"><p>Event <strong>updated</strong></p></div>
 	<?php } else if ($action == 'no_access') { ?>
 		<div id="message" class="updated fade"><p>Action prohibited</p></div>
+	<?php } else if ($action == 'category_new') { ?>
+		<div id="message" class="updated fade"><p>Category <strong>created</strong></p></div>
+	<?php } else if ($action == 'category_field_error') { ?>
+		<div id="message" class="updated fade"><p>No category name filled in</p></div>
 	<?php } ?>
 
 	<div class="wrap">
-		<h2>Manage Events (<a href="post-new.php?page=wp-events.php">add new</a>)</h2>
-		<?php $events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` ORDER BY $order"); ?>
+		<h2>Manage Events (<a href="post-new.php?page=wp-events">add new</a>)</h2>
 
-		<form name="events" id="post" method="post" action="edit.php?page=wp-events.php">
+		<form name="events" id="post" method="post" action="edit.php?page=wp-events">
 			<div class="tablenav">
 
 				<div class="alignleft">
-					<input onclick="return confirm('You are about to delete multiple events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete" name="delete_multiple" class="button-secondary delete" />
+					<input onclick="return confirm('You are about to delete multiple events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_multiple" class="button-secondary delete" />
 					<select name='order' id='cat' class='postform' >
 				        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending, default)</option>
 				        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending)</option>
@@ -119,6 +124,8 @@ function events_manage_page() {
 				        <option value="title DESC" <?php if($order == "title DESC") { echo 'selected'; } ?>>by title (Z-A)</option>
 				        <option value="location ASC" <?php if($order == "location ASC") { echo 'selected'; } ?>>by location (A-Z)</option>
 				        <option value="location DESC" <?php if($order == "location DESC") { echo 'selected'; } ?>>by location (Z-A)</option>
+				        <option value="category ASC" <?php if($order == "category ASC") { echo 'selected'; } ?>>by category (A-Z)</option>
+				        <option value="category DESC" <?php if($order == "category DESC") { echo 'selected'; } ?>>by category (Z-A)</option>
 					</select>
 					<input type="submit" id="post-query-submit" value="Sort" class="button-secondary" />
 				</div>
@@ -132,22 +139,26 @@ function events_manage_page() {
   				<tr>
 					<th scope="col" class="check-column">&nbsp;</th>
 					<th scope="col" width="15%">Date</th>
-					<th scope="col" width="15%">Location</th>
+					<th scope="col" width="10%">Location</th>
+					<th scope="col" width="10%">Category</th>
 					<th scope="col">Title</th>
 					<th scope="col" width="20%">Starts when</th>
 					<th scope="col" width="20%">Ends after</th>
 				</tr>
   			</thead>
   			<tbody>
-		<?php if ($events) {
+		<?php $events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` ORDER BY $order");
+		if ($events) {
 			foreach($events as $event) {
+				$cat = $wpdb->get_row("SELECT name FROM " . $wpdb->prefix . "events_categories WHERE id = '".$event->category."'");
 				$class = ('alternate' != $class) ? 'alternate' : ''; ?>
 			    <tr id='event-<?php echo $event->id; ?>' class=' <?php echo $class; ?>'>
 					<th scope="row" class="check-column"><input type="checkbox" name="eventcheck[]" value="<?php echo $event->id; ?>" /></th>
 					<td><?php echo date("F d Y H:i", $event->thetime);?></td>
 					<td><?php echo stripslashes(html_entity_decode($event->location));?></td>
+					<td><?php echo $cat->name; ?></td>
 					<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
-					<td><?php echo events_countdown($event->thetime, $event->post_message); ?></td>
+					<td><?php echo events_countdown($event->thetime, $event->post_message, $event->allday); ?></td>
 					<td><?php echo events_duration($event->thetime, $event->theend, $event->allday);?></td>
 				</tr>
  			<?php } ?>
@@ -155,6 +166,54 @@ function events_manage_page() {
 			<tr id='no-id'><td scope="row" colspan="5"><em>No Events yet!</em></td></tr>
 		<?php }	?>
 			</tbody>
+		</table>
+		</form>
+
+		<h2>Categories</h2>
+
+		<form name="groups" id="post" method="post" action="edit.php?page=wp-events">
+		<div class="tablenav">
+
+			<div class="alignleft">
+				<input onclick="return confirm('You are about to delete categories! Make sure there are no events in those categories or they will not show on the website\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete category" name="delete_categories" class="button-secondary delete" />
+				<select name='catorder' id='cat' class='postform' >
+			        <option value="id ASC" <?php if($catorder == "id ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
+			        <option value="id DESC" <?php if($catorder == "id DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
+			        <option value="name ASC" <?php if($catorder == "name ASC") { echo 'selected'; } ?>>by name (A-Z)</option>
+			        <option value="name DESC" <?php if($catorder == "name DESC") { echo 'selected'; } ?>>by name (Z-A)</option>
+				</select>
+				<input type="submit" id="post-query-submit" value="Sort" class="button-secondary" />
+			</div>
+
+			<br class="clear" />
+		</div>
+
+		<br class="clear" />
+		<table class="widefat">
+  			<thead>
+  				<tr>
+					<th scope="col" class="check-column">&nbsp;</th>
+					<th scope="col" width="5%">ID</th>
+					<th scope="col">Name</th>
+				</tr>
+  			</thead>
+  			<tbody>
+		<?php $categories = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events_categories ORDER BY $catorder");
+		if ($categories) {
+			foreach($categories as $category) {
+				$class = ('alternate' != $class) ? 'alternate' : ''; ?>
+			    <tr id='group-<?php echo $category->id; ?>' class=' <?php echo $class; ?>'>
+					<th scope="row" class="check-column"><input type="checkbox" name="categorycheck[]" value="<?php echo $category->id; ?>" /></th>
+					<td><?php echo $category->id;?></td>
+					<td><?php echo $category->name;?></td>
+				</tr>
+ 			<?php } ?>
+		<?php }	?>
+			    <tr id='category-new'>
+					<th scope="row" class="check-column">&nbsp;</th>
+					<td colspan="2"><input name="events_category" type="text" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="add_category_submit" value="Add" class="button-secondary" /></td>
+				</tr>
+ 			</tbody>
 		</table>
 		</form>
 	</div>
@@ -190,82 +249,98 @@ function events_add_page() {
 		<?php } else { ?>
 		<h2>Edit event</h2>
 		<?php
-		$SQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `id` = $event_edit_id";
-		$edit_event = $wpdb->get_row($SQL);
-		list($sday, $smonth, $syear, $shour, $sminute) = split(" ", date("d m Y H i", $edit_event->thetime));
-		list($eday, $emonth, $eyear, $ehour, $eminute) = split(" ", date("d m Y H i", $edit_event->theend)); ?>
-		<?php } ?>
+			$SQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `id` = $event_edit_id";
+			$edit_event = $wpdb->get_row($SQL);
+			list($sday, $smonth, $syear, $shour, $sminute) = split(" ", date("d m Y H i", $edit_event->thetime));
+			list($eday, $emonth, $eyear, $ehour, $eminute) = split(" ", date("d m Y H i", $edit_event->theend));
+		}
 		
-	  	<form method="post" action="post-new.php?page=wp-events.php">
-	  	   	<input type="hidden" name="events_submit" value="true" />
-	    	<input type="hidden" name="events_username" value="<?php echo $userdata->display_name;?>" />
-	    	<input type="hidden" name="events_event_id" value="<?php echo $event_edit_id;?>" />
-	    	<table class="form-table">
+		$SQL2 = "SELECT * FROM ".$wpdb->prefix."events_categories ORDER BY id";
+		$categories = $wpdb->get_results($SQL2);
+		if($categories) { ?>
+		  	<form method="post" action="post-new.php?page=wp-events.php">
+		  	   	<input type="hidden" name="events_submit" value="true" />
+		    	<input type="hidden" name="events_username" value="<?php echo $userdata->display_name;?>" />
+		    	<input type="hidden" name="events_event_id" value="<?php echo $event_edit_id;?>" />
+		    	<table class="form-table">
+					<tr valign="top">
+						<td colspan="4" bgcolor="#DDD">Please note that the time field uses a 24 hour clock. This means that 22:00 hour is actually 10:00pm.<br />Hint: If you're used to the AM/PM system and the event takes place/starts after lunch just add 12 hours.</td>
+					</tr>
+			      	<tr>
+				        <th scope="row">Title:</th>
+				        <td colspan="2"><input name="events_title" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters.</em></td>
+				        <td width="25%"><input type="checkbox" name="events_title_link" <?php if($edit_event->title_link == 'Y') { ?>checked="checked" <?php } ?>/> Make title a link. Use the field below.<br /><input type="checkbox" name="events_allday" <?php if($edit_event->allday == 'Y') { ?>checked="checked" <?php } ?>/> All-day event.</td>
+			      	</tr>
+			      	<tr>
+				        <th scope="row">Event description (optional):</th>
+				        <td colspan="3"><textarea name="events_pre_event" cols="70" rows="8"><?php echo $edit_event->pre_message;?></textarea><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+			      	</tr>
+			      	<tr>
+				        <th scope="row">Location (optional):</th>
+				        <td width="25%"><input name="events_location" type="text" size="25" maxlength="255" value="<?php echo $edit_event->location;?>" /><br /><em>Maximum 255 characters.</em></td>
+				        <th scope="row">Category:</th>
+				        <td width="25%"><select name='events_category' id='cat' class='postform'>
+						<?php foreach($categories as $category) { ?>
+						    <option value="<?php echo $category->id; ?>" <?php if($category->id == $edit_event->category) { echo 'selected'; } ?>><?php echo $category->name; ?></option>
+				    	<?php } ?>
+				    	</select></td>
+			      	</tr>
+			      	<tr>
+				        <th scope="row">Start DD/MM/YYYY:</th>
+				        <td width="25%"><input id="title" name="events_sday" type="text" size="4" maxlength="2" value="<?php echo $sday;?>" />/<input name="events_smonth" type="text" size="4" maxlength="2" value="<?php echo $smonth;?>" />/<input name="events_syear" type="text" size="4" maxlength="4" value="<?php echo $syear;?>" /></td>
+				        <th scope="row">HH/MM (optional):</th>
+				        <td width="25%"><input name="events_shour" type="text" size="4" maxlength="2" value="<?php echo $shour;?>" />/<input name="events_sminute" type="text" size="4" maxlength="2" value="<?php echo $sminute;?>" /></td>
+			      	</tr>
+			      	<tr>
+				        <th scope="row">End DD/MM/YYYY (optional):</th>
+				        <td width="25%"><input id="title" name="events_eday" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" />/<input name="events_emonth" type="text" size="4" maxlength="2" value="<?php echo $emonth;?>" />/<input name="events_eyear" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
+				        <th scope="row">HH/MM (optional):</th>
+				        <td width="25%"><input name="events_ehour" type="text" size="4" maxlength="2" value="<?php echo $ehour;?>" />/<input name="events_eminute" type="text" size="4" maxlength="2" value="<?php echo $eminute;?>" /></td>
+			      	</tr>
+			      	<tr>
+				        <th scope="row">Show in the sidebar:</th>
+				        <td width="25%"><select name="events_priority">
+						<?php if($edit_event->priority == "yes" OR $edit_event->priority == "") { ?>
+						<option value="yes">Yes</option>
+						<option value="no">No</option>
+						<?php } else { ?>
+						<option value="no">No</option>
+						<option value="yes">Yes</option>
+						<?php } ?>
+						</select></td>
+						<th scope="row">Archive this event:</th>
+						<td width="25%"><select name="events_archive">
+						<?php if($edit_event->archive == "no" OR $edit_event->archive == "") { ?>
+						<option value="no">No</option>
+						<option value="yes">Yes</option>
+						<?php } else { ?>
+						<option value="yes">Yes</option>
+						<option value="no">No</option>
+						<?php } ?>
+						</select></td>
+					</tr>
+			      	<tr>
+				        <th scope="row">Message when event ends (optional):</th>
+				        <td colspan="3"><input name="events_post_event" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->post_message;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+			      	</tr>
+			      	<tr>
+				        <th scope="row">Link to page (optional):</th>
+				        <td colspan="3"><input name="events_link" type="text" size="52 " maxlength="10000" value="<?php echo $edit_event->link;?>" /><br /><em>Include full url and http://, this can be any page.</em></td>
+			      	</tr>
+		    	</table>
+		    	
+		    	<p class="submit">
+					<input type="submit" name="Submit" value="Save event &raquo;" /> <span style="float: right;"><?php if($event_edit_id) { ?><a href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;delete_event='.$edit_event->id; ?>" style="color: #f00;" onclick="return confirm('Are you sure you want to delete this event?')">Delete event</a><?php } ?></span>
+		    	</p>
+	
+		  	</form>
+		<?php } else { ?>
+		    <table class="form-table">
 				<tr valign="top">
-					<td colspan="4" bgcolor="#DDD">Please note that the time field uses a 24 hour clock. This means that 22:00 hour is actually 10:00pm.<br />Hint: If you're used to the AM/PM system and the event takes place/starts after lunch just add 12 hours.</td>
+					<td bgcolor="#DDD"><strong>You should create atleast one category before adding events! <a href="edit.php?page=wp_events">Add a category now</a>.</strong></td>
 				</tr>
-		      	<tr>
-			        <th scope="row">Title:</th>
-			        <td colspan="2"><input name="events_title" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters.</em></td>
-			        <td width="25%"><input type="checkbox" name="events_title_link" <?php if($edit_event->title_link == 'Y') { ?>checked="checked" <?php } ?>/> Make title a link. Use the field below.<br /><input type="checkbox" name="events_allday" <?php if($edit_event->allday == 'Y') { ?>checked="checked" <?php } ?>/> All-day event.</td>
-		      	</tr>
-		      	<tr>
-			        <th scope="row">Event description:</th>
-			        <td colspan="3"><textarea name="events_pre_event" cols="70" rows="8"><?php echo $edit_event->pre_message;?></textarea><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
-		      	</tr>
-		      	<tr>
-			        <th scope="row">Location (optional):</th>
-			        <td colspan="3"><input name="events_location" type="text" size="52" maxlength="255" value="<?php echo $edit_event->location;?>" /><br /><em>Maximum 255 characters.</em></td>
-		      	</tr>
-		      	<tr>
-			        <th scope="row">Start DD/MM/YYYY:</th>
-			        <td width="25%"><input id="title" name="events_sday" type="text" size="4" maxlength="2" value="<?php echo $sday;?>" />/<input name="events_smonth" type="text" size="4" maxlength="2" value="<?php echo $smonth;?>" />/<input name="events_syear" type="text" size="4" maxlength="4" value="<?php echo $syear;?>" /></td>
-			        <th scope="row">HH/MM (optional):</th>
-			        <td width="25%"><input name="events_shour" type="text" size="4" maxlength="2" value="<?php echo $shour;?>" />/<input name="events_sminute" type="text" size="4" maxlength="2" value="<?php echo $sminute;?>" /></td>
-		      	</tr>
-		      	<tr>
-			        <th scope="row">End DD/MM/YYYY (optional):</th>
-			        <td width="25%"><input id="title" name="events_eday" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" />/<input name="events_emonth" type="text" size="4" maxlength="2" value="<?php echo $emonth;?>" />/<input name="events_eyear" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
-			        <th scope="row">HH/MM (optional):</th>
-			        <td width="25%"><input name="events_ehour" type="text" size="4" maxlength="2" value="<?php echo $ehour;?>" />/<input name="events_eminute" type="text" size="4" maxlength="2" value="<?php echo $eminute;?>" /></td>
-		      	</tr>
-		      	<tr>
-			        <th scope="row">Show in the sidebar:</th>
-			        <td width="25%"><select name="events_priority">
-					<?php if($edit_event->priority == "yes" OR $edit_event->priority == "") { ?>
-					<option value="yes">Yes</option>
-					<option value="no">No</option>
-					<?php } else { ?>
-					<option value="no">No</option>
-					<option value="yes">Yes</option>
-					<?php } ?>
-					</select></td>
-					<th scope="row">Archive this event:</th>
-					<td width="25%"><select name="events_archive">
-					<?php if($edit_event->archive == "no" OR $edit_event->archive == "") { ?>
-					<option value="no">No</option>
-					<option value="yes">Yes</option>
-					<?php } else { ?>
-					<option value="yes">Yes</option>
-					<option value="no">No</option>
-					<?php } ?>
-					</select></td>
-				</tr>
-		      	<tr>
-			        <th scope="row">Message when event ends (optional):</th>
-			        <td colspan="3"><input name="events_post_event" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->post_message;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
-		      	</tr>
-		      	<tr>
-			        <th scope="row">Link to page (optional):</th>
-			        <td colspan="3"><input name="events_link" type="text" size="52 " maxlength="10000" value="<?php echo $edit_event->link;?>" /><br /><em>Include full url and http://, this can be any page.</em></td>
-		      	</tr>
-	    	</table>
-	    	
-	    	<p class="submit">
-				<input type="submit" name="Submit" value="Save event &raquo;" /> <span style="float: right;"><?php if($event_edit_id) { ?><a href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events&amp;delete_event='.$edit_event->id; ?>" style="color: #f00;" onclick="return confirm('Are you sure you want to delete this event?')">Delete event</a><?php } ?></span>
-	    	</p>
-
-	  	</form>
+			</table>
+		<?php } ?>
 	</div>
 <?php }
 
@@ -303,21 +378,21 @@ function events_options_page() {
 			        <?php if($events_config['custom_date_sidebar'] == 'no') { ?>
 			        <td><select name="events_dateformat_sidebar">
 				        <option disabled="disabled">-- day month year --</option>
-				        <option value="%d %b %Y %H:%M" <?php if($events_config['dateformat_sidebar'] == "%d %b %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y %H:%M", $theunixdate)); ?> (default)</option>
-				        <option value="%d %B %Y %H:%M" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y %H:%M", $theunixdate)); ?></option>
-				        <option value="%d %B %Y %I:%M %p" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y %I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y %I:%M %p", $theunixdate)); ?></option>
-				        <option value="%d %B %Y %H:%M:%S" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y %H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y %H:%M:%S", $theunixdate)); ?></option>
-				        <option value="%d %b %Y" <?php if($events_config['dateformat_sidebar'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?></option>
-				        <option value="%d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y", $theunixdate)); ?></option>				        
+				        <option value="%d %m %Y" <?php if($events_config['dateformat_sidebar'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %m %Y", $theunixdate)); ?></option>
+				        <option value="%d %b %Y" <?php if($events_config['dateformat_sidebar'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?> (default)</option>
+				        <option value="%d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y", $theunixdate)); ?></option>
+				        <option disabled="disabled">-- month day year --</option>
+				        <option value="%m %d %Y" <?php if($events_config['dateformat_sidebar'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%m %d %Y", $theunixdate)); ?></option>
+				        <option value="%b %d %Y" <?php if($events_config['dateformat_sidebar'] == "%b %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%b %d %Y", $theunixdate)); ?></option>
+				        <option value="%B %d %Y" <?php if($events_config['dateformat_sidebar'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%B %d %Y", $theunixdate)); ?></option>
 				        <option disabled="disabled">-- weekday day/month/year --</option>
-				        <option value="%a, %d %B %Y %H:%M" <?php if($events_config['dateformat_sidebar'] == "%a, %d %B %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%a, %d %B %Y %H:%M", $theunixdate)); ?></option>
-				        <option value="%A, %d %B %Y %H:%M" <?php if($events_config['dateformat_sidebar'] == "%A, %d %B %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%A, %d %B %Y %H:%M", $theunixdate)); ?></option>
+				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%a, %d %B %Y", $theunixdate)); ?></option>
+				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%A, %d %B %Y", $theunixdate)); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
 				        <option value="%x" <?php if($events_config['dateformat_sidebar'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%x", $theunixdate)); ?></option>
-				        <option value="%c" <?php if($events_config['dateformat_sidebar'] == "%c") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%c", $theunixdate)); ?></option>        
 					</select></td>
 					<?php } else { ?>
- 			        <td><input name="events_dateformat_sidebar" type="text" value="<?php echo $events_config['dateformat_sidebar'];?>" size="30" /><br />Careful what you put here. Learn: <a href="http://www.php.net/manual/en/function.strftime.php" target="_blank">php manual</a>.</td>
+ 			        <td><input name="events_dateformat_sidebar" type="text" value="<?php echo $events_config['dateformat_sidebar'];?>" size="30" /><br />Careful what you put here, don't use time values! Learn: <a href="http://www.php.net/manual/en/function.strftime.php" target="_blank">php manual</a>.</td>
  			        <?php } ?>
 			        <th scope="row">Date system</th>
 			        <td><select name="events_custom_date_sidebar">
@@ -331,6 +406,19 @@ function events_options_page() {
 					</select> Save options to see the result!</td>
 		      	</tr>
 		      	<tr valign="top">
+			        <th scope="row">Time format</th>
+			        <td colspan="3"><select name="events_timeformat_sidebar">
+				        <option disabled="disabled">-- 24-hour clock --</option>
+				        <option value="%H:%M" <?php if($events_config['timeformat_sidebar'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M", $theunixdate)); ?> (default)</option>
+				        <option value="%H:%M:%S" <?php if($events_config['timeformat_sidebar'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M:%S", $theunixdate)); ?></option>
+				        <option disabled="disabled">-- 12-hour clock --</option>
+				        <option value="%I:%M %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M %p", $theunixdate)); ?></option>
+				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M:%S %p", $theunixdate)); ?></option>
+				        <option disabled="disabled">-- preferred by locale --</option>
+				        <option value="%X" <?php if($events_config['timeformat_sidebar'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%X", $theunixdate)); ?></option>
+					</select></td>
+		      	</tr>
+		      	<tr valign="top">
 			        <th scope="row">Character limit</th>
 			        <td colspan="3"><input name="events_sidelength" type="text" value="<?php echo $events_config['sidelength'];?>" size="6" /> (default: 120)</td>
 		      	</tr>
@@ -342,18 +430,18 @@ function events_options_page() {
 			        <?php if($events_config['custom_date_page'] == 'no') { ?>
 			        <td><select name="events_dateformat">
 				        <option disabled="disabled">-- day month year --</option>
-				        <option value="%d %b %Y %H:%M" <?php if($events_config['dateformat'] == "%d %b %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y %H:%M", $theunixdate)); ?></option>
-				        <option value="%d %B %Y %H:%M" <?php if($events_config['dateformat'] == "%d %B %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y %H:%M", $theunixdate)); ?></option>
-				        <option value="%d %B %Y %I:%M %p" <?php if($events_config['dateformat'] == "%d %B %Y %I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y %I:%M %p", $theunixdate)); ?></option>
-				        <option value="%d %B %Y %H:%M:%S" <?php if($events_config['dateformat'] == "%d %B %Y %H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y %H:%M:%S", $theunixdate)); ?></option>
-				        <option value="%d %b %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?> (default)</option>
-				        <option value="%d %B %Y" <?php if($events_config['dateformat'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y", $theunixdate)); ?></option>				        
+				        <option value="%d %m %Y" <?php if($events_config['dateformat'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %m %Y", $theunixdate)); ?></option>
+				        <option value="%d %b %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?></option>
+				        <option value="%d %B %Y" <?php if($events_config['dateformat'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y", $theunixdate)); ?> (default)</option>
+				        <option disabled="disabled">-- month day year --</option>
+				        <option value="%m %d %Y" <?php if($events_config['dateformat'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%m %d %Y", $theunixdate)); ?></option>
+				        <option value="%b %d %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?></option>
+				        <option value="%B %d %Y" <?php if($events_config['dateformat'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%B %d %Y", $theunixdate)); ?></option>
 				        <option disabled="disabled">-- weekday day/month/year --</option>
-				        <option value="%a, %d %B %Y %H:%M" <?php if($events_config['dateformat'] == "%a, %d %B %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%a, %d %B %Y %H:%M", $theunixdate)); ?></option>
-				        <option value="%A, %d %B %Y %H:%M" <?php if($events_config['dateformat'] == "%A, %d %B %Y %H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%A, %d %B %Y %H:%M", $theunixdate)); ?></option>
+				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%a, %d %B %Y", $theunixdate)); ?></option>
+				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%A, %d %B %Y", $theunixdate)); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
 				        <option value="%x" <?php if($events_config['dateformat'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%x", $theunixdate)); ?></option>
-				        <option value="%c" <?php if($events_config['dateformat'] == "%c") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%c", $theunixdate)); ?></option>        
 					</select></td>
 					<?php } else { ?>
  			        <td><input name="events_dateformat" type="text" value="<?php echo $events_config['dateformat'];?>" size="30" /><br />Careful what you put here. Learn: <a href="http://www.php.net/manual/en/function.strftime.php" target="_blank">php manual</a>.</td>
@@ -368,6 +456,19 @@ function events_options_page() {
 				        <option value="no">Default</option>
 				        <?php } ?>
 					</select> Save options to see the result!</td>
+		      	</tr>
+		      	<tr valign="top">
+			        <th scope="row">Time format</th>
+			        <td colspan="3"><select name="events_timeformat">
+				        <option disabled="disabled">-- 24-hour clock --</option>
+				        <option value="%H:%M" <?php if($events_config['timeformat'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M", $theunixdate)); ?> (default)</option>
+				        <option value="%H:%M:%S" <?php if($events_config['timeformat'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M:%S", $theunixdate)); ?></option>
+				        <option disabled="disabled">-- 12-hour clock --</option>
+				        <option value="%I:%M %p" <?php if($events_config['timeformat'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M %p", $theunixdate)); ?></option>
+				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M:%S %p", $theunixdate)); ?></option>
+				        <option disabled="disabled">-- preferred by locale --</option>
+				        <option value="%X" <?php if($events_config['timeformat'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%X", $theunixdate)); ?></option>
+					</select></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Character limit</th>
@@ -434,7 +535,7 @@ function events_options_page() {
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="sidebar_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_template']); ?></textarea><br /><em>Options: %title% %event% %link% %starttime% %date% %author% %location%</em></td>
+			        <td><textarea name="sidebar_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_template']); ?></textarea><br /><em>Options: %title% %event% %link% %countdown% %startdate% %starttime% %author% %location%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -449,7 +550,7 @@ function events_options_page() {
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="page_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %starttime% %endtime% %duration% %date% %author% %location%</em></td>
+			        <td><textarea name="page_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -464,7 +565,7 @@ function events_options_page() {
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="archive_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %starttime% %endtime% %duration% %date% %author% %location%</em></td>
+			        <td><textarea name="archive_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countup% %author% %location%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -479,7 +580,7 @@ function events_options_page() {
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="daily_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %starttime% %endtime% %duration% %date% %author% %location%</em></td>
+			        <td><textarea name="daily_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>

@@ -15,6 +15,7 @@ function events_insert_input() {
 	$title	 			= htmlspecialchars(trim($_POST['events_title'], "\t\n "), ENT_QUOTES);
 	$title_link	 		= $_POST['events_title_link'];
 	$location 			= htmlspecialchars(trim($_POST['events_location'], "\t\n "), ENT_QUOTES);
+	$category 			= $_POST['events_category'];
 	$pre_event 			= htmlspecialchars(trim($_POST['events_pre_event'], "\t\n "), ENT_QUOTES);
 	$post_event 		= htmlspecialchars(trim($_POST['events_post_event'], "\t\n "), ENT_QUOTES);
 	$link		 		= htmlspecialchars(trim($_POST['events_link'], "\t\n "), ENT_QUOTES);
@@ -71,14 +72,17 @@ function events_insert_input() {
 		if(strlen($event_id) != 0) {
 			/* Update an existing event */
 			$postquery = "UPDATE `".$wpdb->prefix."events` SET
-			`title` = '$title', `title_link` = '$title_link', `location` = '$location', `pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', `thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', `author` = '$author'
+			`title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category',
+			`pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', 
+			`thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', 
+			`author` = '$author'
 			WHERE `id` = '$event_id'";
 			$action = "update";
 		} else {
 			/* New event */
 			$postquery = "INSERT INTO `".$wpdb->prefix."events`
-			(`title`, `title_link`, `location`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
-			VALUES ('$title', '$title_link', '$location', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
+			(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
+			VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
 			$action = "new";
 		}
 		if($wpdb->query($postquery) !== FALSE) {
@@ -89,6 +93,35 @@ function events_insert_input() {
 		}
 	} else {
 		events_return('field_error');
+		exit;
+	}
+}
+
+/*-------------------------------------------------------------
+ Name:      events_create_category
+
+ Purpose:   Add a new category
+ Receive:   -None-
+ Return:	-None-
+-------------------------------------------------------------*/
+function events_create_category() {
+	global $wpdb, $userdata;
+	
+	$name = $_POST['events_category'];
+	
+	if (strlen($name) != 0) {
+		$postquery = "INSERT INTO ".$wpdb->prefix."events_categories
+		(name)
+		VALUES ('$name')";		
+		$action = "category_new";
+		if($wpdb->query($postquery) !== FALSE) {
+			events_return($action);
+			exit;
+		} else {
+			die(mysql_error());
+		}
+	} else {
+		events_return('category_field_error');
 		exit;
 	}
 }
@@ -110,23 +143,25 @@ function events_clear_old() {
 /*-------------------------------------------------------------
  Name:      events_request_delete
 
- Purpose:   Remove event from database
- Receive:   $del_archive
+ Purpose:   Prepare removal of banner or category from database
+ Receive:   -none-
  Return:    -none-
 -------------------------------------------------------------*/
-function events_request_delete($del_archive = 0) {
+function events_request_delete() {
 	global $wpdb, $events_config;
 
 	$event_ids = $_POST['eventcheck'];
-	/* Check if multiple events are checked */
+	$category_ids = $_POST['categorycheck'];
+
 	if($event_ids != '') {
 		foreach($event_ids as $event_id) {
-			events_delete_eventid($event_id);
+			events_delete($event_id, 'banner');
 		}
-	} else {
-		/* Delete one event, w/ button */
-		$event_id = $_GET['delete_event'];
-		events_delete_eventid($event_id);
+	}
+	if($category_ids != '') {
+		foreach($category_ids as $category_id) {
+			events_delete($category_id, 'group');
+		}
 	}
 	events_return('delete');
 	exit;
@@ -135,35 +170,44 @@ function events_request_delete($del_archive = 0) {
 /*-------------------------------------------------------------
  Name:      events_delete_eventid
 
- Purpose:   Remove event from database
- Receive:   event id
- Return:    boolean
+ Purpose:   Remove event or category from database
+ Receive:   $id, $what
+ Return:    -none-
 -------------------------------------------------------------*/
-function events_delete_eventid ($event_id) {
+function events_delete($id, $what) {
 	global $wpdb, $userdata, $events_config;
 
-	if($event_id > 0) {
-		$SQL = "SELECT
-		`".$wpdb->prefix."events.id`,
-		`".$wpdb->prefix."events.author`,
-		`".$wpdb->prefix."users.display_name` as `display_name`
-		FROM
-		`".$wpdb->prefix."events`,
-		`".$wpdb->prefix."users`
-		WHERE
-		`".$wpdb->prefix."events.id` = '$event_id'
-		AND
-		`".$wpdb->prefix."users.display_name` = ".$wpdb->prefix."events.author";
-
-		$event = $wpdb->get_row($SQL);
-
-		if ( $userdata->user_level >= $events_config['managelevel'] OR $event->display_name == $event->author ) {
-			$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $event_id";
+	if($id > 0) {
+		if($what == 'banner') {
+			$SQL = "SELECT
+			".$wpdb->prefix."events.author,
+			".$wpdb->prefix."users.display_name as display_name
+			FROM
+			".$wpdb->prefix."events,
+			".$wpdb->prefix."users
+			WHERE
+			".$wpdb->prefix."events.id = '$id'
+			AND
+			".$wpdb->prefix."users.display_name = ".$wpdb->prefix."events.author";
+	
+			$event = $wpdb->get_row($SQL);
+	
+			if ($event->display_name == $event->author ) {
+				$SQL = "DELETE FROM ".$wpdb->prefix."events WHERE id = $id";
+				if($wpdb->query($SQL) == FALSE) {
+					die(mysql_error());
+				}
+			} else {
+				events_return('no_access');
+				exit;
+			}
+		} else if ($what == 'group') {
+			$SQL = "DELETE FROM ".$wpdb->prefix."events_categories WHERE id = $id";
 			if($wpdb->query($SQL) == FALSE) {
 				die(mysql_error());
 			}
 		} else {
-			events_return('no_access');
+			events_return('error');
 			exit;
 		}
 	}
@@ -187,29 +231,35 @@ function events_check_config() {
 		$option['managelevel'] 				= 10;
 		$option['custom_date_page']			= 'no';
 		$option['custom_date_sidebar']		= 'no';
-		$option['dateformat'] 				= '%d %b %Y';
-		$option['dateformat_sidebar']		= '%d %b %Y %H:%M';
+		$option['dateformat'] 				= '%d %B %Y';
+		$option['dateformat_sidebar']		= '%d %b %Y';
+		$option['timeformat'] 				= '%H:%M';
+		$option['timeformat_sidebar']		= '%H:%M';
 		$option['timezone']					= '+0';
 		$option['order'] 					= 'thetime ASC';
 		$option['order_archive'] 			= 'thetime DESC';
 		$option['localization'] 			= 'en_EN';
 		update_option('events_config', $option);
-		
-		$template['sidebar_template'] 		= '<li>%title% %link% on %date%<br />%starttime%</li>';
+	}
+	
+	if ( !$template = get_option('events_template') ) {
+		$template['sidebar_template'] 		= '<li>%title% %link% on %startdate% %starttime%<br />%countdown%</li>';
 		$template['sidebar_h_template'] 	= '<h2>Highlighted events</h2><ul>';
 		$template['sidebar_f_template'] 	= '</ul>';
-		$template['page_template'] 			= '<p><strong>%title%</strong>, %event% on %date%<br />%starttime%<br />Duration: %duration%<br />%link%</p>';
+		$template['page_template'] 			= '<p><strong>%title%</strong>, %event% on %startdate% %starttime%<br />%countdown%<br />Duration: %duration%<br />%link%</p>';
 		$template['page_h_template'] 		= '<h2>Important events</h2>';
 		$template['page_f_template'] 		= '';
-		$template['archive_template'] 		= '<p><strong>%title%</strong>, %after% on %date%<br />%starttime%<br />%endtime%<br />%link%</p>';
+		$template['archive_template'] 		= '<p><strong>%title%</strong>, %after% on %startdate% %starttime%<br />%countup%<br />%enddate% %endtime%<br />%link%</p>';
 		$template['archive_h_template'] 	= '<h2>Archive</h2>';
 		$template['archive_f_template'] 	= '';
-		$template['daily_template'] 		= '<p>%title% %event% - %starttime% %link%</p>';
+		$template['daily_template'] 		= '<p>%title% %event% - %countdown% %link%</p>';
 		$template['daily_h_template'] 		= '<h2>Todays events</h2>';
 		$template['daily_f_template'] 		= '';
 		$template['location_seperator']		= '@ ';
 		update_option('events_template', $template);
+	}
 
+	if ( !$language = get_option('events_language') ) {
 		$language['language_today'] 		= 'today';
 		$language['language_hours'] 		= 'hours';
 		$language['language_minutes'] 		= 'minutes';
@@ -249,6 +299,8 @@ function events_options_submit() {
 	$option['custom_date_sidebar']		= $_POST['events_custom_date_sidebar'];
 	$option['dateformat'] 				= htmlspecialchars(trim($_POST['events_dateformat'], "\t\n "), ENT_QUOTES);
 	$option['dateformat_sidebar']		= htmlspecialchars(trim($_POST['events_dateformat_sidebar'], "\t\n "), ENT_QUOTES);
+	$option['timeformat'] 				= $_POST['events_timeformat'];
+	$option['timeformat_sidebar']		= $_POST['events_timeformat_sidebar'];
 	$option['timezone'] 				= $_POST['events_timezone'];
 	$option['order']	 				= $_POST['events_order'];
 	$option['order_archive'] 			= $_POST['events_order_archive'];
@@ -312,6 +364,10 @@ function events_return($action) {
 			wp_redirect('post-new.php?page=wp-events.php&action=field_error');
 		break;
 		
+		case "error" :
+			wp_redirect('post-new.php?page=wp-events.php&action=error');
+		break;
+		
 		case "access" :
 			wp_redirect('post-new.php?page=wp-events.php&action=no_access');
 		break;
@@ -319,8 +375,17 @@ function events_return($action) {
 		case "delete" :
 			wp_redirect('edit.php?page=wp-events.php&action=deleted');
 		break;
+		
 		case "uninstall" :
 			wp_redirect('plugins.php?deactivate=true');
+		break;
+		
+		case "category_new" :
+			wp_redirect('edit.php?page=wp-events.php&action=category_new');
+		break;
+		
+		case "category_field_error" :
+			wp_redirect('edit.php?page=wp-events.php&action=category_field_error');
 		break;
 	}
 }
