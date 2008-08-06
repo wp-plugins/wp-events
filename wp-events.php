@@ -150,7 +150,7 @@ function events_manage_page() {
 		<?php $events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` ORDER BY $order");
 		if ($events) {
 			foreach($events as $event) {
-				$cat = $wpdb->get_row("SELECT name FROM " . $wpdb->prefix . "events_categories WHERE id = '".$event->category."'");
+				$cat = $wpdb->get_row("SELECT `name` FROM `" . $wpdb->prefix . "events_categories` WHERE `id` = '".$event->category."'");
 				$class = ('alternate' != $class) ? 'alternate' : ''; ?>
 			    <tr id='event-<?php echo $event->id; ?>' class=' <?php echo $class; ?>'>
 					<th scope="row" class="check-column"><input type="checkbox" name="eventcheck[]" value="<?php echo $event->id; ?>" /></th>
