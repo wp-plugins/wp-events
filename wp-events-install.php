@@ -11,14 +11,14 @@ function events_mysql_install() {
 
 	$table_name1 = $wpdb->prefix . "events";
 	$table_name2 = $wpdb->prefix . "events_categories";
-	
+
 	if(!events_mysql_table_exists($table_name1)) {
 		$add1 = "CREATE TABLE `".$table_name1."` (
 	  		`id` mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY,
 	  		`title` longtext NOT NULL,
 	  		`title_link` varchar(3) NOT NULL default 'N',
 	  		`location` varchar(255) NOT NULL,
-	  		`category` varchar(255) NOT NULL,
+	  		`category` int(11) NOT NULL default '1',
 	  		`pre_message` longtext NOT NULL,
 	  		`post_message` longtext NOT NULL,
 	  		`link` longtext NOT NULL,
@@ -27,9 +27,9 @@ function events_mysql_install() {
 	  		`theend` int(15) NOT NULL default '0',
 	  		`author` varchar(60) NOT NULL default '',
 	  		`priority` varchar(4) NOT NULL default 'no',
-	  		`archive` varchar(4) NOT NULL default 'no',
+	  		`archive` varchar(4) NOT NULL default 'no'
 			);";
-		if($wpdb->query($add1) === true) {
+		if(mysql_query($add1) === true) {
 			$table1 = 1;
 		}
 	} else {
@@ -39,17 +39,16 @@ function events_mysql_install() {
 	if(!events_mysql_table_exists($table_name2)) {
 		$add2 = "CREATE TABLE `".$table_name2."` (
 			`id` mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY,
-			`name` varchar(255) NOT NULL,
+			`name` varchar(255) NOT NULL
 			);";
 			
-		if($wpdb->query($add2) === true) {
+		if(mysql_query($add2) === true) {
 			$table2 = 1;
 		}
 	} else {
 		$table2 = 1;
-		$query1 = 1;
 	}
-	
+
 	if($table1 == '1' AND $table2 == '1') {
 		return true; //tables exist
 	} else {

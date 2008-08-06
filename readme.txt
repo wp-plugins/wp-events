@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
-Tags: events, countdown
+Tags: events, countdown, plugin, admin, theme, template, event, archive, dashboard
 Requires at least: 2.5
 Tested up to: 2.6
-Stable tag: 1.5
+Stable tag: 1.5.1
 
 Create a list with events/appointments/concerts/future happenings and show them on your site.
 
