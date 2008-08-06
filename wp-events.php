@@ -337,7 +337,7 @@ function events_add_page() {
 		<?php } else { ?>
 		    <table class="form-table">
 				<tr valign="top">
-					<td bgcolor="#DDD"><strong>You should create atleast one category before adding events! <a href="edit.php?page=wp_events">Add a category now</a>.</strong></td>
+					<td bgcolor="#DDD"><strong>You should create atleast one category before adding events! <a href="edit.php?page=wp-events">Add a category now</a>.</strong></td>
 				</tr>
 			</table>
 		<?php } ?>
