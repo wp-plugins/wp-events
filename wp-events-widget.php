@@ -1,13 +1,4 @@
 <?php
-/*
-Plugin Name: Events Widget 
-Plugin URI: http://www.sothq.net/projects/events-plugin/
-Description: Adds a sidebar widget to list events from the Events plugin.
-Author: Ulisse Perusin <uli.peru@gmail.com>
-Version: 1.0
-Author URI: http://ulisse.wordpress.com
-*/
-
 function widget_wp_events_init() {
 
 	if ( !function_exists('register_sidebar_widget') )
@@ -21,7 +12,7 @@ function widget_wp_events_init() {
 		$options = get_option('widget_wp_events');
 		$title = $options['title'];
 
-		echo $before_widget . $before_title . $title . $after_title;
+		echo $before_widget;
 		$url_parts = parse_url(get_bloginfo('home'));
 		echo events_sidebar();
 		echo $after_widget;
