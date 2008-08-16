@@ -3,7 +3,7 @@ Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
 Tags: events, countdown, plugin, admin, theme, template, event, archive, dashboard
 Requires at least: 2.5
-Tested up to: 2.6
+Tested up to: 2.6.1
 Stable tag: 1.5.2
 
 Create a list with events/appointments/concerts/future happenings and show them on your site.
@@ -59,7 +59,7 @@ In specifics, Events sometimes receives a new version of the database and thus c
 
 == Screenshots ==
 
-1. The screen where you add events (version 1.5.2)
-2. A glance of the very extended options panel (version 1.5.2)
-3. Event management (version 1.5.2)
-4. Categories (version 1.5.2)
+1. The screen where you add events
+2. A glance of the very extended options panel
+3. Event management
+4. Categories
