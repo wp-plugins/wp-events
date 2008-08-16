@@ -143,7 +143,8 @@ function events_sidebar() {
 			$output_sidebar .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
 			foreach($events as $event) {
-				/* Build event output */
+				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
+				
 				$template = $events_template['sidebar_template'];
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$template = str_replace('%title%', substr($event->title, 0 , $events_config['sidelength']), $template);
@@ -157,7 +158,7 @@ function events_sidebar() {
 				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->thetime)), $template);
 				
 				$template = str_replace('%author%', $event->author, $template);
-				$template = str_replace('%category%', $event->category, $template);
+				$template = str_replace('%category%', $get_category->name, $template);
 				
 				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
 				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }
@@ -197,14 +198,13 @@ function events_page($atts, $content = null) {
 	$page_footer = $events_template['page_f_template'];
 	$output_page = stripslashes(html_entity_decode($page_header));
 	if($events_config['order']){
-		/* Current events */
 		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` > ".date('U')."$category ORDER BY $order$amount");
-		/* Start processing data */
 		if ( count($events) == 0 ) {
 			$output_page .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				/* Build event output */
+				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
+				
 				$template = $events_template['page_template'];
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$template = str_replace('%title%', $event->title, $template);
@@ -223,7 +223,7 @@ function events_page($atts, $content = null) {
 				$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
 				
 				$template = str_replace('%author%', $event->author, $template);
-				$template = str_replace('%category%', $event->category, $template);
+				$template = str_replace('%category%', $get_category->name, $template);
 				
 				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
 				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }
@@ -270,7 +270,8 @@ function events_archive($atts, $content = null) {
 			$output_archive .= '<em>'.$events_language['language_noarchive'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				/* Build event output */
+				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
+
 				$template = $events_template['archive_template'];
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$template = str_replace('%title%', $event->title, $template);
@@ -289,7 +290,7 @@ function events_archive($atts, $content = null) {
 				$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
 				
 				$template = str_replace('%author%', $event->author, $template);
-				$template = str_replace('%category%', $event->category, $template);
+				$template = str_replace('%category%', $get_category->name, $template);
 				
 				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
 				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }
@@ -339,7 +340,8 @@ function events_today($atts, $content = null) {
 			$output_daily .= '<em>'.$events_language['language_nodaily'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				// Build event output
+				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
+
 				$template = $events_template['daily_template'];
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$template = str_replace('%title%', $event->title, $template);
@@ -358,7 +360,7 @@ function events_today($atts, $content = null) {
 				$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
 				
 				$template = str_replace('%author%', $event->author, $template);
-				$template = str_replace('%category%', $event->category, $template);
+				$template = str_replace('%category%', $get_category->name, $template);
 				
 				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
 				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }

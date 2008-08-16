@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.5.1
+Version: 1.5.2
 Author URI: http://meandmymac.net/
 */
 
@@ -26,36 +26,38 @@ if(events_mysql_install()) {
 	add_shortcode('events_today', 'events_today');
 	add_shortcode('events_archive', 'events_archive');
 
-	events_clear_old(); // Remove non archived old events
+	add_action('widgets_init', 'widget_wp_events_init');
+	add_action('admin_menu', 'events_add_pages');
 
-	add_action('widgets_init', 'widget_wp_events_init'); //Initialize the widget
-	add_action('admin_menu', 'events_add_pages'); //Add page menu links
-	
-	if(isset($_POST['events_submit'])) {
-		add_action('init', 'events_insert_input'); //Save event
-	}
-
-	if(isset($_POST['add_category_submit'])) {
-		add_action('init', 'events_create_category'); //Add a category
-	}
-
-	if(isset($_POST['delete_event']) OR isset($_POST['delete_categories'])) {
-		add_action('init', 'events_request_delete'); //Delete events/categories
-	}
-
-	if(isset($_POST['events_submit_options'])) {
-		add_action('init', 'events_options_submit'); //Update Options
-	}
-
-	if(isset($_POST['event_uninstall'])) {
-		add_action('init', 'events_plugin_uninstall'); //Uninstall
-	}
-	
 	// Load Options
 	$events_config = get_option('events_config');
 	$events_template = get_option('events_template');
 	$events_language = get_option('events_language');
 	setlocale(LC_TIME, $events_config['localization']);	
+	
+	if($events_config['auto_delete'] == "yes" OR isset($_POST['delete_old_events'])) {
+		events_clear_old(); // Remove non archived old events
+	}
+
+	if(isset($_POST['events_submit'])) {
+		add_action('init', 'events_insert_input'); // Save event
+	}
+
+	if(isset($_POST['add_category_submit'])) {
+		add_action('init', 'events_create_category'); // Add a category
+	}
+
+	if(isset($_POST['delete_events']) OR isset($_POST['delete_categories'])) {
+		add_action('init', 'events_request_delete'); // Delete events/categories
+	}
+
+	if(isset($_POST['events_submit_options'])) {
+		add_action('init', 'events_options_submit'); // Update Options
+	}
+
+	if(isset($_POST['event_uninstall'])) {
+		add_action('init', 'events_plugin_uninstall'); // Uninstall
+	}
 }
 
 /*-------------------------------------------------------------
@@ -95,18 +97,8 @@ function events_manage_page() {
 		$catorder = 'id ASC'; 
 	} ?>
 	
-	<?php if ($action == 'deleted') { ?>
-		<div id="message" class="updated fade"><p>Event/Category <strong>deleted</strong></p></div>
-	<?php } else if ($action == 'updated') { ?>
-		<div id="message" class="updated fade"><p>Event <strong>updated</strong></p></div>
-	<?php } else if ($action == 'no_access') { ?>
-		<div id="message" class="updated fade"><p>Action prohibited</p></div>
-	<?php } else if ($action == 'category_new') { ?>
-		<div id="message" class="updated fade"><p>Category <strong>created</strong></p></div>
-	<?php } else if ($action == 'category_field_error') { ?>
-		<div id="message" class="updated fade"><p>No category name filled in</p></div>
-	<?php } ?>
-
+	<?php echo events_notifications($action); ?>
+	
 	<div class="wrap">
 		<h2>Manage Events (<a href="post-new.php?page=wp-events">add new</a>)</h2>
 
@@ -114,7 +106,8 @@ function events_manage_page() {
 			<div class="tablenav">
 
 				<div class="alignleft">
-					<input onclick="return confirm('You are about to delete multiple events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_multiple" class="button-secondary delete" />
+					<input onclick="return confirm('You are about to delete multiple events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_events" class="button-secondary delete" />
+					<?php if($events_config['auto_delete'] == "no") { ?><input onclick="return confirm('Are you sure you want to clean out non-archived events?\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete old events" name="delete_old_events" class="button-secondary delete" /><?php } ?>
 					<select name='order' id='cat' class='postform' >
 				        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending, default)</option>
 				        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending)</option>
@@ -235,13 +228,7 @@ function events_add_page() {
 	}
 	
 	$action = $_GET['action']; 
-	if ($action == 'created') { ?>
-		<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="edit.php?page=wp-events.php">manage events</a></p></div>
-	<?php } else if ($action == 'no_access') { ?>
-		<div id="message" class="updated fade"><p>Action prohibited</p></div>
-	<?php } else if ($action == 'field_error') { ?>
-		<div id="message" class="updated fade"><p>Not all fields met the requirements</p></div>
-	<?php } ?>
+	echo events_notifications($action); ?>
 	
 	<div class="wrap">
 		<?php if(!$event_edit_id) { ?>
@@ -330,14 +317,19 @@ function events_add_page() {
 		    	</table>
 		    	
 		    	<p class="submit">
-					<input type="submit" name="Submit" value="Save event &raquo;" /> <span style="float: right;"><?php if($event_edit_id) { ?><a href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;delete_event='.$edit_event->id; ?>" style="color: #f00;" onclick="return confirm('Are you sure you want to delete this event?')">Delete event</a><?php } ?></span>
+					<?php if($event_edit_id) { ?>
+					<input type="submit" name="submit_save" value="Edit existing event" /> 
+					<input type="submit" name="submit_new" value="Duplicate event with new values" /> 
+					<?php } else { ?>
+					<input type="submit" name="submit_save" value="Save new event" />
+					<?php } ?>
 		    	</p>
 	
 		  	</form>
 		<?php } else { ?>
 		    <table class="form-table">
 				<tr valign="top">
-					<td bgcolor="#DDD"><strong>You should create atleast one category before adding events! <a href="edit.php?page=wp-events">Add a category now</a>.</strong></td>
+					<td bgcolor="#DDD"><strong>You should create atleast one category before adding events! <a href="edit.php?page=wp-events">Add a category now</a>.</strong><br />Tip: If you do not want to use categories create one "uncategorized" and put all events in there. You don't have to show the categories on your blog.</td>
 				</tr>
 			</table>
 		<?php } ?>
@@ -422,6 +414,7 @@ function events_options_page() {
 			        <th scope="row">Character limit</th>
 			        <td colspan="3"><input name="events_sidelength" type="text" value="<?php echo $events_config['sidelength'];?>" size="6" /> (default: 120)</td>
 		      	</tr>
+		      	
 				<tr valign="top">
 					<td colspan="4" bgcolor="#DDD"><strong>Options for the page</strong></td>
 				</tr>
@@ -474,9 +467,17 @@ function events_options_page() {
 			        <th scope="row">Character limit</th>
 			        <td colspan="3"><input name="events_length" type="text" value="<?php echo $events_config['length'];?>" size="6" /> (default: 1000)</td>
 		      	</tr>
+		      	
 				<tr valign="top">
 					<td colspan="4" bgcolor="#DDD"><strong>Global or other options.</strong></td>
 				</tr>
+		      	<tr valign="top">
+			        <th scope="row">Non-archived events</th>
+			        <td colspan="3"><select name="events_auto_delete">
+				        <option value="yes" <?php if($events_config['auto_delete'] == "yes") { echo 'selected'; } ?>>remove old events automagically</option>
+				        <option value="no" <?php if($events_config['auto_delete'] == "no") { echo 'selected'; } ?>>i remove them manually</option>
+					</select></td>
+		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Order events</th>
 			        <td colspan="3"><select name="events_order">
@@ -531,11 +532,11 @@ function events_options_page() {
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
-			        <td><textarea name="sidebar_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_h_template']); ?></textarea><br /><em>Options: %sidebar_title%</em></td>
+			        <td><textarea name="sidebar_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_h_template']); ?></textarea></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="sidebar_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_template']); ?></textarea><br /><em>Options: %title% %event% %link% %countdown% %startdate% %starttime% %author% %location%</em></td>
+			        <td><textarea name="sidebar_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_template']); ?></textarea><br /><em>Options: %title% %event% %link% %countdown% %startdate% %starttime% %author% %location% %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -546,11 +547,11 @@ function events_options_page() {
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
-			        <td><textarea name="page_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_h_template']); ?></textarea><br /><em>Options: %page_title%</em></td>
+			        <td><textarea name="page_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_h_template']); ?></textarea><br /><em>Options: %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="page_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location%</em></td>
+			        <td><textarea name="page_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location% %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -561,11 +562,11 @@ function events_options_page() {
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
-			        <td><textarea name="archive_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_h_template']); ?></textarea><br /><em>Options: %archive_title%</em></td>
+			        <td><textarea name="archive_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_h_template']); ?></textarea><br /><em>Options: %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="archive_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countup% %author% %location%</em></td>
+			        <td><textarea name="archive_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countup% %author% %location% %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -576,11 +577,11 @@ function events_options_page() {
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
-			        <td><textarea name="daily_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_h_template']); ?></textarea><br /><em>Options: %daily_title%</em></td>
+			        <td><textarea name="daily_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_h_template']); ?></textarea><br /><em>Options: %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="daily_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location%</em></td>
+			        <td><textarea name="daily_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location% %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -766,8 +767,8 @@ function events_options_page() {
     	<form method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Events installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.<br />
-					For the techies: Upon un-installation the wp_events table will be dropped along with the events_config record in the wp_options table.</td>
+					<td colspan="2" bgcolor="#DDD">Events installs 2 tables in MySQL. When you disable the plugin these will not be deleted. To delete the table use the button below.<br />
+					For the techies: Upon un-installation the wp_events and wp_events_categories table will be dropped along with the events_config, events_language and events_template record in the wp_options table.</td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">WARNING!</th>

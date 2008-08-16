@@ -69,7 +69,7 @@ function events_insert_input() {
 		}
 		
 		/* Check if you need to update or insert a new record */
-		if(strlen($event_id) != 0) {
+		if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
 			/* Update an existing event */
 			$postquery = "UPDATE `".$wpdb->prefix."events` SET
 			`title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category',
@@ -79,7 +79,7 @@ function events_insert_input() {
 			WHERE `id` = '$event_id'";
 			$action = "update";
 		} else {
-			/* New event */
+			/* New or duplicate event */
 			$postquery = "INSERT INTO `".$wpdb->prefix."events`
 			(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
 			VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
@@ -236,6 +236,7 @@ function events_check_config() {
 		$option['timeformat'] 				= '%H:%M';
 		$option['timeformat_sidebar']		= '%H:%M';
 		$option['timezone']					= '+0';
+		$option['auto_delete']				= 'yes';
 		$option['order'] 					= 'thetime ASC';
 		$option['order_archive'] 			= 'thetime DESC';
 		$option['localization'] 			= 'en_EN';
@@ -302,6 +303,7 @@ function events_options_submit() {
 	$option['timeformat'] 				= $_POST['events_timeformat'];
 	$option['timeformat_sidebar']		= $_POST['events_timeformat_sidebar'];
 	$option['timezone'] 				= $_POST['events_timezone'];
+	$option['auto_delete']	 			= $_POST['events_auto_delete'];
 	$option['order']	 				= $_POST['events_order'];
 	$option['order_archive'] 			= $_POST['events_order_archive'];
 	$option['linktarget'] 				= $_POST['events_linktarget'];
@@ -341,6 +343,34 @@ function events_options_submit() {
 	$language['language_noduration'] 	= htmlspecialchars(trim($_POST['events_language_noduration'], "\t\n "), ENT_QUOTES);
 	$language['language_allday'] 		= htmlspecialchars(trim($_POST['events_language_allday'], "\t\n "), ENT_QUOTES);
 	update_option('events_language', $language);
+}
+
+/*-------------------------------------------------------------
+ Name:      events_notifications
+
+ Purpose:   Display notifications 
+ Receive:   $action
+ Return:    $result
+-------------------------------------------------------------*/
+function events_notifications($action) {
+	
+	if ($action == 'created') {
+		$result = "<div id=\"message\" class=\"updated fade\"><p>Event <strong>created</strong> | <a href=\"edit.php?page=wp-events.php\">manage events</a></p></div>";
+	} else if ($action == 'no_access') {
+		$result = "<div id=\"message\" class=\"updated fade\"><p>Action prohibited</p></div>";
+	} else if ($action == 'field_error') {
+		$result = "<div id=\"message\" class=\"updated fade\"><p>Not all fields met the requirements</p></div>";
+	} else if ($action == 'deleted') {
+		$result = "<div id=\"message\" class=\"updated fade\"><p>Event/Category <strong>deleted</strong></p></div>";
+	} else if ($action == 'updated') {
+		$result = "<div id=\"message\" class=\"updated fade\"><p>Event <strong>updated</strong></p></div>";
+	} else if ($action == 'category_new') {
+		$result = "<div id=\"message\" class=\"updated fade\"><p>Category <strong>created</strong></p></div>";
+	} else if ($action == 'category_field_error') {
+		$result = "<div id=\"message\" class=\"updated fade\"><p>No category name filled in</p></div>";
+	}
+	
+	return $result;
 }
 
 /*-------------------------------------------------------------
