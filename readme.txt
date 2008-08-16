@@ -59,7 +59,7 @@ In specifics, Events sometimes receives a new version of the database and thus c
 
 == Screenshots ==
 
-1. The screen where you add events (version 1.5.2)
-2. A glance of the very extended options panel (version 1.5.2)
-3. Event management (version 1.5.2)
-4. Categories (version 1.5.2)
+1. The screen where you add events
+2. A glance of the very extended options panel
+3. Event management
+4. Categories
