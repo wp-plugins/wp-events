@@ -3,7 +3,6 @@ Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
 Tags: events, countdown, plugin, admin, theme, template, event, archive, dashboard
 Requires at least: 2.5
-Tested up to: 2.6.1
 Stable tag: 1.5.2
 
 Create a list with events/appointments/concerts/future happenings and show them on your site.
@@ -40,11 +39,20 @@ And more, see for yourself...
 
 == Installation ==
 
-Basically you unzip the file and put it in the /plugins/ folder. Then you go to the plugins page and activate the plugin.
+Installation with widget:
 
-For detailed instructions go [here](http://meandmymac.net/plugins/events/#install).
+1. Upload the events folder to your wp-content/plugins/ folder.
+1. Activate the plugin and widget from the “plugins” page.
+1. Goto Options > Events and configure the plugin where required.
+1. You can now go to manage > events to schedule events.
+1. Make a donation. It’s well appreciated!
 
-For upgrading **ALWAYS** review the details on [the plugin page](http://meandmymac.net/plugins/events/#upgrade) !!!
+For more instructions and additional information review the [detailed install instructions](http://meandmymac.net/plugins/events/#install).
+Find how to implement Events on pages, without a widget and many more options...
+
+For upgrading **ALWAYS ALWAYS** review the details on [the plugin page](http://meandmymac.net/plugins/events/#upgrade) !!!!!
+
+For help, go to the [support forum](http://forum.at.meandmymac.net/).
 
 
 == Frequently Asked Questions ==
@@ -55,7 +63,7 @@ For upgrading **ALWAYS** review the details on [the plugin page](http://meandmym
 In specifics, Events sometimes receives a new version of the database and thus cannot automatically upgrade, some things are to be done manually for your own safety!
 
 **Visit here for the FAQ and support:**
-[Here!](http://forum.at.meandmymac.net/)
+[Support forum!](http://forum.at.meandmymac.net/)
 
 == Screenshots ==
 
