@@ -3,14 +3,14 @@
  Name:      events_countdown
 
  Purpose:   Calculates countdown times
- Receive:   $time_event, $message
+ Receive:   $time_start, $time_end, $message, $allday
  Return:	$output_countdown
 -------------------------------------------------------------*/
-function events_countdown($time_event, $message, $allday) {
+function events_countdown($time_start, $time_end, $message, $allday) {
 	global $events_config, $events_language;
 
   	$timezone = date("U") . $events_config['timezone'];
-  	$difference = $time_event - $timezone;
+  	$difference = $time_start - $timezone;
   	if ($difference < 0) $difference = 0;
 
  	$days_left = floor($difference/60/60/24);
@@ -23,7 +23,7 @@ function events_countdown($time_event, $message, $allday) {
 	$output_countdown = '';
   	if ($allday == 'Y') {
 		$output_countdown .= $events_language['language_allday'];
-  	} else if ( $days_left == 0 and $hours_left == 0 and $minutes_left == 0 ) {
+  	} else if ( $days_left == 0 and $hours_left == 0 and $minutes_left == 0 and date('U') > $time_end) {
 		$output_countdown .= $message;
 	} else if ( $days_left == 0 ) {
 		$output_countdown .= $events_language['language_today'].', '. $hours_left .':'. $minutes_left .' '.$events_language['language_hours'].'.';
@@ -45,14 +45,14 @@ function events_countdown($time_event, $message, $allday) {
  Name:      events_countup
 
  Purpose:   Calculates the time since the event
- Receive:   $time_event, $message
+ Receive:   $time_start, $time_end, $message
  Return:	$output_archive
 -------------------------------------------------------------*/
-function events_countup($time_event, $message) {
+function events_countup($time_start, $time_end, $message) {
 	global $events_config, $events_language;
 
   	$timezone = date("U") . $events_config['timezone'];
-  	$difference = $timezone - $time_event;
+  	$difference = $timezone - $time_start;
   	if ($difference < 0) $difference = 0;
 
  	$days_ago = floor($difference/60/60/24);
@@ -63,7 +63,7 @@ function events_countup($time_event, $message) {
 	if($hours_ago < "10") $hours_ago = "0".$hours_ago;
 
 	$output_archive = '';
-  	if ( $days_ago == 0 and $hours_ago == 0 and $minutes_ago == 0 ) {
+  	if ( $days_ago == 0 and $hours_ago == 0 and $minutes_ago == 0 and date('U') > $time_end ) {
 		$output_archive .= $message;
 	} else if ( $days_ago == 0 ) {
 		$output_archive .= $events_language['language_today'].', '. $hours_ago .':'. $minutes_ago .' '.$events_language['language_hours'].' '.$events_language['language_ago'].'.';
@@ -91,7 +91,7 @@ function events_duration($event_start, $event_end, $allday) {
 	global $events_config, $events_language;
 
   	$timezone = date("U") . $events_config['timezone'];
-  	$difference = $event_end - $timezone;
+  	$difference = $event_end - $event_start;
   	if ($difference < 0) $difference = 0;
 
  	$days_duration = floor($difference/60/60/24);
@@ -153,7 +153,7 @@ function events_sidebar() {
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
 				
-				$template = str_replace('%countdown%', events_countdown($event->thetime, substr($event->post_message, 0 , $events_config['sidelength']), $event->allday), $template);
+				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, substr($event->post_message, 0 , $events_config['sidelength']), $event->allday), $template);
 				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat_sidebar'], $event->thetime))), $template);
 				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat_sidebar'], $event->thetime)), $template);
 				
@@ -176,13 +176,13 @@ function events_sidebar() {
 }
 
 /*-------------------------------------------------------------
- Name:      events_page
+ Name:      events_list
 
  Purpose:   Create list of events for the template using shortcodes
  Receive:   $atts, $content
  Return:	$output_page
 -------------------------------------------------------------*/
-function events_page($atts, $content = null) {
+function events_list($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 	
 	if(empty($atts['amount'])) $amount = ""; 
@@ -194,11 +194,14 @@ function events_page($atts, $content = null) {
 	if(empty($atts['category'])) $category = ''; 
 		else $category = " AND `category` = '$atts[category]'";
 		
+	if(empty($atts['event'])) $one_event = ''; 
+		else $one_event = " AND `id` = '$atts[event]'";
+		
 	$page_header = $events_template['page_h_template'];
 	$page_footer = $events_template['page_f_template'];
 	$output_page = stripslashes(html_entity_decode($page_header));
 	if($events_config['order']){
-		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` > ".date('U')."$category ORDER BY $order$amount");
+		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` > ".date('U')."$category$one_event ORDER BY $order$amount");
 		if ( count($events) == 0 ) {
 			$output_page .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
@@ -214,13 +217,19 @@ function events_page($atts, $content = null) {
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
 				
-				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->post_message, $event->allday), $template);
+				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
 				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
 				
-				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
 				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
-				$template = str_replace('%endtime%', utf8_encode(strftime($events_config['timeformat'], $event->theend)), $template);
-				$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
+				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+				
+				if($event->thetime == $event->theend and $events_config['hideend'] == 'hide') {
+					$template = str_replace('%enddate%', '', $template);					
+					$template = str_replace('%endtime%', '', $template);					
+				} else { 
+					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
+					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+				}
 				
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
@@ -281,13 +290,19 @@ function events_archive($atts, $content = null) {
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
 				
-				$template = str_replace('%countup%', events_countup($event->thetime, $event->post_message, $event->allday), $template);
+				$template = str_replace('%countup%', events_countup($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
 				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
 				
-				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
 				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
-				$template = str_replace('%endtime%', utf8_encode(strftime($events_config['timeformat'], $event->theend)), $template);
-				$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
+				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+				
+				if($event->thetime == $event->theend and $events_config['hideend'] == 'show') {
+					$template = str_replace('%enddate%', '', $template);					
+					$template = str_replace('%endtime%', '', $template);					
+				} else { 
+					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
+					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+				}
 				
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
@@ -354,10 +369,16 @@ function events_today($atts, $content = null) {
 				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->post_message, $event->allday), $template);
 				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
 				
-				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
 				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
-				$template = str_replace('%endtime%', utf8_encode(strftime($events_config['timeformat'], $event->theend)), $template);
-				$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
+				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+				
+				if($event->thetime == $event->theend and $events_config['hideend'] == 'show') {
+					$template = str_replace('%enddate%', '', $template);					
+					$template = str_replace('%endtime%', '', $template);					
+				} else { 
+					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
+					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+				}
 				
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);

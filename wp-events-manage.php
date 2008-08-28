@@ -2,15 +2,15 @@
 /*-------------------------------------------------------------
  Name:      events_insert_input
 
- Purpose:   Prepare input form on saving new or updated events
+ Purpose:   Prepare and insert data on saving new or updating event
  Receive:   -None-
  Return:	-None-
 -------------------------------------------------------------*/
 function events_insert_input() {
-	global $wpdb, $userdata, $events_config;
+	global $wpdb, $userdata, $events_config, $events_language;
 	
 	$event_id 			= $_POST['events_event_id'];
-	$eventmsg 			= 'Passed event';
+	$eventmsg 			= $events_language['language_past'];
 	$author 			= $_POST['events_username'];
 	$title	 			= htmlspecialchars(trim($_POST['events_title'], "\t\n "), ENT_QUOTES);
 	$title_link	 		= $_POST['events_title_link'];
@@ -110,8 +110,8 @@ function events_create_category() {
 	$name = $_POST['events_category'];
 	
 	if (strlen($name) != 0) {
-		$postquery = "INSERT INTO ".$wpdb->prefix."events_categories
-		(name)
+		$postquery = "INSERT INTO `".$wpdb->prefix."events_categories`
+		(`name`)
 		VALUES ('$name')";		
 		$action = "category_new";
 		if($wpdb->query($postquery) !== FALSE) {
@@ -180,20 +180,20 @@ function events_delete($id, $what) {
 	if($id > 0) {
 		if($what == 'banner') {
 			$SQL = "SELECT
-			".$wpdb->prefix."events.author,
-			".$wpdb->prefix."users.display_name as display_name
+			`".$wpdb->prefix."events.author`,
+			`".$wpdb->prefix."users.display_name` as display_name
 			FROM
-			".$wpdb->prefix."events,
-			".$wpdb->prefix."users
+			`".$wpdb->prefix."events`,
+			`".$wpdb->prefix."users`
 			WHERE
-			".$wpdb->prefix."events.id = '$id'
+			`".$wpdb->prefix."events.id` = '$id'
 			AND
-			".$wpdb->prefix."users.display_name = ".$wpdb->prefix."events.author";
+			`".$wpdb->prefix."users.display_name` = ".$wpdb->prefix."events.author";
 	
 			$event = $wpdb->get_row($SQL);
 	
 			if ($event->display_name == $event->author ) {
-				$SQL = "DELETE FROM ".$wpdb->prefix."events WHERE id = $id";
+				$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
 				if($wpdb->query($SQL) == FALSE) {
 					die(mysql_error());
 				}
@@ -202,7 +202,7 @@ function events_delete($id, $what) {
 				exit;
 			}
 		} else if ($what == 'group') {
-			$SQL = "DELETE FROM ".$wpdb->prefix."events_categories WHERE id = $id";
+			$SQL = "DELETE FROM `".$wpdb->prefix."events_categories` WHERE `id` = $id";
 			if($wpdb->query($SQL) == FALSE) {
 				die(mysql_error());
 			}
@@ -227,6 +227,7 @@ function events_check_config() {
 		$option['sidelength'] 				= 120;
 		$option['linktarget']				= '_blank';
 		$option['amount'] 					= 2;
+		$option['hideend'] 					= 'show';
 		$option['minlevel'] 				= 7;
 		$option['managelevel'] 				= 10;
 		$option['custom_date_page']			= 'no';
@@ -236,7 +237,6 @@ function events_check_config() {
 		$option['timeformat'] 				= '%H:%M';
 		$option['timeformat_sidebar']		= '%H:%M';
 		$option['timezone']					= '+0';
-		$option['auto_delete']				= 'yes';
 		$option['order'] 					= 'thetime ASC';
 		$option['order_archive'] 			= 'thetime DESC';
 		$option['localization'] 			= 'en_EN';
@@ -278,6 +278,7 @@ function events_check_config() {
 		$language['language_e_config'] 		= 'A configuration error has occured';
 		$language['language_noduration'] 	= 'No duration!';
 		$language['language_allday'] 		= 'All-day event!';
+		$language['language_past'] 			= 'Past event!';
 		update_option('events_language', $language);
 	}
 }
@@ -295,6 +296,7 @@ function events_options_submit() {
 	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
 	$option['amount'] 					= trim($_POST['events_amount'], "\t\n ");
 	$option['minlevel'] 				= $_POST['events_minlevel'];
+	$option['hideend']	 				= $_POST['events_hideend'];
 	$option['managelevel'] 				= $_POST['events_managelevel'];
 	$option['custom_date_page'] 		= $_POST['events_custom_date_page'];
 	$option['custom_date_sidebar']		= $_POST['events_custom_date_sidebar'];
@@ -303,7 +305,6 @@ function events_options_submit() {
 	$option['timeformat'] 				= $_POST['events_timeformat'];
 	$option['timeformat_sidebar']		= $_POST['events_timeformat_sidebar'];
 	$option['timezone'] 				= $_POST['events_timezone'];
-	$option['auto_delete']	 			= $_POST['events_auto_delete'];
 	$option['order']	 				= $_POST['events_order'];
 	$option['order_archive'] 			= $_POST['events_order_archive'];
 	$option['linktarget'] 				= $_POST['events_linktarget'];
@@ -342,35 +343,8 @@ function events_options_submit() {
 	$language['language_e_config'] 		= htmlspecialchars(trim($_POST['events_language_e_config'], "\t\n "), ENT_QUOTES);
 	$language['language_noduration'] 	= htmlspecialchars(trim($_POST['events_language_noduration'], "\t\n "), ENT_QUOTES);
 	$language['language_allday'] 		= htmlspecialchars(trim($_POST['events_language_allday'], "\t\n "), ENT_QUOTES);
+	$language['language_past'] 			= htmlspecialchars(trim($_POST['events_language_past'], "\t\n "), ENT_QUOTES);
 	update_option('events_language', $language);
-}
-
-/*-------------------------------------------------------------
- Name:      events_notifications
-
- Purpose:   Display notifications 
- Receive:   $action
- Return:    $result
--------------------------------------------------------------*/
-function events_notifications($action) {
-	
-	if ($action == 'created') {
-		$result = "<div id=\"message\" class=\"updated fade\"><p>Event <strong>created</strong> | <a href=\"edit.php?page=wp-events.php\">manage events</a></p></div>";
-	} else if ($action == 'no_access') {
-		$result = "<div id=\"message\" class=\"updated fade\"><p>Action prohibited</p></div>";
-	} else if ($action == 'field_error') {
-		$result = "<div id=\"message\" class=\"updated fade\"><p>Not all fields met the requirements</p></div>";
-	} else if ($action == 'deleted') {
-		$result = "<div id=\"message\" class=\"updated fade\"><p>Event/Category <strong>deleted</strong></p></div>";
-	} else if ($action == 'updated') {
-		$result = "<div id=\"message\" class=\"updated fade\"><p>Event <strong>updated</strong></p></div>";
-	} else if ($action == 'category_new') {
-		$result = "<div id=\"message\" class=\"updated fade\"><p>Category <strong>created</strong></p></div>";
-	} else if ($action == 'category_field_error') {
-		$result = "<div id=\"message\" class=\"updated fade\"><p>No category name filled in</p></div>";
-	}
-	
-	return $result;
 }
 
 /*-------------------------------------------------------------

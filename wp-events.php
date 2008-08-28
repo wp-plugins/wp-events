@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.5.2
+Version: 1.5.3
 Author URI: http://meandmymac.net/
 */
 
@@ -22,67 +22,65 @@ events_check_config();
 #---------------------------------------------------
 if(events_mysql_install()) {
 	// Add filters for adding the tags in the WP page/post field
-	add_shortcode('events_list', 'events_page');
+	add_shortcode('events_list', 'events_list');
 	add_shortcode('events_today', 'events_today');
 	add_shortcode('events_archive', 'events_archive');
 
-	add_action('widgets_init', 'widget_wp_events_init');
-	add_action('admin_menu', 'events_add_pages');
+	events_clear_old(); // Remove non archived old events
 
+	add_action('widgets_init', 'widget_wp_events_init'); //Initialize the widget
+	add_action('admin_menu', 'events_dashboard'); //Add page menu links
+	
+	if(isset($_POST['events_submit'])) {
+		add_action('init', 'events_insert_input'); //Save event
+	}
+
+	if(isset($_POST['add_category_submit'])) {
+		add_action('init', 'events_create_category'); //Add a category
+	}
+
+	if(isset($_POST['delete_events']) OR isset($_POST['delete_categories'])) {
+		add_action('init', 'events_request_delete'); //Delete events/categories
+	}
+
+	if(isset($_POST['events_submit_options'])) {
+		add_action('init', 'events_options_submit'); //Update Options
+	}
+
+	if(isset($_POST['event_uninstall'])) {
+		add_action('init', 'events_plugin_uninstall'); //Uninstall
+	}
+	
 	// Load Options
 	$events_config = get_option('events_config');
 	$events_template = get_option('events_template');
 	$events_language = get_option('events_language');
 	setlocale(LC_TIME, $events_config['localization']);	
-	
-	if($events_config['auto_delete'] == "yes" OR isset($_POST['delete_old_events'])) {
-		events_clear_old(); // Remove non archived old events
-	}
-
-	if(isset($_POST['events_submit'])) {
-		add_action('init', 'events_insert_input'); // Save event
-	}
-
-	if(isset($_POST['add_category_submit'])) {
-		add_action('init', 'events_create_category'); // Add a category
-	}
-
-	if(isset($_POST['delete_events']) OR isset($_POST['delete_categories'])) {
-		add_action('init', 'events_request_delete'); // Delete events/categories
-	}
-
-	if(isset($_POST['events_submit_options'])) {
-		add_action('init', 'events_options_submit'); // Update Options
-	}
-
-	if(isset($_POST['event_uninstall'])) {
-		add_action('init', 'events_plugin_uninstall'); // Uninstall
-	}
 }
 
 /*-------------------------------------------------------------
- Name:      events_add_pages
+ Name:      events_dashboard
 
  Purpose:   Add pages to admin menus
  Receive:   -none-
  Return:    -none-
 -------------------------------------------------------------*/
-function events_add_pages() {
+function events_dashboard() {
 	global $events_config;
 
-	add_submenu_page('post-new.php', 'Events', 'Event', $events_config['minlevel'], 'wp-events', 'events_add_page');
-	add_submenu_page('edit.php', 'Events', 'Events', $events_config['minlevel'], 'wp-events', 'events_manage_page');
-	add_submenu_page('options-general.php', 'Events', 'Events', $events_config['minlevel'], 'wp-events', 'events_options_page');
+	add_submenu_page('post-new.php', 'Events', 'Event', $events_config['minlevel'], 'wp-events', 'events_schedule');
+	add_submenu_page('edit.php', 'Events', 'Events', $events_config['minlevel'], 'wp-events', 'events_manage');
+	add_submenu_page('options-general.php', 'Events', 'Events', $events_config['minlevel'], 'wp-events', 'events_options');
 }
 
 /*-------------------------------------------------------------
- Name:      events_manage_page
+ Name:      events_manage
 
  Purpose:   Admin management page
  Receive:   -none-
  Return:    -none-
 -------------------------------------------------------------*/
-function events_manage_page() {
+function events_manage() {
 	global $wpdb, $userdata, $events_config;
 
 	$action = $_GET['action'];
@@ -97,8 +95,18 @@ function events_manage_page() {
 		$catorder = 'id ASC'; 
 	} ?>
 	
-	<?php echo events_notifications($action); ?>
-	
+	<?php if ($action == 'deleted') { ?>
+		<div id="message" class="updated fade"><p>Event/Category <strong>deleted</strong></p></div>
+	<?php } else if ($action == 'updated') { ?>
+		<div id="message" class="updated fade"><p>Event <strong>updated</strong></p></div>
+	<?php } else if ($action == 'no_access') { ?>
+		<div id="message" class="updated fade"><p>Action prohibited</p></div>
+	<?php } else if ($action == 'category_new') { ?>
+		<div id="message" class="updated fade"><p>Category <strong>created</strong></p></div>
+	<?php } else if ($action == 'category_field_error') { ?>
+		<div id="message" class="updated fade"><p>No category name filled in</p></div>
+	<?php } ?>
+
 	<div class="wrap">
 		<h2>Manage Events (<a href="post-new.php?page=wp-events">add new</a>)</h2>
 
@@ -107,7 +115,6 @@ function events_manage_page() {
 
 				<div class="alignleft">
 					<input onclick="return confirm('You are about to delete multiple events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_events" class="button-secondary delete" />
-					<?php if($events_config['auto_delete'] == "no") { ?><input onclick="return confirm('Are you sure you want to clean out non-archived events?\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete old events" name="delete_old_events" class="button-secondary delete" /><?php } ?>
 					<select name='order' id='cat' class='postform' >
 				        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending, default)</option>
 				        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending)</option>
@@ -151,7 +158,7 @@ function events_manage_page() {
 					<td><?php echo stripslashes(html_entity_decode($event->location));?></td>
 					<td><?php echo $cat->name; ?></td>
 					<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
-					<td><?php echo events_countdown($event->thetime, $event->post_message, $event->allday); ?></td>
+					<td><?php echo events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday); ?></td>
 					<td><?php echo events_duration($event->thetime, $event->theend, $event->allday);?></td>
 				</tr>
  			<?php } ?>
@@ -214,13 +221,13 @@ function events_manage_page() {
 }
 
 /*-------------------------------------------------------------
- Name:      events_add_page
+ Name:      events_schedule
 
- Purpose:   Create new events
+ Purpose:   Create new or edit events
  Receive:   -none-
  Return:    -none-
 -------------------------------------------------------------*/
-function events_add_page() {
+function events_schedule() {
 	global $wpdb, $userdata, $events_config;
 	
 	if($_GET['edit_event']) {
@@ -228,7 +235,13 @@ function events_add_page() {
 	}
 	
 	$action = $_GET['action']; 
-	echo events_notifications($action); ?>
+	if ($action == 'created') { ?>
+		<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="edit.php?page=wp-events.php">manage events</a></p></div>
+	<?php } else if ($action == 'no_access') { ?>
+		<div id="message" class="updated fade"><p>Action prohibited</p></div>
+	<?php } else if ($action == 'field_error') { ?>
+		<div id="message" class="updated fade"><p>Not all fields met the requirements</p></div>
+	<?php } ?>
 	
 	<div class="wrap">
 		<?php if(!$event_edit_id) { ?>
@@ -266,23 +279,230 @@ function events_add_page() {
 				        <th scope="row">Location (optional):</th>
 				        <td width="25%"><input name="events_location" type="text" size="25" maxlength="255" value="<?php echo $edit_event->location;?>" /><br /><em>Maximum 255 characters.</em></td>
 				        <th scope="row">Category:</th>
-				        <td width="25%"><select name='events_category' id='cat' class='postform'>
+				        <td width="25%" valign="top"><select name='events_category' id='cat' class='postform'>
 						<?php foreach($categories as $category) { ?>
 						    <option value="<?php echo $category->id; ?>" <?php if($category->id == $edit_event->category) { echo 'selected'; } ?>><?php echo $category->name; ?></option>
 				    	<?php } ?>
 				    	</select></td>
 			      	</tr>
 			      	<tr>
-				        <th scope="row">Start DD/MM/YYYY:</th>
-				        <td width="25%"><input id="title" name="events_sday" type="text" size="4" maxlength="2" value="<?php echo $sday;?>" />/<input name="events_smonth" type="text" size="4" maxlength="2" value="<?php echo $smonth;?>" />/<input name="events_syear" type="text" size="4" maxlength="4" value="<?php echo $syear;?>" /></td>
-				        <th scope="row">HH/MM (optional):</th>
-				        <td width="25%"><input name="events_shour" type="text" size="4" maxlength="2" value="<?php echo $shour;?>" />/<input name="events_sminute" type="text" size="4" maxlength="2" value="<?php echo $sminute;?>" /></td>
+				        <th scope="row">Startdate Day/Month/Year:</th>
+				        <td width="25%">
+				        	<input id="title" name="events_sday" type="text" size="4" maxlength="2" value="<?php echo $sday;?>" /> / 
+							<select name="events_smonth">
+								<option value="01" <?php if($smonth == "01") { echo 'selected'; } ?>>January</option>
+								<option value="02" <?php if($smonth == "02") { echo 'selected'; } ?>>February</option>
+								<option value="03" <?php if($smonth == "03") { echo 'selected'; } ?>>March</option>
+								<option value="04" <?php if($smonth == "04") { echo 'selected'; } ?>>April</option>
+								<option value="05" <?php if($smonth == "05") { echo 'selected'; } ?>>May</option>
+								<option value="06" <?php if($smonth == "06") { echo 'selected'; } ?>>June</option>
+								<option value="07" <?php if($smonth == "07") { echo 'selected'; } ?>>July</option>
+								<option value="08" <?php if($smonth == "08") { echo 'selected'; } ?>>August</option>
+								<option value="09" <?php if($smonth == "09") { echo 'selected'; } ?>>September</option>
+								<option value="10" <?php if($smonth == "10") { echo 'selected'; } ?>>October</option>
+								<option value="11" <?php if($smonth == "11") { echo 'selected'; } ?>>November</option>
+								<option value="12" <?php if($smonth == "12") { echo 'selected'; } ?>>December</option>
+							</select> / 
+							<input name="events_syear" type="text" size="4" maxlength="4" value="<?php echo $syear;?>" />	
+						</td>
+				        <th scope="row">Hour/Minute (optional):</th>
+				        <td width="25%"><select name="events_shour">
+				        <option value="00" <?php if($shour == "00") { echo 'selected'; } ?>>00</option>
+				        <option value="01" <?php if($shour == "01") { echo 'selected'; } ?>>01</option>
+				        <option value="02" <?php if($shour == "02") { echo 'selected'; } ?>>02</option>
+				        <option value="03" <?php if($shour == "03") { echo 'selected'; } ?>>03</option>
+				        <option value="04" <?php if($shour == "04") { echo 'selected'; } ?>>04</option>
+				        <option value="05" <?php if($shour == "05") { echo 'selected'; } ?>>05</option>
+				        <option value="06" <?php if($shour == "06") { echo 'selected'; } ?>>06</option>
+				        <option value="07" <?php if($shour == "07") { echo 'selected'; } ?>>07</option>
+				        <option value="08" <?php if($shour == "08") { echo 'selected'; } ?>>08</option>
+				        <option value="09" <?php if($shour == "09") { echo 'selected'; } ?>>09</option>
+				        <option value="10" <?php if($shour == "10") { echo 'selected'; } ?>>10</option>
+				        <option value="11" <?php if($shour == "11") { echo 'selected'; } ?>>11</option>
+				        <option value="12" <?php if($shour == "12") { echo 'selected'; } ?>>12</option>
+				        <option value="13" <?php if($shour == "13") { echo 'selected'; } ?>>13</option>
+				        <option value="14" <?php if($shour == "14") { echo 'selected'; } ?>>14</option>
+				        <option value="15" <?php if($shour == "15") { echo 'selected'; } ?>>15</option>
+				        <option value="16" <?php if($shour == "16") { echo 'selected'; } ?>>16</option>
+				        <option value="17" <?php if($shour == "17") { echo 'selected'; } ?>>17</option>
+				        <option value="18" <?php if($shour == "18") { echo 'selected'; } ?>>18</option>
+				        <option value="19" <?php if($shour == "19") { echo 'selected'; } ?>>19</option>
+				        <option value="20" <?php if($shour == "20") { echo 'selected'; } ?>>20</option>
+				        <option value="21" <?php if($shour == "21") { echo 'selected'; } ?>>21</option>
+				        <option value="22" <?php if($shour == "22") { echo 'selected'; } ?>>22</option>
+				        <option value="23" <?php if($shour == "23") { echo 'selected'; } ?>>23</option>
+					</select> / <select name="events_sminute">
+				        <option value="00" <?php if($sminute == "00") { echo 'selected'; } ?>>00</option>
+				        <option value="01" <?php if($sminute == "01") { echo 'selected'; } ?>>01</option>
+				        <option value="02" <?php if($sminute == "02") { echo 'selected'; } ?>>02</option>
+				        <option value="03" <?php if($sminute == "03") { echo 'selected'; } ?>>03</option>
+				        <option value="04" <?php if($sminute == "04") { echo 'selected'; } ?>>04</option>
+				        <option value="05" <?php if($sminute == "05") { echo 'selected'; } ?>>05</option>
+				        <option value="06" <?php if($sminute == "06") { echo 'selected'; } ?>>06</option>
+				        <option value="07" <?php if($sminute == "07") { echo 'selected'; } ?>>07</option>
+				        <option value="08" <?php if($sminute == "08") { echo 'selected'; } ?>>08</option>
+				        <option value="09" <?php if($sminute == "09") { echo 'selected'; } ?>>09</option>
+				        <option value="10" <?php if($sminute == "10") { echo 'selected'; } ?>>10</option>
+				        <option value="11" <?php if($sminute == "11") { echo 'selected'; } ?>>11</option>
+				        <option value="12" <?php if($sminute == "12") { echo 'selected'; } ?>>12</option>
+				        <option value="13" <?php if($sminute == "13") { echo 'selected'; } ?>>13</option>
+				        <option value="14" <?php if($sminute == "14") { echo 'selected'; } ?>>14</option>
+				        <option value="15" <?php if($sminute == "15") { echo 'selected'; } ?>>15</option>
+				        <option value="16" <?php if($sminute == "16") { echo 'selected'; } ?>>16</option>
+				        <option value="17" <?php if($sminute == "17") { echo 'selected'; } ?>>17</option>
+				        <option value="18" <?php if($sminute == "18") { echo 'selected'; } ?>>18</option>
+				        <option value="19" <?php if($sminute == "19") { echo 'selected'; } ?>>19</option>
+				        <option value="20" <?php if($sminute == "20") { echo 'selected'; } ?>>20</option>
+				        <option value="21" <?php if($sminute == "21") { echo 'selected'; } ?>>21</option>
+				        <option value="22" <?php if($sminute == "22") { echo 'selected'; } ?>>22</option>
+				        <option value="23" <?php if($sminute == "23") { echo 'selected'; } ?>>23</option>
+				        <option value="24" <?php if($sminute == "24") { echo 'selected'; } ?>>24</option>
+				        <option value="25" <?php if($sminute == "25") { echo 'selected'; } ?>>25</option>
+				        <option value="26" <?php if($sminute == "26") { echo 'selected'; } ?>>26</option>
+				        <option value="27" <?php if($sminute == "27") { echo 'selected'; } ?>>27</option>
+				        <option value="28" <?php if($sminute == "28") { echo 'selected'; } ?>>28</option>
+				        <option value="29" <?php if($sminute == "29") { echo 'selected'; } ?>>29</option>
+				        <option value="30" <?php if($sminute == "30") { echo 'selected'; } ?>>30</option>
+				        <option value="31" <?php if($sminute == "31") { echo 'selected'; } ?>>31</option>
+				        <option value="32" <?php if($sminute == "32") { echo 'selected'; } ?>>32</option>
+				        <option value="33" <?php if($sminute == "33") { echo 'selected'; } ?>>33</option>
+				        <option value="34" <?php if($sminute == "34") { echo 'selected'; } ?>>34</option>
+				        <option value="35" <?php if($sminute == "35") { echo 'selected'; } ?>>35</option>
+				        <option value="36" <?php if($sminute == "36") { echo 'selected'; } ?>>36</option>
+				        <option value="37" <?php if($sminute == "37") { echo 'selected'; } ?>>37</option>
+				        <option value="38" <?php if($sminute == "38") { echo 'selected'; } ?>>38</option>
+				        <option value="39" <?php if($sminute == "39") { echo 'selected'; } ?>>39</option>
+				        <option value="40" <?php if($sminute == "40") { echo 'selected'; } ?>>40</option>
+				        <option value="41" <?php if($sminute == "41") { echo 'selected'; } ?>>41</option>
+				        <option value="42" <?php if($sminute == "42") { echo 'selected'; } ?>>42</option>
+				        <option value="43" <?php if($sminute == "43") { echo 'selected'; } ?>>43</option>
+				        <option value="44" <?php if($sminute == "44") { echo 'selected'; } ?>>44</option>
+				        <option value="45" <?php if($sminute == "45") { echo 'selected'; } ?>>45</option>
+				        <option value="46" <?php if($sminute == "46") { echo 'selected'; } ?>>46</option>
+				        <option value="47" <?php if($sminute == "47") { echo 'selected'; } ?>>47</option>
+				        <option value="48" <?php if($sminute == "48") { echo 'selected'; } ?>>48</option>
+				        <option value="49" <?php if($sminute == "49") { echo 'selected'; } ?>>49</option>
+				        <option value="50" <?php if($sminute == "50") { echo 'selected'; } ?>>50</option>
+				        <option value="51" <?php if($sminute == "51") { echo 'selected'; } ?>>51</option>
+				        <option value="52" <?php if($sminute == "52") { echo 'selected'; } ?>>52</option>
+				        <option value="53" <?php if($sminute == "53") { echo 'selected'; } ?>>53</option>
+				        <option value="54" <?php if($sminute == "54") { echo 'selected'; } ?>>54</option>
+				        <option value="55" <?php if($sminute == "55") { echo 'selected'; } ?>>55</option>
+				        <option value="56" <?php if($sminute == "56") { echo 'selected'; } ?>>56</option>
+				        <option value="57" <?php if($sminute == "57") { echo 'selected'; } ?>>57</option>
+				        <option value="58" <?php if($sminute == "58") { echo 'selected'; } ?>>58</option>
+				        <option value="59" <?php if($sminute == "59") { echo 'selected'; } ?>>59</option>
+				        <option value="60" <?php if($sminute == "60") { echo 'selected'; } ?>>60</option>
+					</select></td>
 			      	</tr>
 			      	<tr>
-				        <th scope="row">End DD/MM/YYYY (optional):</th>
-				        <td width="25%"><input id="title" name="events_eday" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" />/<input name="events_emonth" type="text" size="4" maxlength="2" value="<?php echo $emonth;?>" />/<input name="events_eyear" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
-				        <th scope="row">HH/MM (optional):</th>
-				        <td width="25%"><input name="events_ehour" type="text" size="4" maxlength="2" value="<?php echo $ehour;?>" />/<input name="events_eminute" type="text" size="4" maxlength="2" value="<?php echo $eminute;?>" /></td>
+				        <th scope="row">Enddate Day/Month/Year (optional):</th>
+				        <td width="25%">
+				        	<input id="title" name="events_eday" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" /> / 
+							<select name="events_emonth">
+								<option value="01" <?php if($smonth == "01") { echo 'selected'; } ?>>January</option>
+								<option value="02" <?php if($smonth == "02") { echo 'selected'; } ?>>February</option>
+								<option value="03" <?php if($smonth == "03") { echo 'selected'; } ?>>March</option>
+								<option value="04" <?php if($smonth == "04") { echo 'selected'; } ?>>April</option>
+								<option value="05" <?php if($smonth == "05") { echo 'selected'; } ?>>May</option>
+								<option value="06" <?php if($smonth == "06") { echo 'selected'; } ?>>June</option>
+								<option value="07" <?php if($smonth == "07") { echo 'selected'; } ?>>July</option>
+								<option value="08" <?php if($smonth == "08") { echo 'selected'; } ?>>August</option>
+								<option value="09" <?php if($smonth == "09") { echo 'selected'; } ?>>September</option>
+								<option value="10" <?php if($smonth == "10") { echo 'selected'; } ?>>October</option>
+								<option value="11" <?php if($smonth == "11") { echo 'selected'; } ?>>November</option>
+								<option value="12" <?php if($smonth == "12") { echo 'selected'; } ?>>December</option>
+							</select> / 
+							<input name="events_eyear" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
+				        <th scope="row">Hour/Minute (optional):</th>
+				        <td width="25%"><select name="events_ehour">
+				        <option value="00" <?php if($ehour == "00") { echo 'selected'; } ?>>00</option>
+				        <option value="01" <?php if($ehour == "01") { echo 'selected'; } ?>>01</option>
+				        <option value="02" <?php if($ehour == "02") { echo 'selected'; } ?>>02</option>
+				        <option value="03" <?php if($ehour == "03") { echo 'selected'; } ?>>03</option>
+				        <option value="04" <?php if($ehour == "04") { echo 'selected'; } ?>>04</option>
+				        <option value="05" <?php if($ehour == "05") { echo 'selected'; } ?>>05</option>
+				        <option value="06" <?php if($ehour == "06") { echo 'selected'; } ?>>06</option>
+				        <option value="07" <?php if($ehour == "07") { echo 'selected'; } ?>>07</option>
+				        <option value="08" <?php if($ehour == "08") { echo 'selected'; } ?>>08</option>
+				        <option value="09" <?php if($ehour == "09") { echo 'selected'; } ?>>09</option>
+				        <option value="10" <?php if($ehour == "10") { echo 'selected'; } ?>>10</option>
+				        <option value="11" <?php if($ehour == "11") { echo 'selected'; } ?>>11</option>
+				        <option value="12" <?php if($ehour == "12") { echo 'selected'; } ?>>12</option>
+				        <option value="13" <?php if($ehour == "13") { echo 'selected'; } ?>>13</option>
+				        <option value="14" <?php if($ehour == "14") { echo 'selected'; } ?>>14</option>
+				        <option value="15" <?php if($ehour == "15") { echo 'selected'; } ?>>15</option>
+				        <option value="16" <?php if($ehour == "16") { echo 'selected'; } ?>>16</option>
+				        <option value="17" <?php if($ehour == "17") { echo 'selected'; } ?>>17</option>
+				        <option value="18" <?php if($ehour == "18") { echo 'selected'; } ?>>18</option>
+				        <option value="19" <?php if($ehour == "19") { echo 'selected'; } ?>>19</option>
+				        <option value="20" <?php if($ehour == "20") { echo 'selected'; } ?>>20</option>
+				        <option value="21" <?php if($ehour == "21") { echo 'selected'; } ?>>21</option>
+				        <option value="22" <?php if($ehour == "22") { echo 'selected'; } ?>>22</option>
+				        <option value="23" <?php if($ehour == "23") { echo 'selected'; } ?>>23</option>
+					</select> / <select name="events_eminute">
+				        <option value="00" <?php if($eminute == "00") { echo 'selected'; } ?>>00</option>
+				        <option value="01" <?php if($eminute == "01") { echo 'selected'; } ?>>01</option>
+				        <option value="02" <?php if($eminute == "02") { echo 'selected'; } ?>>02</option>
+				        <option value="03" <?php if($eminute == "03") { echo 'selected'; } ?>>03</option>
+				        <option value="04" <?php if($eminute == "04") { echo 'selected'; } ?>>04</option>
+				        <option value="05" <?php if($eminute == "05") { echo 'selected'; } ?>>05</option>
+				        <option value="06" <?php if($eminute == "06") { echo 'selected'; } ?>>06</option>
+				        <option value="07" <?php if($eminute == "07") { echo 'selected'; } ?>>07</option>
+				        <option value="08" <?php if($eminute == "08") { echo 'selected'; } ?>>08</option>
+				        <option value="09" <?php if($eminute == "09") { echo 'selected'; } ?>>09</option>
+				        <option value="10" <?php if($eminute == "10") { echo 'selected'; } ?>>10</option>
+				        <option value="11" <?php if($eminute == "11") { echo 'selected'; } ?>>11</option>
+				        <option value="12" <?php if($eminute == "12") { echo 'selected'; } ?>>12</option>
+				        <option value="13" <?php if($eminute == "13") { echo 'selected'; } ?>>13</option>
+				        <option value="14" <?php if($eminute == "14") { echo 'selected'; } ?>>14</option>
+				        <option value="15" <?php if($eminute == "15") { echo 'selected'; } ?>>15</option>
+				        <option value="16" <?php if($eminute == "16") { echo 'selected'; } ?>>16</option>
+				        <option value="17" <?php if($eminute == "17") { echo 'selected'; } ?>>17</option>
+				        <option value="18" <?php if($eminute == "18") { echo 'selected'; } ?>>18</option>
+				        <option value="19" <?php if($eminute == "19") { echo 'selected'; } ?>>19</option>
+				        <option value="20" <?php if($eminute == "20") { echo 'selected'; } ?>>20</option>
+				        <option value="21" <?php if($eminute == "21") { echo 'selected'; } ?>>21</option>
+				        <option value="22" <?php if($eminute == "22") { echo 'selected'; } ?>>22</option>
+				        <option value="23" <?php if($eminute == "23") { echo 'selected'; } ?>>23</option>
+				        <option value="24" <?php if($eminute == "24") { echo 'selected'; } ?>>24</option>
+				        <option value="25" <?php if($eminute == "25") { echo 'selected'; } ?>>25</option>
+				        <option value="26" <?php if($eminute == "26") { echo 'selected'; } ?>>26</option>
+				        <option value="27" <?php if($eminute == "27") { echo 'selected'; } ?>>27</option>
+				        <option value="28" <?php if($eminute == "28") { echo 'selected'; } ?>>28</option>
+				        <option value="29" <?php if($eminute == "29") { echo 'selected'; } ?>>29</option>
+				        <option value="30" <?php if($eminute == "30") { echo 'selected'; } ?>>30</option>
+				        <option value="31" <?php if($eminute == "31") { echo 'selected'; } ?>>31</option>
+				        <option value="32" <?php if($eminute == "32") { echo 'selected'; } ?>>32</option>
+				        <option value="33" <?php if($eminute == "33") { echo 'selected'; } ?>>33</option>
+				        <option value="34" <?php if($eminute == "34") { echo 'selected'; } ?>>34</option>
+				        <option value="35" <?php if($eminute == "35") { echo 'selected'; } ?>>35</option>
+				        <option value="36" <?php if($eminute == "36") { echo 'selected'; } ?>>36</option>
+				        <option value="37" <?php if($eminute == "37") { echo 'selected'; } ?>>37</option>
+				        <option value="38" <?php if($eminute == "38") { echo 'selected'; } ?>>38</option>
+				        <option value="39" <?php if($eminute == "39") { echo 'selected'; } ?>>39</option>
+				        <option value="40" <?php if($eminute == "40") { echo 'selected'; } ?>>40</option>
+				        <option value="41" <?php if($eminute == "41") { echo 'selected'; } ?>>41</option>
+				        <option value="42" <?php if($eminute == "42") { echo 'selected'; } ?>>42</option>
+				        <option value="43" <?php if($eminute == "43") { echo 'selected'; } ?>>43</option>
+				        <option value="44" <?php if($eminute == "44") { echo 'selected'; } ?>>44</option>
+				        <option value="45" <?php if($eminute == "45") { echo 'selected'; } ?>>45</option>
+				        <option value="46" <?php if($eminute == "46") { echo 'selected'; } ?>>46</option>
+				        <option value="47" <?php if($eminute == "47") { echo 'selected'; } ?>>47</option>
+				        <option value="48" <?php if($eminute == "48") { echo 'selected'; } ?>>48</option>
+				        <option value="49" <?php if($eminute == "49") { echo 'selected'; } ?>>49</option>
+				        <option value="50" <?php if($eminute == "50") { echo 'selected'; } ?>>50</option>
+				        <option value="51" <?php if($eminute == "51") { echo 'selected'; } ?>>51</option>
+				        <option value="52" <?php if($eminute == "52") { echo 'selected'; } ?>>52</option>
+				        <option value="53" <?php if($eminute == "53") { echo 'selected'; } ?>>53</option>
+				        <option value="54" <?php if($eminute == "54") { echo 'selected'; } ?>>54</option>
+				        <option value="55" <?php if($eminute == "55") { echo 'selected'; } ?>>55</option>
+				        <option value="56" <?php if($eminute == "56") { echo 'selected'; } ?>>56</option>
+				        <option value="57" <?php if($eminute == "57") { echo 'selected'; } ?>>57</option>
+				        <option value="58" <?php if($eminute == "58") { echo 'selected'; } ?>>58</option>
+				        <option value="59" <?php if($eminute == "59") { echo 'selected'; } ?>>59</option>
+				        <option value="60" <?php if($eminute == "60") { echo 'selected'; } ?>>60</option>
+					</select></td>
 			      	</tr>
 			      	<tr>
 				        <th scope="row">Show in the sidebar:</th>
@@ -308,20 +528,21 @@ function events_add_page() {
 					</tr>
 			      	<tr>
 				        <th scope="row">Message when event ends (optional):</th>
-				        <td colspan="3"><input name="events_post_event" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->post_message;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+				        <td colspan="3"><textarea name="events_post_event" cols="70" rows="2"><?php echo $edit_event->post_message;?></textarea><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 			      	</tr>
 			      	<tr>
 				        <th scope="row">Link to page (optional):</th>
-				        <td colspan="3"><input name="events_link" type="text" size="52 " maxlength="10000" value="<?php echo $edit_event->link;?>" /><br /><em>Include full url and http://, this can be any page.</em></td>
+				        <td colspan="3"><input name="events_link" type="text" size="52 " maxlength="10000" value="<?php echo $edit_event->link;?>" /><br />
+				        	<em>Include full url and http://, this can be any page. Required if checkbox above is checked!</em></td>
 			      	</tr>
 		    	</table>
 		    	
 		    	<p class="submit">
 					<?php if($event_edit_id) { ?>
-					<input type="submit" name="submit_save" value="Edit existing event" /> 
-					<input type="submit" name="submit_new" value="Duplicate event with new values" /> 
+					<input type="submit" name="submit_save" value="Edit event" /> 
+					<input type="submit" name="submit_new" value="Duplicate event" /> 
 					<?php } else { ?>
-					<input type="submit" name="submit_save" value="Save new event" />
+					<input type="submit" name="submit_save" value="Save event" />
 					<?php } ?>
 		    	</p>
 	
@@ -338,13 +559,13 @@ function events_add_page() {
 
 
 /*-------------------------------------------------------------
- Name:      events_options_page
+ Name:      events_options
 
  Purpose:   Admin options page
  Receive:   -none-
  Return:    -none-
 -------------------------------------------------------------*/
-function events_options_page() {
+function events_options() {
 	$events_config = get_option('events_config');
 	$events_template = get_option('events_template');
 	$events_language = get_option('events_language');
@@ -414,7 +635,6 @@ function events_options_page() {
 			        <th scope="row">Character limit</th>
 			        <td colspan="3"><input name="events_sidelength" type="text" value="<?php echo $events_config['sidelength'];?>" size="6" /> (default: 120)</td>
 		      	</tr>
-		      	
 				<tr valign="top">
 					<td colspan="4" bgcolor="#DDD"><strong>Options for the page</strong></td>
 				</tr>
@@ -467,17 +687,16 @@ function events_options_page() {
 			        <th scope="row">Character limit</th>
 			        <td colspan="3"><input name="events_length" type="text" value="<?php echo $events_config['length'];?>" size="6" /> (default: 1000)</td>
 		      	</tr>
-		      	
+		      	<tr valign="top">
+			        <th scope="row">Date parsing</th>
+			        <td colspan="3"><select name="events_hideend">
+				        <option value="hide" <?php if($events_config['hideend'] == "hide") { echo 'selected'; } ?>>Hide the ending date if it's the same as the starting date</option>
+				        <option value="show" <?php if($events_config['hideend'] == "show") { echo 'selected'; } ?>>Show the ending date even if it's the same as the starting date</option>
+					</select></td>
+		      	</tr>
 				<tr valign="top">
 					<td colspan="4" bgcolor="#DDD"><strong>Global or other options.</strong></td>
 				</tr>
-		      	<tr valign="top">
-			        <th scope="row">Non-archived events</th>
-			        <td colspan="3"><select name="events_auto_delete">
-				        <option value="yes" <?php if($events_config['auto_delete'] == "yes") { echo 'selected'; } ?>>remove old events automagically</option>
-				        <option value="no" <?php if($events_config['auto_delete'] == "no") { echo 'selected'; } ?>>i remove them manually</option>
-					</select></td>
-		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Order events</th>
 			        <td colspan="3"><select name="events_order">
@@ -685,6 +904,10 @@ function events_options_page() {
 			        <td><input name="events_language_noevents" type="text" value="<?php echo $events_language['language_noevents'];?>" size="45" /> (default: No events to show)</td>
 		      	</tr>
 		      	<tr valign="top">
+			        <th scope="row">If the event already happened:</th>
+			        <td><input name="events_language_past" type="text" value="<?php echo $events_language['language_past'];?>" size="45" /> (default: Past event!)</td>
+		      	</tr>
+		      	<tr valign="top">
 			        <th scope="row">If there are no events today:</th>
 			        <td><input name="events_language_nodaily" type="text" value="<?php echo $events_language['language_nodaily'];?>" size="45" /> (default: No events today)</td>
 		      	</tr>
@@ -767,8 +990,8 @@ function events_options_page() {
     	<form method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Events installs 2 tables in MySQL. When you disable the plugin these will not be deleted. To delete the table use the button below.<br />
-					For the techies: Upon un-installation the wp_events and wp_events_categories table will be dropped along with the events_config, events_language and events_template record in the wp_options table.</td>
+					<td colspan="2" bgcolor="#DDD">Events installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.<br />
+					For the techies: Upon un-installation the wp_events table will be dropped along with the events_config record in the wp_options table.</td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">WARNING!</th>
