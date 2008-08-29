@@ -228,7 +228,7 @@ function events_list($atts, $content = null) {
 					$template = str_replace('%endtime%', '', $template);					
 				} else { 
 					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
 				}
 				
 				$template = str_replace('%author%', $event->author, $template);
@@ -301,7 +301,7 @@ function events_archive($atts, $content = null) {
 					$template = str_replace('%endtime%', '', $template);					
 				} else { 
 					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
 				}
 				
 				$template = str_replace('%author%', $event->author, $template);
@@ -377,7 +377,7 @@ function events_today($atts, $content = null) {
 					$template = str_replace('%endtime%', '', $template);					
 				} else { 
 					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
+					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
 				}
 				
 				$template = str_replace('%author%', $event->author, $template);
