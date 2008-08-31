@@ -366,7 +366,7 @@ function events_today($atts, $content = null) {
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
 				
-				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->post_message, $event->allday), $template);
+				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
 				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
 				
 				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
