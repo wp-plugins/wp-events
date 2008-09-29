@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.5.3
+Version: 1.5.4
 Author URI: http://meandmymac.net/
 */
 
@@ -400,18 +400,18 @@ function events_schedule() {
 				        <td width="25%">
 				        	<input id="title" name="events_eday" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" /> / 
 							<select name="events_emonth">
-								<option value="01" <?php if($smonth == "01") { echo 'selected'; } ?>>January</option>
-								<option value="02" <?php if($smonth == "02") { echo 'selected'; } ?>>February</option>
-								<option value="03" <?php if($smonth == "03") { echo 'selected'; } ?>>March</option>
-								<option value="04" <?php if($smonth == "04") { echo 'selected'; } ?>>April</option>
-								<option value="05" <?php if($smonth == "05") { echo 'selected'; } ?>>May</option>
-								<option value="06" <?php if($smonth == "06") { echo 'selected'; } ?>>June</option>
-								<option value="07" <?php if($smonth == "07") { echo 'selected'; } ?>>July</option>
-								<option value="08" <?php if($smonth == "08") { echo 'selected'; } ?>>August</option>
-								<option value="09" <?php if($smonth == "09") { echo 'selected'; } ?>>September</option>
-								<option value="10" <?php if($smonth == "10") { echo 'selected'; } ?>>October</option>
-								<option value="11" <?php if($smonth == "11") { echo 'selected'; } ?>>November</option>
-								<option value="12" <?php if($smonth == "12") { echo 'selected'; } ?>>December</option>
+								<option value="01" <?php if($emonth == "01") { echo 'selected'; } ?>>January</option>
+								<option value="02" <?php if($emonth == "02") { echo 'selected'; } ?>>February</option>
+								<option value="03" <?php if($emonth == "03") { echo 'selected'; } ?>>March</option>
+								<option value="04" <?php if($emonth == "04") { echo 'selected'; } ?>>April</option>
+								<option value="05" <?php if($emonth == "05") { echo 'selected'; } ?>>May</option>
+								<option value="06" <?php if($emonth == "06") { echo 'selected'; } ?>>June</option>
+								<option value="07" <?php if($emonth == "07") { echo 'selected'; } ?>>July</option>
+								<option value="08" <?php if($emonth == "08") { echo 'selected'; } ?>>August</option>
+								<option value="09" <?php if($emonth == "09") { echo 'selected'; } ?>>September</option>
+								<option value="10" <?php if($emonth == "10") { echo 'selected'; } ?>>October</option>
+								<option value="11" <?php if($emonth == "11") { echo 'selected'; } ?>>November</option>
+								<option value="12" <?php if($emonth == "12") { echo 'selected'; } ?>>December</option>
 							</select> / 
 							<input name="events_eyear" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
 				        <th scope="row">Hour/Minute (optional):</th>
@@ -605,7 +605,7 @@ function events_options() {
 				        <option value="%x" <?php if($events_config['dateformat_sidebar'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%x", $theunixdate)); ?></option>
 					</select></td>
 					<?php } else { ?>
- 			        <td><input name="events_dateformat_sidebar" type="text" value="<?php echo $events_config['dateformat_sidebar'];?>" size="30" /><br />Careful what you put here, don't use time values! Learn: <a href="http://www.php.net/manual/en/function.strftime.php" target="_blank">php manual</a>.</td>
+ 			        <td><input name="events_dateformat_sidebar" type="text" value="<?php echo $events_config['dateformat_sidebar'];?>" size="30" /><br />Careful what you put here! Learn: <a href="http://www.php.net/manual/en/function.strftime.php" target="_blank">php manual</a>.</td>
  			        <?php } ?>
 			        <th scope="row">Date system</th>
 			        <td><select name="events_custom_date_sidebar">
@@ -616,7 +616,7 @@ function events_options() {
 				        <option value="yes">Advanced</option>
 				        <option value="no">Default</option>
 				        <?php } ?>
-					</select> Save options to see the result!</td>
+					</select><br />Save options to see the result!</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Time format</th>
@@ -668,7 +668,7 @@ function events_options() {
 				        <option value="yes">Advanced</option>
 				        <option value="no">Default</option>
 				        <?php } ?>
-					</select> Save options to see the result!</td>
+					</select><br />Save options to see the result!</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Time format</th>

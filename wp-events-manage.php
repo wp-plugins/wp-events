@@ -155,7 +155,7 @@ function events_request_delete() {
 
 	if($event_ids != '') {
 		foreach($event_ids as $event_id) {
-			events_delete($event_id, 'banner');
+			events_delete($event_id, 'event');
 		}
 	}
 	if($category_ids != '') {
@@ -178,7 +178,7 @@ function events_delete($id, $what) {
 	global $wpdb, $userdata, $events_config;
 
 	if($id > 0) {
-		if($what == 'banner') {
+		if($what == 'event') {
 			$SQL = "SELECT
 			`".$wpdb->prefix."events.author`,
 			`".$wpdb->prefix."users.display_name` as display_name
@@ -192,7 +192,7 @@ function events_delete($id, $what) {
 	
 			$event = $wpdb->get_row($SQL);
 	
-			if ($event->display_name == $event->author ) {
+			if ($userdata->wp_user_level == $event_config['managelevel'] ) {
 				$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
 				if($wpdb->query($SQL) == FALSE) {
 					die(mysql_error());

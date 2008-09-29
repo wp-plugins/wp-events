@@ -160,8 +160,11 @@ function events_sidebar() {
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
 				
-				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
-				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }
+				if(strlen($event->location) == 0) { 
+					$template = str_replace('%location%', '', $template); 
+				} else {
+					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
+				}
 
 				$output_sidebar .= stripslashes(html_entity_decode($template));
 			}
@@ -221,21 +224,29 @@ function events_list($atts, $content = null) {
 				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
 				
 				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
-				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
 				
 				if($event->thetime == $event->theend and $events_config['hideend'] == 'hide') {
-					$template = str_replace('%enddate%', '', $template);					
 					$template = str_replace('%endtime%', '', $template);					
+					$template = str_replace('%enddate%', '', $template);					
 				} else { 
+					if($event->allday == "Y") {
+						$template = str_replace('%starttime%', '', $template);
+						$template = str_replace('%endtime%', '', $template);					
+					} else {
+						$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);					
+						$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
+					}
 					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
 				}
 				
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
 				
-				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
-				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }
+				if(strlen($event->location) == 0) { 
+					$template = str_replace('%location%', '', $template); 
+				} else {
+					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
+				}
 				
 				$output_page .= stripslashes(html_entity_decode($template));
 			}
@@ -293,22 +304,28 @@ function events_archive($atts, $content = null) {
 				$template = str_replace('%countup%', events_countup($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
 				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
 				
-				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
-				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
-				
-				if($event->thetime == $event->theend and $events_config['hideend'] == 'show') {
-					$template = str_replace('%enddate%', '', $template);					
+				if($event->thetime == $event->theend and $events_config['hideend'] == 'hide') {
 					$template = str_replace('%endtime%', '', $template);					
+					$template = str_replace('%enddate%', '', $template);					
 				} else { 
+					if($event->allday == "Y") {
+						$template = str_replace('%starttime%', '', $template);
+						$template = str_replace('%endtime%', '', $template);					
+					} else {
+						$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);					
+						$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
+					}
 					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
 				}
 				
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
 				
-				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
-				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }
+				if(strlen($event->location) == 0) { 
+					$template = str_replace('%location%', '', $template); 
+				} else {
+					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
+				}
 				
 				$output_archive .= stripslashes(html_entity_decode($template));
 			}
@@ -369,22 +386,28 @@ function events_today($atts, $content = null) {
 				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
 				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
 				
-				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
-				$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);
-				
-				if($event->thetime == $event->theend and $events_config['hideend'] == 'show') {
-					$template = str_replace('%enddate%', '', $template);					
+				if($event->thetime == $event->theend and $events_config['hideend'] == 'hide') {
 					$template = str_replace('%endtime%', '', $template);					
+					$template = str_replace('%enddate%', '', $template);					
 				} else { 
+					if($event->allday == "Y") {
+						$template = str_replace('%starttime%', '', $template);
+						$template = str_replace('%endtime%', '', $template);					
+					} else {
+						$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);					
+						$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
+					}
 					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-					$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
 				}
 				
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
 				
-				if(strlen($event->location) != 0) { $template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template); }
-				if(strlen($event->location) == 0) { $template = str_replace('%location%', '', $template); }
+				if(strlen($event->location) == 0) { 
+					$template = str_replace('%location%', '', $template); 
+				} else {
+					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
+				}
 				
 				$output_daily .= stripslashes(html_entity_decode($template));
 			}
