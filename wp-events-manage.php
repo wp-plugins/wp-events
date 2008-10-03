@@ -44,8 +44,8 @@ function events_insert_input() {
 		if(strlen($eday) == 0) $eday = $sday;
 		if(strlen($eyear) == 0) $eyear = $syear;
 		
-		$startdate = mktime($shour, $sminute, 0, $smonth, $sday, $syear);
-		$enddate = mktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
+		$startdate = gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
+		$enddate = gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
 		
 		if(strlen($post_event) == 0) {
 			$post_event = $eventmsg;

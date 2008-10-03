@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.5.4
+Version: 1.5.5
 Author URI: http://meandmymac.net/
 */
 
@@ -87,7 +87,7 @@ function events_manage() {
 	if(isset($_POST['order'])) { 
 		$order = $_POST['order']; 
 	} else { 
-		$order = 'thetime ASC'; 
+		$order = 'thetime DESC'; 
 	} 
 	if(isset($_POST['catorder'])) { 
 		$catorder = $_POST['catorder']; 
@@ -116,8 +116,8 @@ function events_manage() {
 				<div class="alignleft">
 					<input onclick="return confirm('You are about to delete multiple events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_events" class="button-secondary delete" />
 					<select name='order' id='cat' class='postform' >
-				        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending, default)</option>
-				        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending)</option>
+				        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending, default)</option>
+				        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending)</option>
 				        <option value="ID ASC" <?php if($order == "ID ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
 				        <option value="ID DESC" <?php if($order == "ID DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
 				        <option value="title ASC" <?php if($order == "title ASC") { echo 'selected'; } ?>>by title (A-Z)</option>
@@ -169,6 +169,7 @@ function events_manage() {
 		</table>
 		</form>
 
+		<br />
 		<h2>Categories</h2>
 
 		<form name="groups" id="post" method="post" action="edit.php?page=wp-events">
@@ -307,6 +308,7 @@ function events_schedule() {
 						</td>
 				        <th scope="row">Hour/Minute (optional):</th>
 				        <td width="25%"><select name="events_shour">
+				        <option value="" <?php if($shour == "") { echo 'selected'; } ?>>--</option>
 				        <option value="00" <?php if($shour == "00") { echo 'selected'; } ?>>00</option>
 				        <option value="01" <?php if($shour == "01") { echo 'selected'; } ?>>01</option>
 				        <option value="02" <?php if($shour == "02") { echo 'selected'; } ?>>02</option>
@@ -332,6 +334,7 @@ function events_schedule() {
 				        <option value="22" <?php if($shour == "22") { echo 'selected'; } ?>>22</option>
 				        <option value="23" <?php if($shour == "23") { echo 'selected'; } ?>>23</option>
 					</select> / <select name="events_sminute">
+				        <option value="" <?php if($sminute == "") { echo 'selected'; } ?>>--</option>
 				        <option value="00" <?php if($sminute == "00") { echo 'selected'; } ?>>00</option>
 				        <option value="01" <?php if($sminute == "01") { echo 'selected'; } ?>>01</option>
 				        <option value="02" <?php if($sminute == "02") { echo 'selected'; } ?>>02</option>
@@ -400,6 +403,7 @@ function events_schedule() {
 				        <td width="25%">
 				        	<input id="title" name="events_eday" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" /> / 
 							<select name="events_emonth">
+								<option value="" <?php if($emonth == "") { echo 'selected'; } ?>>--</option>
 								<option value="01" <?php if($emonth == "01") { echo 'selected'; } ?>>January</option>
 								<option value="02" <?php if($emonth == "02") { echo 'selected'; } ?>>February</option>
 								<option value="03" <?php if($emonth == "03") { echo 'selected'; } ?>>March</option>
@@ -416,6 +420,7 @@ function events_schedule() {
 							<input name="events_eyear" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
 				        <th scope="row">Hour/Minute (optional):</th>
 				        <td width="25%"><select name="events_ehour">
+				        <option value="" <?php if($ehour == "") { echo 'selected'; } ?>>--</option>
 				        <option value="00" <?php if($ehour == "00") { echo 'selected'; } ?>>00</option>
 				        <option value="01" <?php if($ehour == "01") { echo 'selected'; } ?>>01</option>
 				        <option value="02" <?php if($ehour == "02") { echo 'selected'; } ?>>02</option>
@@ -441,6 +446,7 @@ function events_schedule() {
 				        <option value="22" <?php if($ehour == "22") { echo 'selected'; } ?>>22</option>
 				        <option value="23" <?php if($ehour == "23") { echo 'selected'; } ?>>23</option>
 					</select> / <select name="events_eminute">
+				        <option value="" <?php if($eminute == "") { echo 'selected'; } ?>>--</option>
 				        <option value="00" <?php if($eminute == "00") { echo 'selected'; } ?>>00</option>
 				        <option value="01" <?php if($eminute == "01") { echo 'selected'; } ?>>01</option>
 				        <option value="02" <?php if($eminute == "02") { echo 'selected'; } ?>>02</option>

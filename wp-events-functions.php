@@ -90,7 +90,6 @@ function events_countup($time_start, $time_end, $message) {
 function events_duration($event_start, $event_end, $allday) {
 	global $events_config, $events_language;
 
-  	$timezone = date("U") . $events_config['timezone'];
   	$difference = $event_end - $event_start;
   	if ($difference < 0) $difference = 0;
 
@@ -150,7 +149,7 @@ function events_sidebar() {
 				$template = str_replace('%title%', substr($event->title, 0 , $events_config['sidelength']), $template);
 				$template = str_replace('%event%', substr($event->pre_message, 0 , $events_config['sidelength']), $template);
 				
-				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
+				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_sidelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
 				
 				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, substr($event->post_message, 0 , $events_config['sidelength']), $event->allday), $template);
@@ -208,46 +207,8 @@ function events_list($atts, $content = null) {
 		if ( count($events) == 0 ) {
 			$output_page .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
-			foreach ( $events as $event ) {
-				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
-				
-				$template = $events_template['page_template'];
-				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
-				$template = str_replace('%title%', $event->title, $template);
-				$template = str_replace('%event%', $event->pre_message, $template);
-				$template = str_replace('%after%', $event->post_message, $template);
-				
-				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
-				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
-				
-				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
-				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
-				
-				$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $event->thetime)), $template);
-				
-				if($event->thetime == $event->theend and $events_config['hideend'] == 'hide') {
-					$template = str_replace('%endtime%', '', $template);					
-					$template = str_replace('%enddate%', '', $template);					
-				} else { 
-					if($event->allday == "Y") {
-						$template = str_replace('%starttime%', '', $template);
-						$template = str_replace('%endtime%', '', $template);					
-					} else {
-						$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);					
-						$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
-					}
-					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-				}
-				
-				$template = str_replace('%author%', $event->author, $template);
-				$template = str_replace('%category%', $get_category->name, $template);
-				
-				if(strlen($event->location) == 0) { 
-					$template = str_replace('%location%', '', $template); 
-				} else {
-					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
-				}
-				
+			foreach ( $events as $event ) {				
+				$template = events_build_output($event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
 				$output_page .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -290,43 +251,7 @@ function events_archive($atts, $content = null) {
 			$output_archive .= '<em>'.$events_language['language_noarchive'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
-
-				$template = $events_template['archive_template'];
-				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
-				$template = str_replace('%title%', $event->title, $template);
-				$template = str_replace('%event%', $event->pre_message, $template);
-				$template = str_replace('%after%', $event->post_message, $template);
-				
-				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
-				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
-				
-				$template = str_replace('%countup%', events_countup($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
-				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
-				
-				if($event->thetime == $event->theend and $events_config['hideend'] == 'hide') {
-					$template = str_replace('%endtime%', '', $template);					
-					$template = str_replace('%enddate%', '', $template);					
-				} else { 
-					if($event->allday == "Y") {
-						$template = str_replace('%starttime%', '', $template);
-						$template = str_replace('%endtime%', '', $template);					
-					} else {
-						$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);					
-						$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
-					}
-					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-				}
-				
-				$template = str_replace('%author%', $event->author, $template);
-				$template = str_replace('%category%', $get_category->name, $template);
-				
-				if(strlen($event->location) == 0) { 
-					$template = str_replace('%location%', '', $template); 
-				} else {
-					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
-				}
-				
+				$template = events_build_output($event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
 				$output_archive .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -372,43 +297,7 @@ function events_today($atts, $content = null) {
 			$output_daily .= '<em>'.$events_language['language_nodaily'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
-
-				$template = $events_template['daily_template'];
-				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
-				$template = str_replace('%title%', $event->title, $template);
-				$template = str_replace('%event%', $event->pre_message, $template);
-				$template = str_replace('%after%', $event->post_message, $template);
-				
-				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
-				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
-				
-				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday), $template);
-				$template = str_replace('%duration%', events_duration($event->thetime, $event->theend, $event->allday), $template);
-				
-				if($event->thetime == $event->theend and $events_config['hideend'] == 'hide') {
-					$template = str_replace('%endtime%', '', $template);					
-					$template = str_replace('%enddate%', '', $template);					
-				} else { 
-					if($event->allday == "Y") {
-						$template = str_replace('%starttime%', '', $template);
-						$template = str_replace('%endtime%', '', $template);					
-					} else {
-						$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->thetime))), $template);					
-						$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $event->theend))), $template);
-					}
-					$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $event->theend)), $template);
-				}
-				
-				$template = str_replace('%author%', $event->author, $template);
-				$template = str_replace('%category%', $get_category->name, $template);
-				
-				if(strlen($event->location) == 0) { 
-					$template = str_replace('%location%', '', $template); 
-				} else {
-					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
-				}
-				
+				$template = events_build_output($event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
 				$output_daily .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -421,4 +310,55 @@ function events_today($atts, $content = null) {
 	return $output_daily;
 }
 
+/*-------------------------------------------------------------
+ Name:      events_build_output
+
+ Purpose:   Build output for page, archive and today's listings
+ Receive:   $category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location
+ Return:	$template
+-------------------------------------------------------------*/
+function events_build_output($category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location) {
+	global $wpdb, $events_config, $events_language, $events_template;
+				
+	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
+				
+	$template = $events_template['page_template'];
+	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
+	$template = str_replace('%title%', $title, $template);
+	$template = str_replace('%event%', $pre_message, $template);
+	$template = str_replace('%after%', $post_message, $template);
+				
+	if(strlen($link) > 0) { $template = str_replace('%link%', '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
+	if(strlen($link) == 0) { $template = str_replace('%link%', '', $template); }
+				
+	$template = str_replace('%countdown%', events_countdown($thetime, $theend, $post_message, $allday), $template);
+	$template = str_replace('%duration%', events_duration($thetime, $theend, $allday), $template);
+				
+	$template = str_replace('%startdate%', utf8_encode(strftime($events_config['dateformat'], $thetime)), $template);
+				
+	if($thetime == $theend and $events_config['hideend'] == 'hide') {
+		$template = str_replace('%endtime%', '', $template);					
+		$template = str_replace('%enddate%', '', $template);					
+	} else { 
+		if($allday == "Y") {
+			$template = str_replace('%starttime%', '', $template);
+			$template = str_replace('%endtime%', '', $template);					
+		} else {
+			$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $thetime))), $template);					
+			$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(strftime($events_config['timeformat'], $theend))), $template);
+		}
+		$template = str_replace('%enddate%', utf8_encode(strftime($events_config['dateformat'], $theend)), $template);
+	}
+				
+	$template = str_replace('%author%', $author, $template);
+	$template = str_replace('%category%', $get_category->name, $template);
+				
+	if(strlen($location) == 0) { 
+		$template = str_replace('%location%', '', $template); 
+	} else {
+		$template = str_replace('%location%', $events_template['location_seperator'].$location, $template);
+	}
+	
+	return $template;
+}
 ?>
