@@ -152,7 +152,6 @@ function events_request_delete() {
 
 	$event_ids = $_POST['eventcheck'];
 	$category_ids = $_POST['categorycheck'];
-
 	if($event_ids != '') {
 		foreach($event_ids as $event_id) {
 			events_delete($event_id, 'event');
@@ -191,8 +190,8 @@ function events_delete($id, $what) {
 			`".$wpdb->prefix."users.display_name` = ".$wpdb->prefix."events.author";
 	
 			$event = $wpdb->get_row($SQL);
-	
-			if ($userdata->wp_user_level == $event_config['managelevel'] ) {
+
+			if ($userdata->wp_user_level >= $events_config['managelevel'] ) {
 				$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
 				if($wpdb->query($SQL) == FALSE) {
 					die(mysql_error());
@@ -372,7 +371,7 @@ function events_return($action) {
 			wp_redirect('post-new.php?page=wp-events.php&action=error');
 		break;
 		
-		case "access" :
+		case "no_access" :
 			wp_redirect('post-new.php?page=wp-events.php&action=no_access');
 		break;
 		
