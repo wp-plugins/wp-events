@@ -44,21 +44,17 @@ function events_insert_input() {
 		if(strlen($eday) == 0) $eday = $sday;
 		if(strlen($eyear) == 0) $eyear = $syear;
 		
-		$startdate = gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
-		$enddate = gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
-		
+		$gmt_offset = get_option('gmt_offset')*3600;
+		$startdate = gmmktime($shour, $sminute, 0, $smonth, $sday, $syear) - $gmt_offset;
+		$enddate = gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear) - $gmt_offset;
+
 		if(strlen($post_event) == 0) {
 			$post_event = $eventmsg;
 		}
 		
-		if(isset($title_link) AND strlen($link) == 0) {
-			// If link checkmark is on but no link is set...
-			$title_link = 'N';			
-		} else if(isset($title_link) AND strlen($link) != 0) {
-			// See if the link checkmark is on and a link is set
-			$title_link = 'Y';
+		if(isset($title_link) AND strlen($link) != 0) {
+			$title_link = 'Y';			
 		} else {
-			// Or there is just no link
 			$title_link = 'N';
 		}
 		
@@ -68,7 +64,6 @@ function events_insert_input() {
 			$allday = 'N';
 		}
 		
-		/* Check if you need to update or insert a new record */
 		if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
 			/* Update an existing event */
 			$postquery = "UPDATE `".$wpdb->prefix."events` SET
@@ -136,7 +131,7 @@ function events_create_category() {
 function events_clear_old() {
 	global $wpdb;
 
-	$removeme = date("U") - 86400;
+	$removeme = gmdate("U") + (get_option('gmt_offset')*3600) - 86400;
 	$wpdb->query("DELETE FROM `".$wpdb->prefix."events` WHERE `thetime` < ".$removeme." AND `archive` = 'no'");
 }
 
@@ -235,7 +230,6 @@ function events_check_config() {
 		$option['dateformat_sidebar']		= '%d %b %Y';
 		$option['timeformat'] 				= '%H:%M';
 		$option['timeformat_sidebar']		= '%H:%M';
-		$option['timezone']					= '+0';
 		$option['order'] 					= 'thetime ASC';
 		$option['order_archive'] 			= 'thetime DESC';
 		$option['localization'] 			= 'en_EN';
@@ -303,7 +297,6 @@ function events_options_submit() {
 	$option['dateformat_sidebar']		= htmlspecialchars(trim($_POST['events_dateformat_sidebar'], "\t\n "), ENT_QUOTES);
 	$option['timeformat'] 				= $_POST['events_timeformat'];
 	$option['timeformat_sidebar']		= $_POST['events_timeformat_sidebar'];
-	$option['timezone'] 				= $_POST['events_timezone'];
 	$option['order']	 				= $_POST['events_order'];
 	$option['order_archive'] 			= $_POST['events_order_archive'];
 	$option['linktarget'] 				= $_POST['events_linktarget'];
