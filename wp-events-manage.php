@@ -3,7 +3,7 @@
  Name:      events_insert_input
 
  Purpose:   Prepare and insert data on saving new or updating event
- Receive:   -None-
+ Receive:   $_POST
  Return:	-None-
 -------------------------------------------------------------*/
 function events_insert_input() {
@@ -35,34 +35,22 @@ function events_insert_input() {
 
 	if (strlen($title)!=0 AND strlen($syear)!=0 AND strlen($sday)!=0 AND strlen($smonth)!=0) {
 		/* Date is sorted here */
-		if(strlen($shour) == 0) $shour = 0;
-		if(strlen($sminute) == 0) $sminute = 0;
+		if(strlen($ehour) == 0) 	$ehour = $shour;
+		if(strlen($eminute) == 0) 	$eminute = $sminute;
+		if(strlen($emonth) == 0) 	$emonth = $smonth;
+		if(strlen($eday) == 0) 		$eday = $sday;
+		if(strlen($eyear) == 0) 	$eyear = $syear;
 		
-		if(strlen($ehour) == 0) $ehour = $shour;
-		if(strlen($eminute) == 0) $eminute = $sminute;
-		if(strlen($emonth) == 0) $emonth = $smonth;
-		if(strlen($eday) == 0) $eday = $sday;
-		if(strlen($eyear) == 0) $eyear = $syear;
-		
-		$gmt_offset = get_option('gmt_offset')*3600;
-		$startdate = gmmktime($shour, $sminute, 0, $smonth, $sday, $syear) - $gmt_offset;
-		$enddate = gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear) - $gmt_offset;
+		$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
+		$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
 
-		if(strlen($post_event) == 0) {
-			$post_event = $eventmsg;
-		}
+		if(strlen($post_event) == 0) $post_event = $eventmsg;
 		
-		if(isset($title_link) AND strlen($link) != 0) {
-			$title_link = 'Y';			
-		} else {
-			$title_link = 'N';
-		}
+		if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';			
+			else $title_link = 'N';
 		
-		if(isset($allday)) {
-			$allday = 'Y';			
-		} else {
-			$allday = 'N';
-		}
+		if(isset($allday)) $allday = 'Y';			
+			else $allday = 'N';
 		
 		if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
 			/* Update an existing event */
@@ -96,7 +84,7 @@ function events_insert_input() {
  Name:      events_create_category
 
  Purpose:   Add a new category
- Receive:   -None-
+ Receive:   $_POST
  Return:	-None-
 -------------------------------------------------------------*/
 function events_create_category() {
@@ -162,7 +150,7 @@ function events_request_delete() {
 }
 
 /*-------------------------------------------------------------
- Name:      events_delete_eventid
+ Name:      events_delete
 
  Purpose:   Remove event or category from database
  Receive:   $id, $what
@@ -219,6 +207,7 @@ function events_check_config() {
 		// Default Options
 		$option['length'] 					= 1000;
 		$option['sidelength'] 				= 120;
+		$option['sideshow'] 				= 1;
 		$option['linktarget']				= '_blank';
 		$option['amount'] 					= 2;
 		$option['hideend'] 					= 'show';
@@ -287,6 +276,7 @@ function events_options_submit() {
 	//options page
 	$option['length'] 					= trim($_POST['events_length'], "\t\n ");
 	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
+	$option['sideshow'] 				= $_POST['events_sideshow'];
 	$option['amount'] 					= trim($_POST['events_amount'], "\t\n ");
 	$option['minlevel'] 				= $_POST['events_minlevel'];
 	$option['hideend']	 				= $_POST['events_hideend'];

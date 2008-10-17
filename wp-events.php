@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.5.5
+Version: 1.5.6
 Author URI: http://meandmymac.net/
 */
 
@@ -82,7 +82,7 @@ function events_dashboard() {
 -------------------------------------------------------------*/
 function events_manage() {
 	global $wpdb, $userdata, $events_config;
-
+	
 	$action = $_GET['action'];
 	if(isset($_POST['order'])) { 
 		$order = $_POST['order']; 
@@ -154,7 +154,7 @@ function events_manage() {
 				$class = ('alternate' != $class) ? 'alternate' : ''; ?>
 			    <tr id='event-<?php echo $event->id; ?>' class=' <?php echo $class; ?>'>
 					<th scope="row" class="check-column"><input type="checkbox" name="eventcheck[]" value="<?php echo $event->id; ?>" /></th>
-					<td><?php echo date("F d Y H:i", $event->thetime);?></td>
+					<td><?php echo gmdate("F d Y H:i", $event->thetime);?></td>
 					<td><?php echo stripslashes(html_entity_decode($event->location));?></td>
 					<td><?php echo $cat->name; ?></td>
 					<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
@@ -231,6 +231,8 @@ function events_manage() {
 function events_schedule() {
 	global $wpdb, $userdata, $events_config;
 	
+	$timezone = get_option('gmt_offset')*3600;
+	
 	if($_GET['edit_event']) {
 		$event_edit_id = $_GET['edit_event'];
 	}
@@ -252,8 +254,8 @@ function events_schedule() {
 		<?php
 			$SQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `id` = $event_edit_id";
 			$edit_event = $wpdb->get_row($SQL);
-			list($sday, $smonth, $syear, $shour, $sminute) = split(" ", date("d m Y H i", $edit_event->thetime));
-			list($eday, $emonth, $eyear, $ehour, $eminute) = split(" ", date("d m Y H i", $edit_event->theend));
+			list($sday, $smonth, $syear, $shour, $sminute) = split(" ", gmdate("d m Y H i", $edit_event->thetime));
+			list($eday, $emonth, $eyear, $ehour, $eminute) = split(" ", gmdate("d m Y H i", $edit_event->theend));
 		}
 		
 		$SQL2 = "SELECT * FROM ".$wpdb->prefix."events_categories ORDER BY id";
@@ -308,7 +310,6 @@ function events_schedule() {
 						</td>
 				        <th scope="row">Hour/Minute (optional):</th>
 				        <td width="25%"><select name="events_shour">
-				        <option value="" <?php if($shour == "") { echo 'selected'; } ?>>--</option>
 				        <option value="00" <?php if($shour == "00") { echo 'selected'; } ?>>00</option>
 				        <option value="01" <?php if($shour == "01") { echo 'selected'; } ?>>01</option>
 				        <option value="02" <?php if($shour == "02") { echo 'selected'; } ?>>02</option>
@@ -334,7 +335,6 @@ function events_schedule() {
 				        <option value="22" <?php if($shour == "22") { echo 'selected'; } ?>>22</option>
 				        <option value="23" <?php if($shour == "23") { echo 'selected'; } ?>>23</option>
 					</select> / <select name="events_sminute">
-				        <option value="" <?php if($sminute == "") { echo 'selected'; } ?>>--</option>
 				        <option value="00" <?php if($sminute == "00") { echo 'selected'; } ?>>00</option>
 				        <option value="01" <?php if($sminute == "01") { echo 'selected'; } ?>>01</option>
 				        <option value="02" <?php if($sminute == "02") { echo 'selected'; } ?>>02</option>
@@ -534,7 +534,8 @@ function events_schedule() {
 					</tr>
 			      	<tr>
 				        <th scope="row">Message when event ends (optional):</th>
-				        <td colspan="3"><textarea name="events_post_event" cols="70" rows="2"><?php echo $edit_event->post_message;?></textarea><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
+				        <td colspan="3"><textarea name="events_post_event" cols="70" rows="2"><?php echo $edit_event->post_message;?></textarea><br />
+				        	<em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 			      	</tr>
 			      	<tr>
 				        <th scope="row">Link to page (optional):</th>
@@ -575,7 +576,9 @@ function events_options() {
 	$events_config = get_option('events_config');
 	$events_template = get_option('events_template');
 	$events_language = get_option('events_language');
-	$theunixdate = date("U");
+	
+	$gmt_offset = (get_option('gmt_offset')*3600);
+	$timezone = gmdate("U") + $gmt_offset;
 ?>
 	<div class="wrap">
 	  	<h2>Events options</h2>
@@ -593,25 +596,34 @@ function events_options() {
 			        <td colspan="3"><input name="events_amount" type="text" value="<?php echo $events_config['amount'];?>" size="6" /> (default: 2)</td>
 		      	</tr>
 		      	<tr valign="top">
+			        <th scope="row">Show</th>
+			        <td colspan="3"><select name="events_sideshow">
+				        <option value="1" <?php if($events_config['sideshow'] == "1") { echo 'selected'; } ?>>Future events including events that happen today (default)</option>
+				        <option value="2" <?php if($events_config['sideshow'] == "2") { echo 'selected'; } ?>>Events that didn't start yet</option>
+				        <option value="3" <?php if($events_config['sideshow'] == "3") { echo 'selected'; } ?>>Events that didn't end yet</option>
+				        <option value="4" <?php if($events_config['sideshow'] == "4") { echo 'selected'; } ?>>The archive</option>
+					</select></td>
+		      	</tr>
+		      	<tr valign="top">
 			        <th scope="row">Date format</th>
 			        <?php if($events_config['custom_date_sidebar'] == 'no') { ?>
 			        <td><select name="events_dateformat_sidebar">
 				        <option disabled="disabled">-- day month year --</option>
-				        <option value="%d %m %Y" <?php if($events_config['dateformat_sidebar'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %m %Y", $theunixdate)); ?></option>
-				        <option value="%d %b %Y" <?php if($events_config['dateformat_sidebar'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?> (default)</option>
-				        <option value="%d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y", $theunixdate)); ?></option>
+				        <option value="%d %m %Y" <?php if($events_config['dateformat_sidebar'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %m %Y", $timezone)); ?></option>
+				        <option value="%d %b %Y" <?php if($events_config['dateformat_sidebar'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %b %Y", $timezone)); ?> (default)</option>
+				        <option value="%d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %B %Y", $timezone)); ?></option>
 				        <option disabled="disabled">-- month day year --</option>
-				        <option value="%m %d %Y" <?php if($events_config['dateformat_sidebar'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%m %d %Y", $theunixdate)); ?></option>
-				        <option value="%b %d %Y" <?php if($events_config['dateformat_sidebar'] == "%b %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%b %d %Y", $theunixdate)); ?></option>
-				        <option value="%B %d %Y" <?php if($events_config['dateformat_sidebar'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%B %d %Y", $theunixdate)); ?></option>
+				        <option value="%m %d %Y" <?php if($events_config['dateformat_sidebar'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%m %d %Y", $timezone)); ?></option>
+				        <option value="%b %d %Y" <?php if($events_config['dateformat_sidebar'] == "%b %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%b %d %Y", $timezone)); ?></option>
+				        <option value="%B %d %Y" <?php if($events_config['dateformat_sidebar'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%B %d %Y", $timezone)); ?></option>
 				        <option disabled="disabled">-- weekday day/month/year --</option>
-				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%a, %d %B %Y", $theunixdate)); ?></option>
-				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%A, %d %B %Y", $theunixdate)); ?></option>
+				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%a, %d %B %Y", $timezone)); ?></option>
+				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%A, %d %B %Y", $timezone)); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%x" <?php if($events_config['dateformat_sidebar'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%x", $theunixdate)); ?></option>
+				        <option value="%x" <?php if($events_config['dateformat_sidebar'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%x", $timezone)); ?></option>
 					</select></td>
 					<?php } else { ?>
- 			        <td><input name="events_dateformat_sidebar" type="text" value="<?php echo $events_config['dateformat_sidebar'];?>" size="30" /><br />Careful what you put here! Learn: <a href="http://www.php.net/manual/en/function.strftime.php" target="_blank">php manual</a>.</td>
+ 			        <td><input name="events_dateformat_sidebar" type="text" value="<?php echo $events_config['dateformat_sidebar'];?>" size="30" /><br />Careful what you put here! Learn: <a href="http://www.php.net/manual/en/function.gmstrftime.php" target="_blank">php manual</a>.</td>
  			        <?php } ?>
 			        <th scope="row">Date system</th>
 			        <td><select name="events_custom_date_sidebar">
@@ -628,13 +640,13 @@ function events_options() {
 			        <th scope="row">Time format</th>
 			        <td colspan="3"><select name="events_timeformat_sidebar">
 				        <option disabled="disabled">-- 24-hour clock --</option>
-				        <option value="%H:%M" <?php if($events_config['timeformat_sidebar'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M", $theunixdate)); ?> (default)</option>
-				        <option value="%H:%M:%S" <?php if($events_config['timeformat_sidebar'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M:%S", $theunixdate)); ?></option>
+				        <option value="%H:%M" <?php if($events_config['timeformat_sidebar'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M", $timezone)); ?> (default)</option>
+				        <option value="%H:%M:%S" <?php if($events_config['timeformat_sidebar'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M:%S", $timezone)); ?></option>
 				        <option disabled="disabled">-- 12-hour clock --</option>
-				        <option value="%I:%M %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M %p", $theunixdate)); ?></option>
-				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M:%S %p", $theunixdate)); ?></option>
+				        <option value="%I:%M %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M %p", $timezone)); ?></option>
+				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M:%S %p", $timezone)); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%X" <?php if($events_config['timeformat_sidebar'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%X", $theunixdate)); ?></option>
+				        <option value="%X" <?php if($events_config['timeformat_sidebar'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%X", $timezone)); ?></option>
 					</select></td>
 		      	</tr>
 		      	<tr valign="top">
@@ -649,21 +661,21 @@ function events_options() {
 			        <?php if($events_config['custom_date_page'] == 'no') { ?>
 			        <td><select name="events_dateformat">
 				        <option disabled="disabled">-- day month year --</option>
-				        <option value="%d %m %Y" <?php if($events_config['dateformat'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %m %Y", $theunixdate)); ?></option>
-				        <option value="%d %b %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?></option>
-				        <option value="%d %B %Y" <?php if($events_config['dateformat'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %B %Y", $theunixdate)); ?> (default)</option>
+				        <option value="%d %m %Y" <?php if($events_config['dateformat'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %m %Y", $timezone)); ?></option>
+				        <option value="%d %b %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %b %Y", $timezone)); ?></option>
+				        <option value="%d %B %Y" <?php if($events_config['dateformat'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %B %Y", $timezone)); ?> (default)</option>
 				        <option disabled="disabled">-- month day year --</option>
-				        <option value="%m %d %Y" <?php if($events_config['dateformat'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%m %d %Y", $theunixdate)); ?></option>
-				        <option value="%b %d %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%d %b %Y", $theunixdate)); ?></option>
-				        <option value="%B %d %Y" <?php if($events_config['dateformat'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%B %d %Y", $theunixdate)); ?></option>
+				        <option value="%m %d %Y" <?php if($events_config['dateformat'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%m %d %Y", $timezone)); ?></option>
+				        <option value="%b %d %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %b %Y", $timezone)); ?></option>
+				        <option value="%B %d %Y" <?php if($events_config['dateformat'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%B %d %Y", $timezone)); ?></option>
 				        <option disabled="disabled">-- weekday day/month/year --</option>
-				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%a, %d %B %Y", $theunixdate)); ?></option>
-				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%A, %d %B %Y", $theunixdate)); ?></option>
+				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%a, %d %B %Y", $timezone)); ?></option>
+				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%A, %d %B %Y", $timezone)); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%x" <?php if($events_config['dateformat'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%x", $theunixdate)); ?></option>
+				        <option value="%x" <?php if($events_config['dateformat'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%x", $timezone)); ?></option>
 					</select></td>
 					<?php } else { ?>
- 			        <td><input name="events_dateformat" type="text" value="<?php echo $events_config['dateformat'];?>" size="30" /><br />Careful what you put here. Learn: <a href="http://www.php.net/manual/en/function.strftime.php" target="_blank">php manual</a>.</td>
+ 			        <td><input name="events_dateformat" type="text" value="<?php echo $events_config['dateformat'];?>" size="30" /><br />Careful what you put here. Learn: <a href="http://www.php.net/manual/en/function.gmstrftime.php" target="_blank">php manual</a>.</td>
  			        <?php } ?>
 			        <th scope="row">Date system</th>
 			        <td><select name="events_custom_date_page">
@@ -680,13 +692,13 @@ function events_options() {
 			        <th scope="row">Time format</th>
 			        <td colspan="3"><select name="events_timeformat">
 				        <option disabled="disabled">-- 24-hour clock --</option>
-				        <option value="%H:%M" <?php if($events_config['timeformat'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M", $theunixdate)); ?> (default)</option>
-				        <option value="%H:%M:%S" <?php if($events_config['timeformat'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%H:%M:%S", $theunixdate)); ?></option>
+				        <option value="%H:%M" <?php if($events_config['timeformat'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M", $timezone)); ?> (default)</option>
+				        <option value="%H:%M:%S" <?php if($events_config['timeformat'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M:%S", $timezone)); ?></option>
 				        <option disabled="disabled">-- 12-hour clock --</option>
-				        <option value="%I:%M %p" <?php if($events_config['timeformat'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M %p", $theunixdate)); ?></option>
-				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%I:%M:%S %p", $theunixdate)); ?></option>
+				        <option value="%I:%M %p" <?php if($events_config['timeformat'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M %p", $timezone)); ?></option>
+				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M:%S %p", $timezone)); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%X" <?php if($events_config['timeformat'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(strftime("%X", $theunixdate)); ?></option>
+				        <option value="%X" <?php if($events_config['timeformat'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%X", $timezone)); ?></option>
 					</select></td>
 		      	</tr>
 		      	<tr valign="top">
@@ -942,44 +954,9 @@ function events_options() {
 	
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Set the timezone to your timezone this ensures that no mishaps occur when you set the time for an event. <br />
-					Localization can usually be en_EN. Changing this value should translate the dates to your language.<br />
+					<td colspan="2" bgcolor="#DDD">Localization can usually be en_EN. Changing this value should translate the dates to your language.<br />
 					On Linux/Mac Osx (Darwin) you should use 'en_EN' in the field. For windows just 'en' should suffice. Your server most likely uses <strong><?php echo PHP_OS; ?>.</td>
 				</tr>
-		      	<tr valign="top">
-			        <th scope="row">Your timezone?</th>
-			        <td><select name="events_timezone">
-				        <option value="-43200" <?php if($events_config['timezone'] == "-43200") { echo 'selected'; } ?>>(GMT -12:00) Eniwetok, Kwajalein</option>
-						<option value="-39600" <?php if($events_config['timezone'] == "-39600") { echo 'selected'; } ?>>(GMT -11:00) Midway Island, Samoa</option>
-				        <option value="-36000" <?php if($events_config['timezone'] == "-36000") { echo 'selected'; } ?>>(GMT -10:00) Hawaii</option>
-				        <option value="-32400" <?php if($events_config['timezone'] == "-32400") { echo 'selected'; } ?>>(GMT -9:00) Alaska</option>
-				        <option value="-28800" <?php if($events_config['timezone'] == "-28800") { echo 'selected'; } ?>>(GMT -8:00) Pacific Time (US & Canada)</option>
-				        <option value="-25200" <?php if($events_config['timezone'] == "-25200") { echo 'selected'; } ?>>(GMT -7:00) Mountain Time (US & Canada)</option>
-				        <option value="-21600" <?php if($events_config['timezone'] == "-21600") { echo 'selected'; } ?>>(GMT -6:00) Central Time (US & Canada), Mexico City</option>
-				        <option value="-18000" <?php if($events_config['timezone'] == "-18000") { echo 'selected'; } ?>>(GMT -5:00) Eastern Time (US & Canada), Bogota, Lima</option>
-				        <option value="-14400" <?php if($events_config['timezone'] == "-14400") { echo 'selected'; } ?>>(GMT -4:00) Atlantic Time (Canada), Caracas, La Paz</option>
-				        <option value="-12600" <?php if($events_config['timezone'] == "-12600") { echo 'selected'; } ?>>(GMT -3:30) Newfoundland</option>
-				        <option value="-10800" <?php if($events_config['timezone'] == "-10800") { echo 'selected'; } ?>>(GMT -3:00) Brazil, Buenos Aires, Georgetown</option>
-				        <option value="-7200" <?php if($events_config['timezone'] == "-7200") { echo 'selected'; } ?>>(GMT -2:00) Mid-Atlantic</option>
-				        <option value="-3600" <?php if($events_config['timezone'] == "-3600") { echo 'selected'; } ?>>(GMT -1:00) Azores, Cape Verde Islands</option>
-				        <option value="+0" <?php if($events_config['timezone'] == "+0") { echo 'selected'; } ?>>(GMT) Western Europe Time, London, Lisbon, Casablanca</option>
-				        <option value="+3600" <?php if($events_config['timezone'] == "+3600") { echo 'selected'; } ?>>(GMT +1:00) Amsterdam, Brussels, Copenhagen, Madrid, Paris</option>
-				        <option value="+7200" <?php if($events_config['timezone'] == "+7200") { echo 'selected'; } ?>>(GMT +2:00) Kanliningrad, South Africa</option>
-				        <option value="+10800" <?php if($events_config['timezone'] == "+10800") { echo 'selected'; } ?>>(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg</option>
-				        <option value="+12600" <?php if($events_config['timezone'] == "+12600") { echo 'selected'; } ?>>(GMT +3:30) Tehran</option>
-				        <option value="+14400" <?php if($events_config['timezone'] == "+14400") { echo 'selected'; } ?>>(GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi</option>
-				        <option value="+16200" <?php if($events_config['timezone'] == "+16200") { echo 'selected'; } ?>>(GMT +4:30) Kabul</option>
-				        <option value="+18000" <?php if($events_config['timezone'] == "+18000") { echo 'selected'; } ?>>(GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent</option>
-				        <option value="+19800" <?php if($events_config['timezone'] == "+19800") { echo 'selected'; } ?>>(GMT +5:30) Bombay, Calcutta, Madras, New Delphi</option>
-				        <option value="+21600" <?php if($events_config['timezone'] == "+21600") { echo 'selected'; } ?>>(GMT +6:00) Almaty, Dhaka, Colombo</option>
-				        <option value="+25200" <?php if($events_config['timezone'] == "+25200") { echo 'selected'; } ?>>(GMT +7:00) Bangkok, Hanoi, Jakarta</option>
-				        <option value="+28800" <?php if($events_config['timezone'] == "+28800") { echo 'selected'; } ?>>(GMT +8:00) Beijing, Perth, Singapore, Hong Kong</option>
-				        <option value="+32400" <?php if($events_config['timezone'] == "+32400") { echo 'selected'; } ?>>(GMT +9:00) Adelaide, Darwin</option>
-				        <option value="+36000" <?php if($events_config['timezone'] == "+36000") { echo 'selected'; } ?>>(GMT +10:00) Eastern Australia, Guam, Vladivostok</option>
-				        <option value="+39600" <?php if($events_config['timezone'] == "+39600") { echo 'selected'; } ?>>(GMT +11:00) Magadan, Solomon Islands, New Caledonia</option>
-				        <option value="+43200" <?php if($events_config['timezone'] == "+43200") { echo 'selected'; } ?>>(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka</option>
-					</select></td>
-		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Date localization:</th>
 			        <td><input name="events_localization" type="text" value="<?php echo $events_config['localization'];?>" size="10" /> (default: en_EN)</td>
