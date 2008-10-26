@@ -119,7 +119,7 @@ function events_create_category() {
 function events_clear_old() {
 	global $wpdb;
 
-	$removeme = gmdate("U") + (get_option('gmt_offset')*3600) - 86400;
+	$removeme = current_time('timestamp') - 86400;
 	$wpdb->query("DELETE FROM `".$wpdb->prefix."events` WHERE `thetime` < ".$removeme." AND `archive` = 'no'");
 }
 
@@ -139,14 +139,16 @@ function events_request_delete() {
 		foreach($event_ids as $event_id) {
 			events_delete($event_id, 'event');
 		}
+		events_return('delete-event');
+		exit;
 	}
 	if($category_ids != '') {
 		foreach($category_ids as $category_id) {
-			events_delete($category_id, 'group');
+			events_delete($category_id, 'category');
 		}
+		events_return('delete-category');
+		exit;
 	}
-	events_return('delete');
-	exit;
 }
 
 /*-------------------------------------------------------------
@@ -183,7 +185,7 @@ function events_delete($id, $what) {
 				events_return('no_access');
 				exit;
 			}
-		} else if ($what == 'group') {
+		} else if ($what == 'category') {
 			$SQL = "DELETE FROM `".$wpdb->prefix."events_categories` WHERE `id` = $id";
 			if($wpdb->query($SQL) == FALSE) {
 				die(mysql_error());
@@ -358,8 +360,12 @@ function events_return($action) {
 			wp_redirect('post-new.php?page=wp-events.php&action=no_access');
 		break;
 		
-		case "delete" :
-			wp_redirect('edit.php?page=wp-events.php&action=deleted');
+		case "delete-event" :
+			wp_redirect('edit.php?page=wp-events.php&action=delete-event');
+		break;
+		
+		case "delete-category" :
+			wp_redirect('edit.php?page=wp-events.php&action=delete-category');
 		break;
 		
 		case "uninstall" :

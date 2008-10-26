@@ -1,12 +1,12 @@
 <?php
 /*-------------------------------------------------------------
- Name:      events_mysql_install
+ Name:      events_activate
 
  Purpose:   Creates database tables if they don't exist
  Receive:   -none-
  Return:	-none-
 -------------------------------------------------------------*/
-function events_mysql_install() {
+function events_activate() {
 	global $wpdb;
 
 	$table_name1 = $wpdb->prefix . "events";
@@ -51,6 +51,7 @@ function events_mysql_install() {
 
 	if($table1 == '1' AND $table2 == '1') {
 		return true; //tables exist
+		// Future (WP2.7) add function for upgrade script
 	} else {
 		events_mysql_warning();
 		exit;

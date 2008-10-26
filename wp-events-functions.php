@@ -132,7 +132,7 @@ function events_duration($event_start, $event_end, $allday) {
  Receive:   -none-
  Return:	$output_sidebar
 -------------------------------------------------------------*/
-function events_sidebar($cat, $limit = 0) {
+function events_sidebar($cat = 0, $limit = 0) {
 	global $wpdb, $events_config, $events_language, $events_template;
 	
 	$present = current_time('timestamp');
@@ -150,7 +150,7 @@ function events_sidebar($cat, $limit = 0) {
 	} else if($events_config['sideshow'] == "4") {
 		$sideshow = " AND `thetime` <= '$present'";
 	} else {
-		$sideshow = " AND `theend` >= '$daystart'"; // default behaviour
+		$sideshow = " AND `theend` >= '$daystart'"; // default behaviour (1)
 	}
 	
 	$sidebar_header = $events_template['sidebar_h_template'];
@@ -167,8 +167,10 @@ function events_sidebar($cat, $limit = 0) {
 				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
 				
 				$template = $events_template['sidebar_template'];
+
+				$event->title = substr($event->title, 0 , $events_config['sidelength']);
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
-				$template = str_replace('%title%', substr($event->title, 0 , $events_config['sidelength']), $template);
+				$template = str_replace('%title%', $event->title, $template);
 				$template = str_replace('%event%', substr($event->pre_message, 0 , $events_config['sidelength']), $template);
 				
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_sidelink'].'</a>', $template); }
@@ -236,7 +238,7 @@ function events_list($atts, $content = null) {
 			$output_page .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
 			foreach ( $events as $event ) {				
-				$template = events_build_output($event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
+				$template = events_build_output('list', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
 				$output_page .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -281,7 +283,7 @@ function events_archive($atts, $content = null) {
 			$output_archive .= '<em>'.$events_language['language_noarchive'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				$template = events_build_output($event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
+				$template = events_build_output('archive', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
 				$output_archive .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -327,7 +329,7 @@ function events_today($atts, $content = null) {
 			$output_daily .= '<em>'.$events_language['language_nodaily'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				$template = events_build_output($event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
+				$template = events_build_output('today', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
 				$output_daily .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -344,15 +346,18 @@ function events_today($atts, $content = null) {
  Name:      events_build_output
 
  Purpose:   Build output for page, archive and today's listings
- Receive:   $category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location
+ Receive:   $type, $category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location
  Return:	$template
 -------------------------------------------------------------*/
-function events_build_output($category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location) {
+function events_build_output($type, $category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location) {
 	global $wpdb, $events_config, $events_language, $events_template;
 				
 	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
 				
-	$template = $events_template['page_template'];
+	if($type == 'list') $template = $events_template['page_template'];
+	if($type == 'archive') $template = $events_template['archive_template'];
+	if($type == 'today') $template = $events_template['daily_template'];
+	
 	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
 	$template = str_replace('%title%', $title, $template);
 	$template = str_replace('%event%', $pre_message, $template);

@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.5.6
+Version: 1.5.7
 Author URI: http://meandmymac.net/
 */
 
@@ -15,48 +15,44 @@ include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-install.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-functions.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-manage.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-widget.php');
+register_activation_hook(__FILE__, 'events_activate');
 events_check_config();
 
-#---------------------------------------------------
-# Only proceed with the plugin if MySQL Tables are setup properly
-#---------------------------------------------------
-if(events_mysql_install()) {
-	// Add filters for adding the tags in the WP page/post field
-	add_shortcode('events_list', 'events_list');
-	add_shortcode('events_today', 'events_today');
-	add_shortcode('events_archive', 'events_archive');
+// Add filters for adding the tags in the WP page/post field
+add_shortcode('events_list', 'events_list');
+add_shortcode('events_today', 'events_today');
+add_shortcode('events_archive', 'events_archive');
 
-	events_clear_old(); // Remove non archived old events
+events_clear_old(); // Remove non archived old events
 
-	add_action('widgets_init', 'widget_wp_events_init'); //Initialize the widget
-	add_action('admin_menu', 'events_dashboard'); //Add page menu links
+add_action('widgets_init', 'widget_wp_events_init'); //Initialize the widget
+add_action('admin_menu', 'events_dashboard'); //Add page menu links
 	
-	if(isset($_POST['events_submit'])) {
-		add_action('init', 'events_insert_input'); //Save event
-	}
-
-	if(isset($_POST['add_category_submit'])) {
-		add_action('init', 'events_create_category'); //Add a category
-	}
-
-	if(isset($_POST['delete_events']) OR isset($_POST['delete_categories'])) {
-		add_action('init', 'events_request_delete'); //Delete events/categories
-	}
-
-	if(isset($_POST['events_submit_options'])) {
-		add_action('init', 'events_options_submit'); //Update Options
-	}
-
-	if(isset($_POST['event_uninstall'])) {
-		add_action('init', 'events_plugin_uninstall'); //Uninstall
-	}
-	
-	// Load Options
-	$events_config = get_option('events_config');
-	$events_template = get_option('events_template');
-	$events_language = get_option('events_language');
-	setlocale(LC_TIME, $events_config['localization']);	
+if(isset($_POST['events_submit'])) {
+	add_action('init', 'events_insert_input'); //Save event
 }
+
+if(isset($_POST['add_category_submit'])) {
+	add_action('init', 'events_create_category'); //Add a category
+}
+
+if(isset($_POST['delete_events']) OR isset($_POST['delete_categories'])) {
+	add_action('init', 'events_request_delete'); //Delete events/categories
+}
+
+if(isset($_POST['events_submit_options'])) {
+	add_action('init', 'events_options_submit'); //Update Options
+}
+
+if(isset($_POST['event_uninstall'])) {
+	add_action('init', 'events_plugin_uninstall'); //Uninstall
+}
+
+// Load Options
+$events_config = get_option('events_config');
+$events_template = get_option('events_template');
+$events_language = get_option('events_language');
+setlocale(LC_TIME, $events_config['localization']);	
 
 /*-------------------------------------------------------------
  Name:      events_dashboard
@@ -95,8 +91,10 @@ function events_manage() {
 		$catorder = 'id ASC'; 
 	} ?>
 	
-	<?php if ($action == 'deleted') { ?>
-		<div id="message" class="updated fade"><p>Event/Category <strong>deleted</strong></p></div>
+	<?php if ($action == 'delete-event') { ?>
+		<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
+	<?php } else if ($action == 'delete-category') { ?>
+		<div id="message" class="updated fade"><p>Category <strong>deleted</strong></p></div>
 	<?php } else if ($action == 'updated') { ?>
 		<div id="message" class="updated fade"><p>Event <strong>updated</strong></p></div>
 	<?php } else if ($action == 'no_access') { ?>
@@ -147,23 +145,29 @@ function events_manage() {
 				</tr>
   			</thead>
   			<tbody>
-		<?php $events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` ORDER BY $order");
-		if ($events) {
-			foreach($events as $event) {
-				$cat = $wpdb->get_row("SELECT name FROM " . $wpdb->prefix . "events_categories WHERE id = '".$event->category."'");
-				$class = ('alternate' != $class) ? 'alternate' : ''; ?>
-			    <tr id='event-<?php echo $event->id; ?>' class=' <?php echo $class; ?>'>
-					<th scope="row" class="check-column"><input type="checkbox" name="eventcheck[]" value="<?php echo $event->id; ?>" /></th>
-					<td><?php echo gmdate("F d Y H:i", $event->thetime);?></td>
-					<td><?php echo stripslashes(html_entity_decode($event->location));?></td>
-					<td><?php echo $cat->name; ?></td>
-					<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
-					<td><?php echo events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday); ?></td>
-					<td><?php echo events_duration($event->thetime, $event->theend, $event->allday);?></td>
-				</tr>
- 			<?php } ?>
- 		<?php } else { ?>
-			<tr id='no-id'><td scope="row" colspan="5"><em>No Events yet!</em></td></tr>
+		<?php 
+		if(events_mysql_table_exists($wpdb->prefix.'events')) {
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` ORDER BY $order");
+			if ($events) {
+				foreach($events as $event) {
+					$cat = $wpdb->get_row("SELECT name FROM " . $wpdb->prefix . "events_categories WHERE id = '".$event->category."'");
+					$class = ('alternate' != $class) ? 'alternate' : ''; ?>
+				    <tr id='event-<?php echo $event->id; ?>' class=' <?php echo $class; ?>'>
+						<th scope="row" class="check-column"><input type="checkbox" name="eventcheck[]" value="<?php echo $event->id; ?>" /></th>
+						<td><?php echo gmdate("F d Y H:i", $event->thetime);?></td>
+						<td><?php echo stripslashes(html_entity_decode($event->location));?></td>
+						<td><?php echo $cat->name; ?></td>
+						<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
+						<td><?php echo events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday); ?></td>
+						<td><?php echo events_duration($event->thetime, $event->theend, $event->allday);?></td>
+					</tr>
+	 			<?php } ?>
+	 		<?php } else { ?>
+				<tr id='no-id'><td scope="row" colspan="7"><em>No Events yet!</em></td></tr>
+			<?php 
+			} 
+		} else { ?>
+			<tr id='no-id'><td scope="row" colspan="7"><span style="font-weight: bold; color: #f00;">There was an error locating the main database table for Events. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
 		<?php }	?>
 			</tbody>
 		</table>
@@ -199,16 +203,22 @@ function events_manage() {
 				</tr>
   			</thead>
   			<tbody>
-		<?php $categories = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events_categories ORDER BY $catorder");
-		if ($categories) {
-			foreach($categories as $category) {
-				$class = ('alternate' != $class) ? 'alternate' : ''; ?>
-			    <tr id='group-<?php echo $category->id; ?>' class=' <?php echo $class; ?>'>
-					<th scope="row" class="check-column"><input type="checkbox" name="categorycheck[]" value="<?php echo $category->id; ?>" /></th>
-					<td><?php echo $category->id;?></td>
-					<td><?php echo $category->name;?></td>
-				</tr>
- 			<?php } ?>
+		<?php 
+		if(events_mysql_table_exists($wpdb->prefix.'events_categories')) {
+		$categories = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events_categories ORDER BY $catorder");
+			if ($categories) {
+				foreach($categories as $category) {
+					$class = ('alternate' != $class) ? 'alternate' : ''; ?>
+				    <tr id='group-<?php echo $category->id; ?>' class=' <?php echo $class; ?>'>
+						<th scope="row" class="check-column"><input type="checkbox" name="categorycheck[]" value="<?php echo $category->id; ?>" /></th>
+						<td><?php echo $category->id;?></td>
+						<td><?php echo $category->name;?></td>
+					</tr>
+	 			<?php } ?>
+			<?php 
+			} 
+		} else { ?>
+			<tr id='no-id'><td scope="row" colspan="3"><span style="font-weight: bold; color: #f00;">There was an error locating the database table for the Events categories. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
 		<?php }	?>
 			    <tr id='category-new'>
 					<th scope="row" class="check-column">&nbsp;</th>
