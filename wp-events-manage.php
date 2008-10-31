@@ -176,7 +176,7 @@ function events_delete($id, $what) {
 	
 			$event = $wpdb->get_row($SQL);
 
-			if ($userdata->wp_user_level >= $events_config['managelevel'] ) {
+			if ($userdata->user_level >= $events_config['managelevel'] ) {
 				$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
 				if($wpdb->query($SQL) == FALSE) {
 					die(mysql_error());
