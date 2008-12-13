@@ -1,9 +1,10 @@
-=== Plugin Name ===
+=== Events ===
 Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
-Tags: events, countdown, plugin, admin, theme, template, event, archive, dashboard
+Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
 Requires at least: 2.5
-Stable tag: 1.5.7.1
+Tested up to: 2.7
+Stable tag: 1.6
 
 Create a list with events/appointments/concerts/future happenings and show them on your site. Includes optional widget and advanced page options.
 
@@ -15,7 +16,6 @@ When you create or edit an event you can set it to be archived. So that it remai
 
 **Features**
 
-* Easy installation
 * Widget for themes that support it
 * Separate page for events
 * Completely customizable layout
@@ -57,10 +57,6 @@ For help, go to the [support forum](http://forum.at.meandmymac.net/).
 
 
 == Frequently Asked Questions ==
-
-**Q:** Is it safe to use the automatic upgrade?
-
-**A:** By default no! Not for any plugin. I'm working on a way to make it easier though.
 
 **Visit here for the FAQ and support:**
 [Support forum!](http://forum.at.meandmymac.net/)

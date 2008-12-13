@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables the user to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.5.7.1
+Version: 1.6
 Author URI: http://meandmymac.net/
 */
 
@@ -17,6 +17,16 @@ include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-manage.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-widget.php');
 register_activation_hook(__FILE__, 'events_activate');
 events_check_config();
+
+if(!function_exists('multiplug_menu')) {
+	function events_warning() {
+		$install_url = get_option('siteurl') . '/wp-admin/plugin-install.php?tab=search&type=term&s=multiplug';
+		$activate_url = get_option('siteurl') . '/wp-admin/plugins.php';
+		echo "<div id='events-warning' class='updated fade'><p><strong>Oops!</strong> Events requires the plugin MultiPlug to function properly. <a href=".$install_url.">Click here</a> to install it or go to your <a href=".$activate_url.">plugin page</a> and activate MultiPlug!</p></div>";
+	}
+	add_action('admin_notices', 'events_warning');
+	return;
+}
 
 // Add filters for adding the tags in the WP page/post field
 add_shortcode('events_list', 'events_list');
@@ -64,9 +74,9 @@ setlocale(LC_TIME, $events_config['localization']);
 function events_dashboard() {
 	global $events_config;
 
-	add_submenu_page('post-new.php', 'Events', 'Event', $events_config['minlevel'], 'wp-events', 'events_schedule');
-	add_submenu_page('edit.php', 'Events', 'Events', $events_config['minlevel'], 'wp-events', 'events_manage');
-	add_submenu_page('options-general.php', 'Events', 'Events', $events_config['minlevel'], 'wp-events', 'events_options');
+	add_submenu_page('multiplug', 'Events > Add/Edit', 'Add/Edit Event', $events_config['minlevel'], 'wp-events', 'events_schedule');
+	add_submenu_page('multiplug', 'Events > Manage', 'Manage Events', $events_config['minlevel'], 'wp-events2', 'events_manage');
+	add_submenu_page('options-general.php', 'Events > Settings', 'Events', $events_config['minlevel'], 'wp-events3', 'events_options');
 }
 
 /*-------------------------------------------------------------
@@ -91,37 +101,35 @@ function events_manage() {
 		$catorder = 'id ASC'; 
 	} ?>
 	
-	<?php if ($action == 'delete-event') { ?>
-		<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
-	<?php } else if ($action == 'delete-category') { ?>
-		<div id="message" class="updated fade"><p>Category <strong>deleted</strong></p></div>
-	<?php } else if ($action == 'updated') { ?>
-		<div id="message" class="updated fade"><p>Event <strong>updated</strong></p></div>
-	<?php } else if ($action == 'no_access') { ?>
-		<div id="message" class="updated fade"><p>Action prohibited</p></div>
-	<?php } else if ($action == 'category_new') { ?>
-		<div id="message" class="updated fade"><p>Category <strong>created</strong></p></div>
-	<?php } else if ($action == 'category_field_error') { ?>
-		<div id="message" class="updated fade"><p>No category name filled in</p></div>
-	<?php } ?>
-
 	<div class="wrap">
-		<h2>Manage Events (<a href="post-new.php?page=wp-events">add new</a>)</h2>
+		<h2>Manage Events (<a href="admin.php?page=wp-events">add new</a>)</h2>
 
-		<form name="events" id="post" method="post" action="edit.php?page=wp-events">
+		<?php if ($action == 'delete-event') { ?>
+			<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
+		<?php } else if ($action == 'delete-category') { ?>
+			<div id="message" class="updated fade"><p>Category <strong>deleted</strong></p></div>
+		<?php } else if ($action == 'updated') { ?>
+			<div id="message" class="updated fade"><p>Event <strong>updated</strong></p></div>
+		<?php } else if ($action == 'no_access') { ?>
+			<div id="message" class="updated fade"><p>Action prohibited</p></div>
+		<?php } else if ($action == 'category_new') { ?>
+			<div id="message" class="updated fade"><p>Category <strong>created</strong></p></div>
+		<?php } else if ($action == 'category_field_error') { ?>
+			<div id="message" class="updated fade"><p>No category name filled in</p></div>
+		<?php } ?>
+
+		<form name="events" id="post" method="post" action="admin.php?page=wp-events2">
 			<div class="tablenav">
 
-				<div class="alignleft">
-					<input onclick="return confirm('You are about to delete multiple events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_events" class="button-secondary delete" />
-					<select name='order' id='cat' class='postform' >
+				<div class="alignleft actions">
+					<input onclick="return confirm('You are about to delete one or more events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_events" class="button-secondary delete" />
+					<select name='order'>
 				        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending, default)</option>
 				        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending)</option>
 				        <option value="ID ASC" <?php if($order == "ID ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
 				        <option value="ID DESC" <?php if($order == "ID DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
 				        <option value="title ASC" <?php if($order == "title ASC") { echo 'selected'; } ?>>by title (A-Z)</option>
 				        <option value="title DESC" <?php if($order == "title DESC") { echo 'selected'; } ?>>by title (Z-A)</option>
-				        <option value="location ASC" <?php if($order == "location ASC") { echo 'selected'; } ?>>by location (A-Z)</option>
-				        <option value="location DESC" <?php if($order == "location DESC") { echo 'selected'; } ?>>by location (Z-A)</option>
 				        <option value="category ASC" <?php if($order == "category ASC") { echo 'selected'; } ?>>by category (A-Z)</option>
 				        <option value="category DESC" <?php if($order == "category DESC") { echo 'selected'; } ?>>by category (Z-A)</option>
 					</select>
@@ -137,11 +145,9 @@ function events_manage() {
   				<tr>
 					<th scope="col" class="check-column">&nbsp;</th>
 					<th scope="col" width="15%">Date</th>
-					<th scope="col" width="10%">Location</th>
-					<th scope="col" width="10%">Category</th>
 					<th scope="col">Title</th>
+					<th scope="col" width="10%">Category</th>
 					<th scope="col" width="20%">Starts when</th>
-					<th scope="col" width="20%">Ends after</th>
 				</tr>
   			</thead>
   			<tbody>
@@ -155,19 +161,17 @@ function events_manage() {
 				    <tr id='event-<?php echo $event->id; ?>' class=' <?php echo $class; ?>'>
 						<th scope="row" class="check-column"><input type="checkbox" name="eventcheck[]" value="<?php echo $event->id; ?>" /></th>
 						<td><?php echo gmdate("F d Y H:i", $event->thetime);?></td>
-						<td><?php echo stripslashes(html_entity_decode($event->location));?></td>
+						<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/admin.php?page=wp-events&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
 						<td><?php echo $cat->name; ?></td>
-						<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/post-new.php?page=wp-events.php&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
 						<td><?php echo events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday); ?></td>
-						<td><?php echo events_duration($event->thetime, $event->theend, $event->allday);?></td>
 					</tr>
 	 			<?php } ?>
 	 		<?php } else { ?>
-				<tr id='no-id'><td scope="row" colspan="7"><em>No Events yet!</em></td></tr>
+				<tr id='no-id'><td scope="row" colspan="5"><em>No Events yet!</em></td></tr>
 			<?php 
 			} 
 		} else { ?>
-			<tr id='no-id'><td scope="row" colspan="7"><span style="font-weight: bold; color: #f00;">There was an error locating the main database table for Events. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
+			<tr id='no-id'><td scope="row" colspan="5"><span style="font-weight: bold; color: #f00;">There was an error locating the main database table for Events. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
 		<?php }	?>
 			</tbody>
 		</table>
@@ -176,12 +180,11 @@ function events_manage() {
 		<br />
 		<h2>Categories</h2>
 
-		<form name="groups" id="post" method="post" action="edit.php?page=wp-events">
+		<form name="groups" id="post" method="post" action="admin.php?page=wp-events2">
 		<div class="tablenav">
-
-			<div class="alignleft">
-				<input onclick="return confirm('You are about to delete categories! Make sure there are no events in those categories or they will not show on the website\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete category" name="delete_categories" class="button-secondary delete" />
-				<select name='catorder' id='cat' class='postform' >
+			<div class="alignleft actions">
+				<input onclick="return confirm('You are about to delete one or more categories! Make sure there are no events in those categories or they will not show on the website\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete category" name="delete_categories" class="button-secondary delete" />
+				<select name='catorder'>
 			        <option value="id ASC" <?php if($catorder == "id ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
 			        <option value="id DESC" <?php if($catorder == "id DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
 			        <option value="name ASC" <?php if($catorder == "name ASC") { echo 'selected'; } ?>>by name (A-Z)</option>
@@ -200,31 +203,34 @@ function events_manage() {
 					<th scope="col" class="check-column">&nbsp;</th>
 					<th scope="col" width="5%">ID</th>
 					<th scope="col">Name</th>
+					<th scope="col" width="20%">Events</th>
 				</tr>
   			</thead>
   			<tbody>
 		<?php 
 		if(events_mysql_table_exists($wpdb->prefix.'events_categories')) {
-		$categories = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events_categories ORDER BY $catorder");
+			$categories = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events_categories ORDER BY $catorder");
 			if ($categories) {
 				foreach($categories as $category) {
+					$count = $wpdb->get_var("SELECT COUNT(category) FROM " . $wpdb->prefix . "events WHERE category = '". $category->id."' GROUP BY category");
 					$class = ('alternate' != $class) ? 'alternate' : ''; ?>
 				    <tr id='group-<?php echo $category->id; ?>' class=' <?php echo $class; ?>'>
 						<th scope="row" class="check-column"><input type="checkbox" name="categorycheck[]" value="<?php echo $category->id; ?>" /></th>
 						<td><?php echo $category->id;?></td>
 						<td><?php echo $category->name;?></td>
+						<td><?php echo $count;?></td>
 					</tr>
 	 			<?php } ?>
 			<?php 
 			} 
 		} else { ?>
-			<tr id='no-id'><td scope="row" colspan="3"><span style="font-weight: bold; color: #f00;">There was an error locating the database table for the Events categories. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
+			<tr id='no-id'><td scope="row" colspan="4"><span style="font-weight: bold; color: #f00;">There was an error locating the database table for the Events categories. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
 		<?php }	?>
-			    <tr id='category-new'>
-					<th scope="row" class="check-column">&nbsp;</th>
-					<td colspan="2"><input name="events_category" type="text" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="add_category_submit" value="Add" class="button-secondary" /></td>
-				</tr>
- 			</tbody>
+			<tr id='category-new'>
+				<th scope="row" class="check-column">&nbsp;</th>
+				<td colspan="3"><input name="events_category" type="text" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="add_category_submit" value="Add" class="button-secondary" /></td>
+			</tr>
+ 		</tbody>
 		</table>
 		</form>
 	</div>
@@ -243,19 +249,11 @@ function events_schedule() {
 	
 	$timezone = get_option('gmt_offset')*3600;
 	
+	$action = $_GET['action']; 
 	if($_GET['edit_event']) {
 		$event_edit_id = $_GET['edit_event'];
 	}
-	
-	$action = $_GET['action']; 
-	if ($action == 'created') { ?>
-		<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="edit.php?page=wp-events.php">manage events</a></p></div>
-	<?php } else if ($action == 'no_access') { ?>
-		<div id="message" class="updated fade"><p>Action prohibited</p></div>
-	<?php } else if ($action == 'field_error') { ?>
-		<div id="message" class="updated fade"><p>Not all fields met the requirements</p></div>
-	<?php } ?>
-	
+	?> 
 	<div class="wrap">
 		<?php if(!$event_edit_id) { ?>
 		<h2>Add event</h2>
@@ -268,40 +266,57 @@ function events_schedule() {
 			list($eday, $emonth, $eyear, $ehour, $eminute) = split(" ", gmdate("d m Y H i", $edit_event->theend));
 		}
 		
+		if ($action == 'created') { ?>
+			<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="admin.php?page=wp-events2">manage events</a></p></div>
+		<?php } else if ($action == 'no_access') { ?>
+			<div id="message" class="updated fade"><p>Action prohibited</p></div>
+		<?php } else if ($action == 'field_error') { ?>
+			<div id="message" class="updated fade"><p>Not all fields met the requirements</p></div>
+		<?php }
+		
 		$SQL2 = "SELECT * FROM ".$wpdb->prefix."events_categories ORDER BY id";
 		$categories = $wpdb->get_results($SQL2);
 		if($categories) { ?>
-		  	<form method="post" action="post-new.php?page=wp-events.php">
+		  	<form method="post" action="admin.php?page=wp-events">
 		  	   	<input type="hidden" name="events_submit" value="true" />
 		    	<input type="hidden" name="events_username" value="<?php echo $userdata->display_name;?>" />
 		    	<input type="hidden" name="events_event_id" value="<?php echo $event_edit_id;?>" />
-		    	<table class="form-table">
-					<tr valign="top">
-						<td colspan="4" bgcolor="#DDD">Please note that the time field uses a 24 hour clock. This means that 22:00 hour is actually 10:00pm.<br />Hint: If you're used to the AM/PM system and the event takes place/starts after lunch just add 12 hours.</td>
+				
+		    	<table class="widefat" style="margin-top: .5em">
+	
+					<thead>
+					<tr valign="top" id="quicktags">
+						<td colspan="3">Enter your event details below.</td>
 					</tr>
+			      	</thead>
+
+			      	<tbody>
 			      	<tr>
 				        <th scope="row">Title:</th>
-				        <td colspan="2"><input name="events_title" type="text" size="52" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" /><br /><em>Maximum <?php echo $events_config['length'];?> characters.</em></td>
-				        <td width="25%"><input type="checkbox" name="events_title_link" <?php if($edit_event->title_link == 'Y') { ?>checked="checked" <?php } ?>/> Make title a link. Use the field below.<br /><input type="checkbox" name="events_allday" <?php if($edit_event->allday == 'Y') { ?>checked="checked" <?php } ?>/> All-day event.</td>
-			      	</tr>
-			      	<tr>
-				        <th scope="row">Event description (optional):</th>
-				        <td colspan="3"><textarea name="events_pre_event" cols="70" rows="8"><?php echo $edit_event->pre_message;?></textarea><br /><em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
-			      	</tr>
-			      	<tr>
-				        <th scope="row">Location (optional):</th>
-				        <td width="25%"><input name="events_location" type="text" size="25" maxlength="255" value="<?php echo $edit_event->location;?>" /><br /><em>Maximum 255 characters.</em></td>
-				        <th scope="row">Category:</th>
-				        <td width="25%" valign="top"><select name='events_category' id='cat' class='postform'>
-						<?php foreach($categories as $category) { ?>
-						    <option value="<?php echo $category->id; ?>" <?php if($category->id == $edit_event->category) { echo 'selected'; } ?>><?php echo $category->name; ?></option>
-				    	<?php } ?>
-				    	</select></td>
-			      	</tr>
+				        <td><input name="events_title" class="search-input" type="text" size="55" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" tabindex="1" autocomplete="off" /><br /><em>Maximum <?php echo $events_config['length'];?> characters.</em></td>
+				        <td width="35%"><input type="checkbox" name="events_title_link" <?php if($edit_event->title_link == 'Y') { ?>checked="checked" <?php } ?>/> Make title a link. Use the field below.<br /><input type="checkbox" name="events_allday" <?php if($edit_event->allday == 'Y') { ?>checked="checked" <?php } ?>/> All-day event.</td>
+					</tr>
+				</table>
+
+				<br class="clear" />
+				<div id="postdivrich" class="postarea">
+					<?php the_event_editor($edit_event->pre_message); ?>
+				</div>
+							
+				<br class="clear" />
+		    	<table class="widefat" style="margin-top: .5em">
+	
+					<thead>
+					<tr valign="top" id="quicktags">
+						<td colspan="4" bgcolor="#DDD">Please note that the time field uses a 24 hour clock. This means that 22:00 hour is actually 10:00pm.<br />Hint: If you're used to the AM/PM system and the event takes place/starts after lunch just add 12 hours.</td>
+					</tr>
+			      	</thead>
+
+			      	<tbody>
 			      	<tr>
 				        <th scope="row">Startdate Day/Month/Year:</th>
 				        <td width="25%">
-				        	<input id="title" name="events_sday" type="text" size="4" maxlength="2" value="<?php echo $sday;?>" /> / 
+				        	<input id="title" name="events_sday" class="search-input" type="text" size="4" maxlength="2" value="<?php echo $sday;?>" /> / 
 							<select name="events_smonth">
 								<option value="01" <?php if($smonth == "01") { echo 'selected'; } ?>>January</option>
 								<option value="02" <?php if($smonth == "02") { echo 'selected'; } ?>>February</option>
@@ -316,7 +331,7 @@ function events_schedule() {
 								<option value="11" <?php if($smonth == "11") { echo 'selected'; } ?>>November</option>
 								<option value="12" <?php if($smonth == "12") { echo 'selected'; } ?>>December</option>
 							</select> / 
-							<input name="events_syear" type="text" size="4" maxlength="4" value="<?php echo $syear;?>" />	
+							<input name="events_syear" class="search-input" type="text" size="4" maxlength="4" value="<?php echo $syear;?>" />	
 						</td>
 				        <th scope="row">Hour/Minute (optional):</th>
 				        <td width="25%"><select name="events_shour">
@@ -411,7 +426,7 @@ function events_schedule() {
 			      	<tr>
 				        <th scope="row">Enddate Day/Month/Year (optional):</th>
 				        <td width="25%">
-				        	<input id="title" name="events_eday" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" /> / 
+				        	<input id="title" name="events_eday" class="search-input" type="text" size="4" maxlength="2" value="<?php echo $eday;?>" /> / 
 							<select name="events_emonth">
 								<option value="" <?php if($emonth == "") { echo 'selected'; } ?>>--</option>
 								<option value="01" <?php if($emonth == "01") { echo 'selected'; } ?>>January</option>
@@ -427,7 +442,7 @@ function events_schedule() {
 								<option value="11" <?php if($emonth == "11") { echo 'selected'; } ?>>November</option>
 								<option value="12" <?php if($emonth == "12") { echo 'selected'; } ?>>December</option>
 							</select> / 
-							<input name="events_eyear" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
+							<input name="events_eyear" class="search-input" type="text" size="4" maxlength="4" value="<?php echo $eyear;?>" /></td>
 				        <th scope="row">Hour/Minute (optional):</th>
 				        <td width="25%"><select name="events_ehour">
 				        <option value="" <?php if($ehour == "") { echo 'selected'; } ?>>--</option>
@@ -521,6 +536,16 @@ function events_schedule() {
 					</select></td>
 			      	</tr>
 			      	<tr>
+				        <th scope="row">Location (optional):</th>
+				        <td width="30%"><input name="events_location" class="search-input" type="text" size="25" maxlength="255" value="<?php echo $edit_event->location;?>" /><br /><em>Maximum 255 characters.</em></td>
+				        <th scope="row">Category:</th>
+				        <td width="30%" valign="top"><select name='events_category' id='cat' class='postform'>
+						<?php foreach($categories as $category) { ?>
+						    <option value="<?php echo $category->id; ?>" <?php if($category->id == $edit_event->category) { echo 'selected'; } ?>><?php echo $category->name; ?></option>
+				    	<?php } ?>
+				    	</select></td>
+			      	</tr>
+			      	<tr>
 				        <th scope="row">Show in the sidebar:</th>
 				        <td width="25%"><select name="events_priority">
 						<?php if($edit_event->priority == "yes" OR $edit_event->priority == "") { ?>
@@ -544,22 +569,24 @@ function events_schedule() {
 					</tr>
 			      	<tr>
 				        <th scope="row">Message when event ends (optional):</th>
-				        <td colspan="3"><textarea name="events_post_event" cols="70" rows="2"><?php echo $edit_event->post_message;?></textarea><br />
+				        <td colspan="3"><textarea name="events_post_event" class="search-input" cols="65" rows="2"><?php echo $edit_event->post_message;?></textarea><br />
 				        	<em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 			      	</tr>
 			      	<tr>
 				        <th scope="row">Link to page (optional):</th>
-				        <td colspan="3"><input name="events_link" type="text" size="52 " maxlength="10000" value="<?php echo $edit_event->link;?>" /><br />
+				        <td colspan="3"><input name="events_link" class="search-input" type="text" size="65 " maxlength="10000" value="<?php echo $edit_event->link;?>" /><br />
 				        	<em>Include full url and http://, this can be any page. Required if checkbox above is checked!</em></td>
 			      	</tr>
+			      	</tbody>
+			      	
 		    	</table>
 		    	
 		    	<p class="submit">
 					<?php if($event_edit_id) { ?>
-					<input type="submit" name="submit_save" value="Edit event" /> 
-					<input type="submit" name="submit_new" value="Duplicate event" /> 
+					<input type="submit" name="submit_save" class="button-primary" value="Edit event" /> 
+					<input type="submit" name="submit_new" class="button-primary" value="Duplicate event" /> 
 					<?php } else { ?>
-					<input type="submit" name="submit_save" value="Save event" />
+					<input type="submit" name="submit_save" class="button-primary" value="Save event" />
 					<?php } ?>
 		    	</p>
 	
@@ -599,7 +626,7 @@ function events_options() {
 
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="4" bgcolor="#DDD"><strong>Options for the sidebar and widget.</strong></td>
+					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Options for the sidebar and widget</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Show this many events</th>
@@ -619,18 +646,18 @@ function events_options() {
 			        <?php if($events_config['custom_date_sidebar'] == 'no') { ?>
 			        <td><select name="events_dateformat_sidebar">
 				        <option disabled="disabled">-- day month year --</option>
-				        <option value="%d %m %Y" <?php if($events_config['dateformat_sidebar'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %m %Y", $timezone)); ?></option>
-				        <option value="%d %b %Y" <?php if($events_config['dateformat_sidebar'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %b %Y", $timezone)); ?> (default)</option>
-				        <option value="%d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %B %Y", $timezone)); ?></option>
+				        <option value="%d %m %Y" <?php if($events_config['dateformat_sidebar'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%d %m %Y", $timezone); ?></option>
+				        <option value="%d %b %Y" <?php if($events_config['dateformat_sidebar'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%d %b %Y", $timezone); ?> (default)</option>
+				        <option value="%d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%d %B %Y", $timezone); ?></option>
 				        <option disabled="disabled">-- month day year --</option>
-				        <option value="%m %d %Y" <?php if($events_config['dateformat_sidebar'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%m %d %Y", $timezone)); ?></option>
-				        <option value="%b %d %Y" <?php if($events_config['dateformat_sidebar'] == "%b %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%b %d %Y", $timezone)); ?></option>
-				        <option value="%B %d %Y" <?php if($events_config['dateformat_sidebar'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%B %d %Y", $timezone)); ?></option>
+				        <option value="%m %d %Y" <?php if($events_config['dateformat_sidebar'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%m %d %Y", $timezone); ?></option>
+				        <option value="%b %d %Y" <?php if($events_config['dateformat_sidebar'] == "%b %d %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%b %d %Y", $timezone); ?></option>
+				        <option value="%B %d %Y" <?php if($events_config['dateformat_sidebar'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%B %d %Y", $timezone); ?></option>
 				        <option disabled="disabled">-- weekday day/month/year --</option>
-				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%a, %d %B %Y", $timezone)); ?></option>
-				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%A, %d %B %Y", $timezone)); ?></option>
+				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%a, %d %B %Y", $timezone); ?></option>
+				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat_sidebar'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%A, %d %B %Y", $timezone); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%x" <?php if($events_config['dateformat_sidebar'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%x", $timezone)); ?></option>
+				        <option value="%x" <?php if($events_config['dateformat_sidebar'] == "%x") { echo 'selected'; } ?>><?php echo gmstrftime("%x", $timezone); ?></option>
 					</select></td>
 					<?php } else { ?>
  			        <td><input name="events_dateformat_sidebar" type="text" value="<?php echo $events_config['dateformat_sidebar'];?>" size="30" /><br />Careful what you put here! Learn: <a href="http://www.php.net/manual/en/function.gmstrftime.php" target="_blank">php manual</a>.</td>
@@ -650,13 +677,13 @@ function events_options() {
 			        <th scope="row">Time format</th>
 			        <td colspan="3"><select name="events_timeformat_sidebar">
 				        <option disabled="disabled">-- 24-hour clock --</option>
-				        <option value="%H:%M" <?php if($events_config['timeformat_sidebar'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M", $timezone)); ?> (default)</option>
-				        <option value="%H:%M:%S" <?php if($events_config['timeformat_sidebar'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M:%S", $timezone)); ?></option>
+				        <option value="%H:%M" <?php if($events_config['timeformat_sidebar'] == "%H:%M") { echo 'selected'; } ?>><?php echo gmstrftime("%H:%M", $timezone); ?> (default)</option>
+				        <option value="%H:%M:%S" <?php if($events_config['timeformat_sidebar'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo gmstrftime("%H:%M:%S", $timezone); ?></option>
 				        <option disabled="disabled">-- 12-hour clock --</option>
-				        <option value="%I:%M %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M %p", $timezone)); ?></option>
-				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M:%S %p", $timezone)); ?></option>
+				        <option value="%I:%M %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo gmstrftime("%I:%M %p", $timezone); ?></option>
+				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat_sidebar'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo gmstrftime("%I:%M:%S %p", $timezone); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%X" <?php if($events_config['timeformat_sidebar'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%X", $timezone)); ?></option>
+				        <option value="%X" <?php if($events_config['timeformat_sidebar'] == "%X") { echo 'selected'; } ?>><?php echo gmstrftime("%X", $timezone); ?></option>
 					</select></td>
 		      	</tr>
 		      	<tr valign="top">
@@ -664,25 +691,25 @@ function events_options() {
 			        <td colspan="3"><input name="events_sidelength" type="text" value="<?php echo $events_config['sidelength'];?>" size="6" /> (default: 120)</td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="4" bgcolor="#DDD"><strong>Options for the page</strong></td>
+					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Options for the page</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Date format</th>
 			        <?php if($events_config['custom_date_page'] == 'no') { ?>
 			        <td><select name="events_dateformat">
 				        <option disabled="disabled">-- day month year --</option>
-				        <option value="%d %m %Y" <?php if($events_config['dateformat'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %m %Y", $timezone)); ?></option>
-				        <option value="%d %b %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %b %Y", $timezone)); ?></option>
-				        <option value="%d %B %Y" <?php if($events_config['dateformat'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %B %Y", $timezone)); ?> (default)</option>
+				        <option value="%d %m %Y" <?php if($events_config['dateformat'] == "%d %m %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%d %m %Y", $timezone); ?></option>
+				        <option value="%d %b %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%d %b %Y", $timezone); ?></option>
+				        <option value="%d %B %Y" <?php if($events_config['dateformat'] == "%d %B %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%d %B %Y", $timezone); ?> (default)</option>
 				        <option disabled="disabled">-- month day year --</option>
-				        <option value="%m %d %Y" <?php if($events_config['dateformat'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%m %d %Y", $timezone)); ?></option>
-				        <option value="%b %d %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%d %b %Y", $timezone)); ?></option>
-				        <option value="%B %d %Y" <?php if($events_config['dateformat'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%B %d %Y", $timezone)); ?></option>
+				        <option value="%m %d %Y" <?php if($events_config['dateformat'] == "%m %d %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%m %d %Y", $timezone); ?></option>
+				        <option value="%b %d %Y" <?php if($events_config['dateformat'] == "%d %b %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%d %b %Y", $timezone); ?></option>
+				        <option value="%B %d %Y" <?php if($events_config['dateformat'] == "%B %d %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%B %d %Y", $timezone); ?></option>
 				        <option disabled="disabled">-- weekday day/month/year --</option>
-				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%a, %d %B %Y", $timezone)); ?></option>
-				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%A, %d %B %Y", $timezone)); ?></option>
+				        <option value="%a, %d %B %Y" <?php if($events_config['dateformat'] == "%a, %d %B %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%a, %d %B %Y", $timezone); ?></option>
+				        <option value="%A, %d %B %Y" <?php if($events_config['dateformat'] == "%A, %d %B %Y") { echo 'selected'; } ?>><?php echo gmstrftime("%A, %d %B %Y", $timezone); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%x" <?php if($events_config['dateformat'] == "%x") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%x", $timezone)); ?></option>
+				        <option value="%x" <?php if($events_config['dateformat'] == "%x") { echo 'selected'; } ?>><?php echo gmstrftime("%x", $timezone); ?></option>
 					</select></td>
 					<?php } else { ?>
  			        <td><input name="events_dateformat" type="text" value="<?php echo $events_config['dateformat'];?>" size="30" /><br />Careful what you put here. Learn: <a href="http://www.php.net/manual/en/function.gmstrftime.php" target="_blank">php manual</a>.</td>
@@ -702,13 +729,13 @@ function events_options() {
 			        <th scope="row">Time format</th>
 			        <td colspan="3"><select name="events_timeformat">
 				        <option disabled="disabled">-- 24-hour clock --</option>
-				        <option value="%H:%M" <?php if($events_config['timeformat'] == "%H:%M") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M", $timezone)); ?> (default)</option>
-				        <option value="%H:%M:%S" <?php if($events_config['timeformat'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%H:%M:%S", $timezone)); ?></option>
+				        <option value="%H:%M" <?php if($events_config['timeformat'] == "%H:%M") { echo 'selected'; } ?>><?php echo gmstrftime("%H:%M", $timezone); ?> (default)</option>
+				        <option value="%H:%M:%S" <?php if($events_config['timeformat'] == "%H:%M:%S") { echo 'selected'; } ?>><?php echo gmstrftime("%H:%M:%S", $timezone); ?></option>
 				        <option disabled="disabled">-- 12-hour clock --</option>
-				        <option value="%I:%M %p" <?php if($events_config['timeformat'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M %p", $timezone)); ?></option>
-				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%I:%M:%S %p", $timezone)); ?></option>
+				        <option value="%I:%M %p" <?php if($events_config['timeformat'] == "%I:%M %p") { echo 'selected'; } ?>><?php echo gmstrftime("%I:%M %p", $timezone); ?></option>
+				        <option value="%I:%M:%S %p" <?php if($events_config['timeformat'] == "%I:%M:%S %p") { echo 'selected'; } ?>><?php echo gmstrftime("%I:%M:%S %p", $timezone); ?></option>
 				        <option disabled="disabled">-- preferred by locale --</option>
-				        <option value="%X" <?php if($events_config['timeformat'] == "%X") { echo 'selected'; } ?>><?php echo utf8_encode(gmstrftime("%X", $timezone)); ?></option>
+				        <option value="%X" <?php if($events_config['timeformat'] == "%X") { echo 'selected'; } ?>><?php echo gmstrftime("%X", $timezone); ?></option>
 					</select></td>
 		      	</tr>
 		      	<tr valign="top">
@@ -723,7 +750,7 @@ function events_options() {
 					</select></td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="4" bgcolor="#DDD"><strong>Global or other options.</strong></td>
+					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Global or other options.</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Order events</th>
@@ -765,17 +792,14 @@ function events_options() {
 		      	</tr>
 			</table>
 		    <p class="submit">
-		      	<input type="submit" name="Submit" value="Update Options &raquo;" />
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
 		    </p>
 				
 		   	<h3>Templates</h3>
 	
 		   	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Change the way Events presents Events on the website.<br />Available variables are shown below of the field. Use this option with care!</td>
-				</tr>
-				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD"><strong>Sidebar and widget<strong></td>
+					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Sidebar and widget</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
@@ -790,7 +814,7 @@ function events_options() {
 			        <td><textarea name="sidebar_f_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_f_template']); ?></textarea></td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD"><strong>Page, main list<strong></td>
+					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Page, main list</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
@@ -805,7 +829,7 @@ function events_options() {
 			        <td><textarea name="page_f_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_f_template']); ?></textarea></td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD"><strong>Page, archive list<strong></td>
+					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Page, archive list</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
@@ -820,7 +844,7 @@ function events_options() {
 			        <td><textarea name="archive_f_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_f_template']); ?></textarea></td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD"><strong>Page, today's list<strong></th>
+					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Page, today's list</span></th>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
@@ -835,7 +859,7 @@ function events_options() {
 			        <td><textarea name="daily_f_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_f_template']); ?></textarea></td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD"><strong>Global template values<strong></th>
+					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Global template values</span></th>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Location seperator:</th>
@@ -843,46 +867,43 @@ function events_options() {
 		      	</tr>
 			</table>
 		    <p class="submit">
-		      	<input type="submit" name="Submit" value="Update Options &raquo;" />
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
 		    </p>
 			
 	    	<h3>Management</h3>	    	
 	
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Set these options to prevent certain userlevels from editing, creating or deleting events. The options panel user level cannot be changed.<br />For more information on user roles go to <a href="http://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles" target="_blank">the codex</a>.</td>
+					<td colspan="2">Set these options to prevent certain userlevels from editing, creating or deleting events. The options panel user level cannot be changed.<br />For more information on user roles go to <a href="http://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles" target="_blank">the codex</a>.</td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Add/edit events?</th>
 			        <td><select name="events_minlevel">
-				        <option value="10" <?php if($events_config['minlevel'] == "10") { echo 'selected'; } ?>>Administrator</option>
-				        <option value="7" <?php if($events_config['minlevel'] == "7") { echo 'selected'; } ?>>Editor (default)</option>
-				        <option value="2" <?php if($events_config['minlevel'] == "2") { echo 'selected'; } ?>>Author</option>
-				        <option value="1" <?php if($events_config['minlevel'] == "1") { echo 'selected'; } ?>>Contributor</option>
-				        <option value="0" <?php if($events_config['minlevel'] == "0") { echo 'selected'; } ?>>Subscriber</option>
+				        <option value="manage_options" <?php if($events_config['minlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator</option>
+				        <option value="edit_pages" <?php if($events_config['minlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor (default)</option>
+				        <option value="publish_posts" <?php if($events_config['minlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
+				        <option value="edit_posts" <?php if($events_config['minlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
+				        <option value="read" <?php if($events_config['minlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
 					</select> <em>Can add/edit/view events.</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Delete events?</th>
 			        <td><select name="events_managelevel">
-				        <option value="10" <?php if($events_config['managelevel'] == "10") { echo 'selected'; } ?>>Administrator (default)</option>
-				        <option value="7" <?php if($events_config['managelevel'] == "7") { echo 'selected'; } ?>>Editor</option>
-				        <option value="2" <?php if($events_config['managelevel'] == "2") { echo 'selected'; } ?>>Author</option>
-				        <option value="1" <?php if($events_config['managelevel'] == "1") { echo 'selected'; } ?>>Contributor</option>
-				        <option value="0" <?php if($events_config['managelevel'] == "0") { echo 'selected'; } ?>>Subscriber</option>
+				        <option value="manage_options" <?php if($events_config['managelevel'] == "manage_options") { echo 'selected'; } ?>>Administrator (default)</option>
+				        <option value="edit_pages" <?php if($events_config['managelevel'] == "edit_pages") { echo 'selected'; } ?>>Editor</option>
+				        <option value="publish_posts" <?php if($events_config['managelevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
+				        <option value="edit_posts" <?php if($events_config['managelevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
+				        <option value="read" <?php if($events_config['managelevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
 					</select> <em>Can view/delete events.</em></td>
 		      	</tr>
 			</table>
 		    <p class="submit">
-		      	<input type="submit" name="Submit" value="Update Options &raquo;" />
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
 		    </p>
 			
 		    <h3>Language</h3>	    	
 	
 		    <table class="form-table">
-				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Here you set the language of the plugin. Change the fields below to match your language.
-				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Today:</th>
 			        <td><input name="events_language_today" type="text" value="<?php echo $events_language['language_today'];?>" size="45" /> (default: today)</td>
@@ -957,15 +978,15 @@ function events_options() {
 		      	</tr>
 			</table>
 		    <p class="submit">
-		      	<input type="submit" name="Submit" value="Update Options &raquo;" />
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
 		    </p>
 			
 	    	<h3>Localization</h3>	    	
 	
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Localization can usually be en_EN. Changing this value should translate the dates to your language.<br />
-					On Linux/Mac Osx (Darwin) you should use 'en_EN' in the field. For windows just 'en' should suffice. Your server most likely uses <strong><?php echo PHP_OS; ?>.</td>
+					<td colspan="2">Localization can usually be en_EN. Changing this value should translate the dates to your language.<br />
+					On Linux/Mac Osx (Darwin) you should use 'en_EN' in the field. For windows just 'en' should suffice. Your server most likely uses <?php echo PHP_OS; ?>.</td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Date localization:</th>
@@ -974,7 +995,7 @@ function events_options() {
 
 	    	</table>
 		    <p class="submit">
-		      	<input type="submit" name="Submit" value="Update Options &raquo;" />
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
 		    </p>
 		</form>
 	  	
@@ -983,7 +1004,7 @@ function events_options() {
     	<form method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2" bgcolor="#DDD">Events installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.<br />
+					<td colspan="2">Events installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.<br />
 					For the techies: Upon un-installation the wp_events table will be dropped along with the events_config record in the wp_options table.</td>
 				</tr>
 		      	<tr valign="top">
@@ -993,7 +1014,7 @@ function events_options() {
 			</table>
 	  		<p class="submit">
 		    	<input type="hidden" name="event_uninstall" value="true" />
-		    	<input onclick="return confirm('You are about to uninstall the events plugin\n  All scheduled events will be lost!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" name="Submit" value="Uninstall Plugin &raquo;" />
+		    	<input onclick="return confirm('You are about to uninstall the events plugin\n  All scheduled events will be lost!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" name="Submit" class="button-secondary" value="Uninstall Plugin &raquo;" />
 	  		</p>
 	  	</form>
 	</div>

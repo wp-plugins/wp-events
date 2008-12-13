@@ -1,5 +1,24 @@
 <?php
 /*-------------------------------------------------------------
+ Name:      the_event_editor
+
+ Purpose:   Use simple HTML formatting tools to generate events
+ Receive:   $content, $id, $prev_id, $tab_index
+ Return:	$template
+-------------------------------------------------------------*/
+function the_event_editor($content) { ?>
+	<div id="quicktags">
+	<?php wp_print_scripts( 'quicktags' ); ?>
+	<script type="text/javascript">edToolbar()</script>
+	</div>
+
+	<?php $the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='20' name='events_pre_event' tabindex='2' id='content'>%s</textarea></div>\n");
+	$the_editor_content = apply_filters('the_editor_content', $content);
+
+	printf($the_editor, $the_editor_content);
+}
+
+/*-------------------------------------------------------------
  Name:      events_insert_input
 
  Purpose:   Prepare and insert data on saving new or updating event
@@ -162,36 +181,23 @@ function events_delete($id, $what) {
 	global $wpdb, $userdata, $events_config;
 
 	if($id > 0) {
-		if($what == 'event') {
-			$SQL = "SELECT
-			`".$wpdb->prefix."events.author`,
-			`".$wpdb->prefix."users.display_name` as display_name
-			FROM
-			`".$wpdb->prefix."events`,
-			`".$wpdb->prefix."users`
-			WHERE
-			`".$wpdb->prefix."events.id` = '$id'
-			AND
-			`".$wpdb->prefix."users.display_name` = ".$wpdb->prefix."events.author";
-	
-			$event = $wpdb->get_row($SQL);
-
-			if ($userdata->user_level >= $events_config['managelevel'] ) {
-				$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
+		if (current_user_can($events_config['managelevel'])) {
+			if($what == 'event') {
+					$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
+					if($wpdb->query($SQL) == FALSE) {
+						die(mysql_error());
+					}
+			} else if ($what == 'category') {
+				$SQL = "DELETE FROM `".$wpdb->prefix."events_categories` WHERE `id` = $id";
 				if($wpdb->query($SQL) == FALSE) {
 					die(mysql_error());
 				}
 			} else {
-				events_return('no_access');
+				events_return('error');
 				exit;
 			}
-		} else if ($what == 'category') {
-			$SQL = "DELETE FROM `".$wpdb->prefix."events_categories` WHERE `id` = $id";
-			if($wpdb->query($SQL) == FALSE) {
-				die(mysql_error());
-			}
 		} else {
-			events_return('error');
+			events_return('no_access');
 			exit;
 		}
 	}
@@ -341,43 +347,43 @@ function events_options_submit() {
 function events_return($action) {
 	switch($action) {
 		case "new" :
-			wp_redirect('post-new.php?page=wp-events.php&action=created');
+			wp_redirect('admin.php?page=wp-events&action=created');
 		break;
 		
 		case "update" :
-			wp_redirect('edit.php?page=wp-events.php&action=updated');
+			wp_redirect('admin.php?page=wp-events2&action=updated');
 		break;
 		
 		case "field_error" :
-			wp_redirect('post-new.php?page=wp-events.php&action=field_error');
+			wp_redirect('admin.php?page=wp-event2&action=field_error');
 		break;
 		
 		case "error" :
-			wp_redirect('post-new.php?page=wp-events.php&action=error');
+			wp_redirect('admin.php?page=wp-events&action=error');
 		break;
 		
 		case "no_access" :
-			wp_redirect('post-new.php?page=wp-events.php&action=no_access');
+			wp_redirect('admin.php?page=wp-events2&action=no_access');
 		break;
 		
 		case "delete-event" :
-			wp_redirect('edit.php?page=wp-events.php&action=delete-event');
+			wp_redirect('admin.php?page=wp-events2&action=delete-event');
 		break;
 		
 		case "delete-category" :
-			wp_redirect('edit.php?page=wp-events.php&action=delete-category');
+			wp_redirect('admin.php?page=wp-events2&action=delete-category');
 		break;
 		
 		case "uninstall" :
-			wp_redirect('plugins.php?deactivate=true');
+			wp_redirect('admin.php?deactivate=true');
 		break;
 		
 		case "category_new" :
-			wp_redirect('edit.php?page=wp-events.php&action=category_new');
+			wp_redirect('admin.php?page=wp-events2&action=category_new');
 		break;
 		
 		case "category_field_error" :
-			wp_redirect('edit.php?page=wp-events.php&action=category_field_error');
+			wp_redirect('admin.php?page=wp-events2&action=category_field_error');
 		break;
 	}
 }

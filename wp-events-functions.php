@@ -180,9 +180,9 @@ function events_sidebar($cat = 0, $limit = 0) {
 				if($event->allday == "Y") {
 					$template = str_replace('%starttime%', '', $template);
 				} else {
-					$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(gmstrftime($events_config['timeformat_sidebar'], $event->thetime))), $template);
+					$template = str_replace('%starttime%', str_replace('00:00', '', gmstrftime($events_config['timeformat_sidebar'], $event->thetime)), $template);
 				}
-				$template = str_replace('%startdate%', utf8_encode(gmstrftime($events_config['dateformat_sidebar'], $event->thetime)), $template);
+				$template = str_replace('%startdate%', gmstrftime($events_config['dateformat_sidebar'], $event->thetime), $template);
 				
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
@@ -369,7 +369,7 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 	$template = str_replace('%countdown%', events_countdown($thetime, $theend, $post_message, $allday), $template);
 	$template = str_replace('%duration%', events_duration($thetime, $theend, $allday), $template);
 				
-	$template = str_replace('%startdate%', utf8_encode(gmstrftime($events_config['dateformat'], $thetime)), $template);
+	$template = str_replace('%startdate%', gmstrftime($events_config['dateformat'], $thetime), $template);
 				
 	if($thetime == $theend and $events_config['hideend'] == 'hide') {
 		$template = str_replace('%endtime%', '', $template);					
@@ -378,14 +378,14 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 		if($allday == "Y") {
 			$template = str_replace('%endtime%', '', $template);					
 		} else {
-			$template = str_replace('%endtime%', str_replace('00:00', '', utf8_encode(gmstrftime($events_config['timeformat'], $theend))), $template);
+			$template = str_replace('%endtime%', str_replace('00:00', '', gmstrftime($events_config['timeformat'], $theend)), $template);
 		}
-		$template = str_replace('%enddate%', utf8_encode(gmstrftime($events_config['dateformat'], $theend)), $template);
+		$template = str_replace('%enddate%', gmstrftime($events_config['dateformat'], $theend), $template);
 	}
 	if($allday == "Y") {
 		$template = str_replace('%starttime%', '', $template);
 	} else {
-		$template = str_replace('%starttime%', str_replace('00:00', '', utf8_encode(gmstrftime($events_config['timeformat'], $thetime))), $template);					
+		$template = str_replace('%starttime%', str_replace('00:00', '', gmstrftime($events_config['timeformat'], $thetime)), $template);					
 	}
 				
 	$template = str_replace('%author%', $author, $template);
