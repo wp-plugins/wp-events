@@ -6,13 +6,15 @@
  Receive:   $content, $id, $prev_id, $tab_index
  Return:	$template
 -------------------------------------------------------------*/
-function the_event_editor($content) { ?>
-	<div id="quicktags">
-	<?php wp_print_scripts( 'quicktags' ); ?>
-	<script type="text/javascript">edToolbar()</script>
-	</div>
+function the_event_editor($content, $dashboard = true) {
+	if($dashboard == true) { ?>
+		<div id="quicktags">
+			<?php wp_print_scripts( 'quicktags' ); ?>
+			<script type="text/javascript">edToolbar()</script>
+		</div>
+	<?php }
 
-	<?php $the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='20' name='events_pre_event' tabindex='2' id='content'>%s</textarea></div>\n");
+	$the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='20' name='events_pre_event' tabindex='4' id='content'>%s</textarea></div>\n");
 	$the_editor_content = apply_filters('the_editor_content', $content);
 
 	printf($the_editor, $the_editor_content);
@@ -347,31 +349,31 @@ function events_options_submit() {
 function events_return($action) {
 	switch($action) {
 		case "new" :
-			wp_redirect('admin.php?page=wp-events&action=created');
+			wp_redirect('edit.php?page=wp-events&action=created');
 		break;
 		
 		case "update" :
-			wp_redirect('admin.php?page=wp-events2&action=updated');
+			wp_redirect('plugins.php?page=wp-events2&action=updated');
 		break;
 		
 		case "field_error" :
-			wp_redirect('admin.php?page=wp-event2&action=field_error');
+			wp_redirect('edit.php?page=wp-events&action=field_error');
 		break;
 		
 		case "error" :
-			wp_redirect('admin.php?page=wp-events&action=error');
+			wp_redirect('edit.php?page=wp-events&action=error');
 		break;
 		
 		case "no_access" :
-			wp_redirect('admin.php?page=wp-events2&action=no_access');
+			wp_redirect('plugins.php?page=wp-events2&action=no_access');
 		break;
 		
 		case "delete-event" :
-			wp_redirect('admin.php?page=wp-events2&action=delete-event');
+			wp_redirect('plugins.php?page=wp-events2&action=delete-event');
 		break;
 		
 		case "delete-category" :
-			wp_redirect('admin.php?page=wp-events2&action=delete-category');
+			wp_redirect('plugins.php?page=wp-events2&action=delete-category');
 		break;
 		
 		case "uninstall" :
@@ -379,11 +381,11 @@ function events_return($action) {
 		break;
 		
 		case "category_new" :
-			wp_redirect('admin.php?page=wp-events2&action=category_new');
+			wp_redirect('plugins.php?page=wp-events2&action=category_new');
 		break;
 		
 		case "category_field_error" :
-			wp_redirect('admin.php?page=wp-events2&action=category_field_error');
+			wp_redirect('plugins.php?page=wp-events2&action=category_field_error');
 		break;
 	}
 }

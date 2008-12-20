@@ -367,6 +367,7 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 	if(strlen($link) == 0) { $template = str_replace('%link%', '', $template); }
 				
 	$template = str_replace('%countdown%', events_countdown($thetime, $theend, $post_message, $allday), $template);
+	$template = str_replace('%countup%', events_countup($thetime, $theend, $post_message), $template);
 	$template = str_replace('%duration%', events_duration($thetime, $theend, $allday), $template);
 				
 	$template = str_replace('%startdate%', gmstrftime($events_config['dateformat'], $thetime), $template);

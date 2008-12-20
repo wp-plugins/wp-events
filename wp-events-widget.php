@@ -25,4 +25,17 @@ function widget_wp_events_init() {
 	$widget_ops = array('classname' => 'widget_wp_events', 'description' => "Options are found on the 'settings > Events' panel!" );
 	wp_register_sidebar_widget('Events', 'Events', 'widget_wp_events', $widget_ops);
 }
+
+/*-------------------------------------------------------------
+ Name:      events_dashboard_widget
+
+ Purpose:   Add a WordPress dashboard widget
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_dashboard_init() {
+	wp_add_dashboard_widget( 'events_schedule_widget', 'Events', 'events_schedule_widget' );
+}
+ 
+add_action('wp_dashboard_setup', 'events_dashboard_init');
 ?>
