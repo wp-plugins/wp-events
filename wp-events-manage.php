@@ -1,23 +1,50 @@
 <?php
 /*-------------------------------------------------------------
- Name:      the_event_editor
+ Name:      events_editor
 
  Purpose:   Use simple HTML formatting tools to generate events
  Receive:   $content, $id, $prev_id, $tab_index
  Return:	$template
 -------------------------------------------------------------*/
-function the_event_editor($content, $dashboard = true) {
-	if($dashboard == true) { ?>
-		<div id="quicktags">
-			<?php wp_print_scripts( 'quicktags' ); ?>
-			<script type="text/javascript">edToolbar()</script>
-		</div>
-	<?php }
+function events_editor($content, $id = 'content', $prev_id = 'title') {
+	$media_buttons = false;
+	$richedit =  user_can_richedit();
+	?>
+	<div id="quicktags">
+	<?php wp_print_scripts( 'quicktags' ); ?>
+	<script type="text/javascript">edToolbar()</script>
+	</div>
 
-	$the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='20' name='events_pre_event' tabindex='4' id='content'>%s</textarea></div>\n");
+	<?php $the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='40' name='$id' tabindex='4' id='$id'>%s</textarea></div>\n");
 	$the_editor_content = apply_filters('the_editor_content', $content);
 
 	printf($the_editor, $the_editor_content);
+
+	?>
+	<script type="text/javascript">
+	// <![CDATA[
+	edCanvas = document.getElementById('<?php echo $id; ?>');
+	<?php if ( user_can_richedit() && $prev_id ) { ?>
+	var dotabkey = true;
+	// If tinyMCE is defined.
+	if ( typeof tinyMCE != 'undefined' ) {
+		// This code is meant to allow tabbing from Title to Post (TinyMCE).
+		jQuery('#<?php echo $prev_id; ?>')[jQuery.browser.opera ? 'keypress' : 'keydown'](function (e) {
+			if (e.which == 9 && !e.shiftKey && !e.controlKey && !e.altKey) {
+				if ( (jQuery("#post_ID").val() < 1) && (jQuery("#title").val().length > 0) ) { autosave(); }
+				if ( tinyMCE.activeEditor && ! tinyMCE.activeEditor.isHidden() && dotabkey ) {
+					e.preventDefault();
+					dotabkey = false;
+					tinyMCE.activeEditor.focus();
+					return false;
+				}
+			}
+		});
+	}
+	<?php } ?>
+	// ]]>
+	</script>
+	<?php
 }
 
 /*-------------------------------------------------------------
@@ -28,7 +55,7 @@ function the_event_editor($content, $dashboard = true) {
  Return:	-None-
 -------------------------------------------------------------*/
 function events_insert_input() {
-	global $wpdb, $userdata, $events_config, $events_language;
+	global $wpdb, $userdata, $events_config, $events_language, $events_tracker;
 	
 	$event_id 			= $_POST['events_event_id'];
 	$eventmsg 			= $events_language['language_past'];
@@ -37,7 +64,7 @@ function events_insert_input() {
 	$title_link	 		= $_POST['events_title_link'];
 	$location 			= htmlspecialchars(trim($_POST['events_location'], "\t\n "), ENT_QUOTES);
 	$category 			= $_POST['events_category'];
-	$pre_event 			= htmlspecialchars(trim($_POST['events_pre_event'], "\t\n "), ENT_QUOTES);
+	$pre_event 			= htmlspecialchars(trim($_POST['content'], "\t\n "), ENT_QUOTES);
 	$post_event 		= htmlspecialchars(trim($_POST['events_post_event'], "\t\n "), ENT_QUOTES);
 	$link		 		= htmlspecialchars(trim($_POST['events_link'], "\t\n "), ENT_QUOTES);
 	$allday		 		= $_POST['events_allday'];
@@ -81,16 +108,17 @@ function events_insert_input() {
 			`thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', 
 			`author` = '$author'
 			WHERE `id` = '$event_id'";
-			$action = "update";
+			$action = "Update";
 		} else {
 			/* New or duplicate event */
 			$postquery = "INSERT INTO `".$wpdb->prefix."events`
 			(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
 			VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
-			$action = "new";
+			$action = "New";
 		}
 		if($wpdb->query($postquery) !== FALSE) {
-			events_return($action);
+			if($events_tracker['register'] == 'Y') { events_send_data($action.' Event'); }
+			events_return(strtolower($action));
 			exit;
 		} else {
 			die(mysql_error());
@@ -109,7 +137,7 @@ function events_insert_input() {
  Return:	-None-
 -------------------------------------------------------------*/
 function events_create_category() {
-	global $wpdb, $userdata;
+	global $wpdb, $events_config, $events_tracker, $userdata;
 	
 	$name = $_POST['events_category'];
 	
@@ -117,9 +145,9 @@ function events_create_category() {
 		$postquery = "INSERT INTO `".$wpdb->prefix."events_categories`
 		(`name`)
 		VALUES ('$name')";		
-		$action = "category_new";
 		if($wpdb->query($postquery) !== FALSE) {
-			events_return($action);
+			if($events_tracker['register'] == 'Y') { events_send_data('New Category'); }
+			events_return('category_new');
 			exit;
 		} else {
 			die(mysql_error());
@@ -131,20 +159,6 @@ function events_create_category() {
 }
 
 /*-------------------------------------------------------------
- Name:      events_clear_old
-
- Purpose:   Removes old non archived events
- Receive:   -none-
- Return:    -none-
--------------------------------------------------------------*/
-function events_clear_old() {
-	global $wpdb;
-
-	$removeme = current_time('timestamp') - 86400;
-	$wpdb->query("DELETE FROM `".$wpdb->prefix."events` WHERE `thetime` < ".$removeme." AND `archive` = 'no'");
-}
-
-/*-------------------------------------------------------------
  Name:      events_request_delete
 
  Purpose:   Prepare removal of banner or category from database
@@ -152,13 +166,14 @@ function events_clear_old() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_request_delete() {
-	global $wpdb, $events_config;
+	global $wpdb, $events_config, $events_tracker;
 
 	$event_ids = $_POST['eventcheck'];
 	$category_ids = $_POST['categorycheck'];
 	if($event_ids != '') {
 		foreach($event_ids as $event_id) {
 			events_delete($event_id, 'event');
+			if($events_tracker['register'] == 'Y') { events_send_data('Delete Event'); }
 		}
 		events_return('delete-event');
 		exit;
@@ -166,6 +181,7 @@ function events_request_delete() {
 	if($category_ids != '') {
 		foreach($category_ids as $category_id) {
 			events_delete($category_id, 'category');
+			if($events_tracker['register'] == 'Y') { events_send_data('Delete Category'); }
 		}
 		events_return('delete-category');
 		exit;
@@ -235,6 +251,12 @@ function events_check_config() {
 		update_option('events_config', $option);
 	}
 	
+	if ( !$tracker = get_option('events_tracker') ) {
+		$tracker['register']		 		= 'Y';
+		$tracker['anonymous'] 				= 'N';
+		update_option('events_tracker', $tracker);
+	}
+	
 	if ( !$template = get_option('events_template') ) {
 		$template['sidebar_template'] 		= '<li>%title% %link% on %startdate% %starttime%<br />%countdown%</li>';
 		$template['sidebar_h_template'] 	= '<h2>Highlighted events</h2><ul>';
@@ -278,12 +300,13 @@ function events_check_config() {
 /*-------------------------------------------------------------
  Name:      events_options_submit
 
- Purpose:   Save options
+ Purpose:   Save options from dashboard
  Receive:   $_POST
  Return:    -none-
 -------------------------------------------------------------*/
 function events_options_submit() {
-	//options page
+	
+	// Prepare general settings
 	$option['length'] 					= trim($_POST['events_length'], "\t\n ");
 	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
 	$option['sideshow'] 				= $_POST['events_sideshow'];
@@ -302,7 +325,15 @@ function events_options_submit() {
 	$option['linktarget'] 				= $_POST['events_linktarget'];
 	$option['localization'] 			= htmlspecialchars(trim($_POST['events_localization'], "\t\n "), ENT_QUOTES);
 	update_option('events_config', $option);
+
+	// Prepare Tracker settings
+	if(isset($_POST['events_register'])) $tracker['register'] = 'Y';			
+		else $tracker['register'] = 'N';
+	if(isset($_POST['events_anonymous'])) $tracker['anonymous'] = 'Y';			
+		else $tracker['anonymous'] = 'N';
+	update_option('events_tracker', $tracker);
 	
+	// Prepare Template settings
 	$template['sidebar_template'] 		= htmlspecialchars(trim($_POST['sidebar_template'], "\t\n "), ENT_QUOTES);
 	$template['sidebar_h_template'] 	= htmlspecialchars(trim($_POST['sidebar_h_template'], "\t\n "), ENT_QUOTES);
 	$template['sidebar_f_template'] 	= htmlspecialchars(trim($_POST['sidebar_f_template'], "\t\n "), ENT_QUOTES);
@@ -318,6 +349,7 @@ function events_options_submit() {
 	$template['location_seperator']		= htmlspecialchars(trim($_POST['location_seperator'], "\t\n"), ENT_QUOTES); // Note, spaces are not filtered
 	update_option('events_template', $template);
 	
+	// Prepare language settings
 	$language['language_today'] 		= htmlspecialchars(trim($_POST['events_language_today'], "\t\n "), ENT_QUOTES);
 	$language['language_hours'] 		= htmlspecialchars(trim($_POST['events_language_hours'], "\t\n "), ENT_QUOTES);
 	$language['language_minutes'] 		= htmlspecialchars(trim($_POST['events_language_minutes'], "\t\n "), ENT_QUOTES);
@@ -377,7 +409,7 @@ function events_return($action) {
 		break;
 		
 		case "uninstall" :
-			wp_redirect('admin.php?deactivate=true');
+			wp_redirect('plugins.php?deactivate=true');
 		break;
 		
 		case "category_new" :

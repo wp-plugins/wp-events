@@ -4,18 +4,19 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.6.1
+Version: 1.6.2
 Author URI: http://meandmymac.net/
 */
 
 #---------------------------------------------------
 # Load other plugin files and configuration
 #---------------------------------------------------
-include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-install.php');
+include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-setup.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-functions.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-manage.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-widget.php');
 register_activation_hook(__FILE__, 'events_activate');
+register_deactivation_hook(__FILE__, 'events_deactivate');
 events_check_config();
 
 // Add filters for adding the tags in the WP page/post field
@@ -52,6 +53,7 @@ if(isset($_POST['events_uninstall'])) {
 $events_config = get_option('events_config');
 $events_template = get_option('events_template');
 $events_language = get_option('events_language');
+$events_tracker = get_option('events_tracker');
 setlocale(LC_TIME, $events_config['localization']);	
 
 /*-------------------------------------------------------------
@@ -286,18 +288,20 @@ function events_schedule() {
 				        <td><input name="events_title" class="search-input" type="text" size="55" maxlength="<?php echo $events_config['length'];?>" value="<?php echo $edit_event->title;?>" tabindex="1" autocomplete="off" /><br /><em>Maximum <?php echo $events_config['length'];?> characters.</em></td>
 				        <td width="35%"><input type="checkbox" name="events_title_link" <?php if($edit_event->title_link == 'Y') { ?>checked="checked" <?php } ?> tabindex="2" /> Make title a link. Use the field below.<br /><input type="checkbox" name="events_allday" <?php if($edit_event->allday == 'Y') { ?>checked="checked" <?php } ?> tabindex="3" /> All-day event.</td>
 					</tr>
+					</tbody>
+					
 				</table>
 
 				<br class="clear" />
 				<div id="postdivrich" class="postarea">
-					<?php the_event_editor($edit_event->pre_message); ?>
+					<?php events_editor($edit_event->pre_message, 'content', 'events_title', false, 4); ?>
 				</div>
 							
 				<br class="clear" />
 		    	<table class="widefat" style="margin-top: .5em">
 	
 					<thead>
-					<tr valign="top" id="quicktags">
+					<tr valign="top">
 						<td colspan="4" bgcolor="#DDD">Please note that the time field uses a 24 hour clock. This means that 22:00 hour is actually 10:00pm.<br />Hint: If you're used to the AM/PM system and the event takes place/starts after lunch just add 12 hours.</td>
 					</tr>
 			      	</thead>
@@ -590,6 +594,7 @@ function events_schedule() {
 		<?php } ?>
 	</div>
 <?php }
+
 /*-------------------------------------------------------------
  Name:      events_schedule_widget
 
@@ -699,6 +704,7 @@ function events_options() {
 	$events_config = get_option('events_config');
 	$events_template = get_option('events_template');
 	$events_language = get_option('events_language');
+	$events_tracker = get_option('events_tracker');
 	
 	$gmt_offset = (get_option('gmt_offset')*3600);
 	$timezone = gmdate("U") + $gmt_offset;
@@ -1079,6 +1085,39 @@ function events_options() {
 			        <td><input name="events_localization" type="text" value="<?php echo $events_config['localization'];?>" size="10" /> (default: en_EN)</td>
 		      	</tr>
 
+	    	</table>
+		    <p class="submit">
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
+		    </p>
+
+	    	<h3>Registration</h3>	    	
+	
+	    	<table class="form-table">
+			<tr>
+				<th scope="row" valign="top">Why</th>
+				<td>For fun and as an experiment i would like to gather some information and develop a simple stats system for it. I would like to ask you to participate in this experiment. All it takes for you is to not opt-out. More information is found <a href="http://meandmymac.net/plugins/data-project/" title="http://meandmymac.net/plugins/data-project/ - New window" target="_blank">here</a>. Any questions can be directed to the <a href="http://forum.at.meandmymac.net/" title="http://forum.at.meandmymac.net/ - New window" target="_blank">forum</a>.</td>
+				
+			</tr>
+			<tr>
+				<th scope="row" valign="top">Registration</th>
+				<td><input type="checkbox" name="events_register" <?php if($events_tracker['register'] == 'Y') { ?>checked="checked" <?php } ?> /> Allow Meandmymac.net to collect some data about the plugin usage and your blog.<br /><em>This includes your blog name, blog address, email address and a selection of triggered events as well as the name and version of this plugin.</em></td>
+			</tr>
+			<tr>
+				<th scope="row" valign="top">Anonymous</th>
+				<td><input type="checkbox" name="events_anonymous" <?php if($events_tracker['anonymous'] == 'Y') { ?>checked="checked" <?php } ?> /> Your blog name, blog address and email will not be send.</td>
+			</tr>
+			<tr>
+				<th scope="row" valign="top">Agree</th>
+				<td><strong>Upon activating the plugin you agree to the following:</strong>
+
+				<br />- All gathered information, but not your email address, may be published or used in a statistical overview for reference purposes.
+				<br />- You're free to opt-out or to make any to be gathered data anonymous at any time.
+				<br />- All acquired information remains in my database and will not be sold, made public or otherwise spread to third parties.
+				<br />- If you opt-out or go anonymous, all previously saved data will remain intact.
+				<br />- Requests to remove your data or make everything you sent anonymous will not be granted unless there are pressing issues.
+				<br />- Anonymously gathered data cannot be removed since it's anonymous.
+				</td>
+			</tr>
 	    	</table>
 		    <p class="submit">
 		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />

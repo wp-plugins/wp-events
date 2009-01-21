@@ -134,15 +134,15 @@ function events_duration($event_start, $event_end, $allday) {
 -------------------------------------------------------------*/
 function events_sidebar($cat = 0, $limit = 0) {
 	global $wpdb, $events_config, $events_language, $events_template;
-	
+
 	$present = current_time('timestamp');
 	$daystart = floor($present / 86400) * 86400;
 
 	if($cat == 0) $category = '';
 		else $category = " AND `category` = '$cat'";
-		
+
 	if($limit == 0) $limit = $events_config['amount'];
-			
+
 	if($events_config['sideshow'] == "2") {
 		$sideshow = " AND `thetime` >= '$present'";
 	} else if($events_config['sideshow'] == "3") {
@@ -152,7 +152,7 @@ function events_sidebar($cat = 0, $limit = 0) {
 	} else {
 		$sideshow = " AND `theend` >= '$daystart'"; // default behaviour (1)
 	}
-	
+
 	$sidebar_header = $events_template['sidebar_h_template'];
 	$sidebar_footer = $events_template['sidebar_f_template'];
 	$output_sidebar = stripslashes(html_entity_decode($sidebar_header));
@@ -165,17 +165,17 @@ function events_sidebar($cat = 0, $limit = 0) {
 		} else {
 			foreach($events as $event) {
 				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
-				
+
 				$template = $events_template['sidebar_template'];
 
 				$event->title = substr($event->title, 0 , $events_config['sidelength']);
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$template = str_replace('%title%', $event->title, $template);
 				$template = str_replace('%event%', substr($event->pre_message, 0 , $events_config['sidelength']), $template);
-				
+
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_sidelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
-				
+
 				$template = str_replace('%countdown%', events_countdown($event->thetime, $event->theend, substr($event->post_message, 0 , $events_config['sidelength']), $event->allday), $template);
 				if($event->allday == "Y") {
 					$template = str_replace('%starttime%', '', $template);
@@ -183,12 +183,12 @@ function events_sidebar($cat = 0, $limit = 0) {
 					$template = str_replace('%starttime%', str_replace('00:00', '', gmstrftime($events_config['timeformat_sidebar'], $event->thetime)), $template);
 				}
 				$template = str_replace('%startdate%', gmstrftime($events_config['dateformat_sidebar'], $event->thetime), $template);
-				
+
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
-				
-				if(strlen($event->location) == 0) { 
-					$template = str_replace('%location%', '', $template); 
+
+				if(strlen($event->location) == 0) {
+					$template = str_replace('%location%', '', $template);
 				} else {
 					$template = str_replace('%location%', $events_template['location_seperator'].$event->location, $template);
 				}
@@ -201,7 +201,7 @@ function events_sidebar($cat = 0, $limit = 0) {
 		$output_sidebar .= '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
 	}
 	$output_sidebar .= stripslashes(html_entity_decode($sidebar_footer));
-	
+
 	return $output_sidebar;
 }
 
@@ -214,22 +214,25 @@ function events_sidebar($cat = 0, $limit = 0) {
 -------------------------------------------------------------*/
 function events_list($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
-	
+
 	$present = current_time('timestamp');
 
-	if(empty($atts['amount'])) $amount = ""; 
+	if(empty($atts['amount'])) $amount = "";
 		else $amount = " LIMIT $atts[amount]";
-		
-	if(empty($atts['order'])) $order = $events_config['order']; 
+
+	if(empty($atts['order'])) $order = $events_config['order'];
 		else $amount = $atts['order'];
-		
-	if(empty($atts['category'])) $category = ''; 
+
+	if(empty($atts['category'])) $category = '';
 		else $category = " AND `category` = '$atts[category]'";
-		
-	if(empty($atts['event'])) $one_event = ''; 
+
+	if(empty($atts['event'])) $one_event = '';
 		else $one_event = " AND `id` = '$atts[event]'";
-		
+
+	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
+
 	$page_header = $events_template['page_h_template'];
+	$page_header = str_replace('%category%', $get_category->name, $page_header);
 	$page_footer = $events_template['page_f_template'];
 	$output_page = stripslashes(html_entity_decode($page_header));
 	if($events_config['order']){
@@ -237,8 +240,8 @@ function events_list($atts, $content = null) {
 		if ( count($events) == 0 ) {
 			$output_page .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
-			foreach ( $events as $event ) {				
-				$template = events_build_output('list', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
+			foreach ( $events as $event ) {
+				$template = events_build_output('list', $get_category->name, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);
 				$output_page .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -247,7 +250,7 @@ function events_list($atts, $content = null) {
 		$output_page .= '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
 	}
 	$output_page .= stripslashes(html_entity_decode($page_footer));
-	
+
 	return $output_page;
 }
 
@@ -263,16 +266,19 @@ function events_archive($atts, $content = null) {
 
 	$present = current_time('timestamp');
 
-	if(empty($atts['amount'])) $amount = ""; 
+	if(empty($atts['amount'])) $amount = "";
 		else $amount = " LIMIT $atts[amount]";
-		
-	if(empty($atts['order'])) $order = $events_config['order_archive']; 
+
+	if(empty($atts['order'])) $order = $events_config['order_archive'];
 		else $amount = $atts['order'];
-		
-	if(empty($atts['category'])) $category = ''; 
+
+	if(empty($atts['category'])) $category = '';
 		else $category = " AND `category` = '$atts[category]'";
-		
+
+	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
+
 	$archive_header = $events_template['archive_h_template'];
+	$archive_header = str_replace('%category%', $get_category->name, $archive_header);
 	$archive_footer = $events_template['archive_f_template'];
 	$output_archive = stripslashes(html_entity_decode($archive_header));
 	if($events_config['order_archive']){
@@ -283,7 +289,7 @@ function events_archive($atts, $content = null) {
 			$output_archive .= '<em>'.$events_language['language_noarchive'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				$template = events_build_output('archive', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
+				$template = events_build_output('archive', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);
 				$output_archive .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -292,7 +298,7 @@ function events_archive($atts, $content = null) {
 		$output_archive .= '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
 	}
 	$output_archive .= stripslashes(html_entity_decode($archive_footer));
-	
+
 	return $output_archive;
 }
 
@@ -306,16 +312,19 @@ function events_archive($atts, $content = null) {
 function events_today($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
-	if(empty($atts['amount'])) $amount = ""; 
+	if(empty($atts['amount'])) $amount = "";
 		else $amount = " LIMIT $atts[amount]";
-		
-	if(empty($atts['order'])) $order = $events_config['order']; 
+
+	if(empty($atts['order'])) $order = $events_config['order'];
 		else $amount = $atts['order'];
-		
-	if(empty($atts['category'])) $category = ''; 
+
+	if(empty($atts['category'])) $category = '';
 		else $category = " AND `category` = '$atts[category]'";
-		
+
+	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
+
 	$daily_header = $events_template['daily_h_template'];
+	$daily_header = str_replace('%category%', $get_category->name, $daily_header);
 	$daily_footer = $events_template['daily_f_template'];
 	$output_daily = stripslashes(html_entity_decode($daily_header));
 	if($events_config['order']){
@@ -329,7 +338,7 @@ function events_today($atts, $content = null) {
 			$output_daily .= '<em>'.$events_language['language_nodaily'].'</em>';
 		} else {
 			foreach ( $events as $event ) {
-				$template = events_build_output('today', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);				
+				$template = events_build_output('today', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);
 				$output_daily .= stripslashes(html_entity_decode($template));
 			}
 		}
@@ -338,7 +347,7 @@ function events_today($atts, $content = null) {
 		$output_daily .= '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
 	}
 	$output_daily .= stripslashes(html_entity_decode($daily_footer));
-	
+
 	return $output_daily;
 }
 
@@ -351,33 +360,31 @@ function events_today($atts, $content = null) {
 -------------------------------------------------------------*/
 function events_build_output($type, $category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location) {
 	global $wpdb, $events_config, $events_language, $events_template;
-				
-	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
-				
+
 	if($type == 'list') $template = $events_template['page_template'];
 	if($type == 'archive') $template = $events_template['archive_template'];
 	if($type == 'today') $template = $events_template['daily_template'];
-	
+
 	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
 	$template = str_replace('%title%', $title, $template);
 	$template = str_replace('%event%', $pre_message, $template);
 	$template = str_replace('%after%', $post_message, $template);
-				
+
 	if(strlen($link) > 0) { $template = str_replace('%link%', '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
 	if(strlen($link) == 0) { $template = str_replace('%link%', '', $template); }
-				
+
 	$template = str_replace('%countdown%', events_countdown($thetime, $theend, $post_message, $allday), $template);
 	$template = str_replace('%countup%', events_countup($thetime, $theend, $post_message), $template);
 	$template = str_replace('%duration%', events_duration($thetime, $theend, $allday), $template);
-				
+
 	$template = str_replace('%startdate%', gmstrftime($events_config['dateformat'], $thetime), $template);
-				
+
 	if($thetime == $theend and $events_config['hideend'] == 'hide') {
-		$template = str_replace('%endtime%', '', $template);					
-		$template = str_replace('%enddate%', '', $template);					
-	} else { 
+		$template = str_replace('%endtime%', '', $template);
+		$template = str_replace('%enddate%', '', $template);
+	} else {
 		if($allday == "Y") {
-			$template = str_replace('%endtime%', '', $template);					
+			$template = str_replace('%endtime%', '', $template);
 		} else {
 			$template = str_replace('%endtime%', str_replace('00:00', '', gmstrftime($events_config['timeformat'], $theend)), $template);
 		}
@@ -386,18 +393,82 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 	if($allday == "Y") {
 		$template = str_replace('%starttime%', '', $template);
 	} else {
-		$template = str_replace('%starttime%', str_replace('00:00', '', gmstrftime($events_config['timeformat'], $thetime)), $template);					
+		$template = str_replace('%starttime%', str_replace('00:00', '', gmstrftime($events_config['timeformat'], $thetime)), $template);
 	}
-				
+
 	$template = str_replace('%author%', $author, $template);
-	$template = str_replace('%category%', $get_category->name, $template);
-				
-	if(strlen($location) == 0) { 
-		$template = str_replace('%location%', '', $template); 
+	$template = str_replace('%category%', $category, $template);
+
+	if(strlen($location) == 0) {
+		$template = str_replace('%location%', '', $template);
 	} else {
 		$template = str_replace('%location%', $events_template['location_seperator'].$location, $template);
 	}
-	
+
 	return $template;
+}
+
+/*-------------------------------------------------------------
+ Name:      events_clear_old
+
+ Purpose:   Removes old non archived events
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_clear_old() {
+	global $wpdb;
+
+	$removeme = current_time('timestamp') - 86400;
+	$wpdb->query("DELETE FROM `".$wpdb->prefix."events` WHERE `thetime` < ".$removeme." AND `archive` = 'no'");
+}
+
+/*-------------------------------------------------------------
+ Name:      events_send_data
+
+ Purpose:   Register events at meandmymac.net's database
+ Receive:   $action
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_send_data($action) {
+	$events_tracker = get_option('events_tracker');
+
+	// Prepare data
+	$date			= date('U');
+	$plugin			= 'Events';
+	$version		= '1.6.2';
+	//$action -> pulled from function args
+
+	// User choose anonymous?
+	if($events_tracker['anonymous'] == 'Y') {
+		$ident 		= 'Anonymous';
+		$blogname 	= 'Anonymous';
+		$blogurl	= 'Anonymous';
+		$email		= 'Anonymous';
+	} else {
+		$ident 		= md5(get_option('siteurl'));
+		$blogname	= get_option('blogname');
+		$blogurl	= get_option('siteurl');
+		$email		= get_option('admin_email');
+	}
+
+	// Build array of data
+	$post_data = array (
+		'headers'	=> null,
+		'body'		=> array(
+			'ident'		=> $ident,
+			'blogname' 	=> base64_encode($blogname),
+			'blogurl'	=> base64_encode($blogurl),
+			'email'		=> base64_encode($email),
+			'date'		=> $date,
+			'plugin'	=> $plugin,
+			'version'	=> $version,
+			'action'	=> $action,
+		),
+	);
+
+	// Destination
+	$url = 'http://stats.meandmymac.net/receiver.php';
+
+	wp_remote_post($url, $post_data);
 }
 ?>
