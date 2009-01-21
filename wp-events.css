@@ -1,0 +1,20 @@
+#events_schedule_widget h4 {
+	font-family: "Lucida Grande", Verdana, Arial, "Bitstream Vera Sans", sans-serif;
+	float: left;
+	width: 5.5em;
+	clear: both;
+	font-weight: normal;
+	text-align: right;
+	padding-top: 5px;
+	font-size: 12px;
+}
+
+#events_schedule_widget h4 label {
+	margin-right: 10px;
+}
+
+#events_schedule_widget .options-wrap,
+#events_schedule_widget .input-text-wrap,
+#events_schedule_widget .textarea-wrap {
+	margin: 0 0 1em 5em;
+}
