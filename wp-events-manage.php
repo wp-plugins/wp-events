@@ -57,74 +57,79 @@ function events_editor($content, $id = 'content', $prev_id = 'title') {
 function events_insert_input() {
 	global $wpdb, $userdata, $events_config, $events_language, $events_tracker;
 	
-	$event_id 			= $_POST['events_event_id'];
-	$eventmsg 			= $events_language['language_past'];
-	$author 			= $_POST['events_username'];
-	$title	 			= htmlspecialchars(trim($_POST['events_title'], "\t\n "), ENT_QUOTES);
-	$title_link	 		= $_POST['events_title_link'];
-	$location 			= htmlspecialchars(trim($_POST['events_location'], "\t\n "), ENT_QUOTES);
-	$category 			= $_POST['events_category'];
-	$pre_event 			= htmlspecialchars(trim($_POST['content'], "\t\n "), ENT_QUOTES);
-	$post_event 		= htmlspecialchars(trim($_POST['events_post_event'], "\t\n "), ENT_QUOTES);
-	$link		 		= htmlspecialchars(trim($_POST['events_link'], "\t\n "), ENT_QUOTES);
-	$allday		 		= $_POST['events_allday'];
-	$sday 				= htmlspecialchars(trim($_POST['events_sday'], "\t\n "), ENT_QUOTES);
-	$smonth 			= htmlspecialchars(trim($_POST['events_smonth'], "\t\n "), ENT_QUOTES);
-	$syear 				= htmlspecialchars(trim($_POST['events_syear'], "\t\n "), ENT_QUOTES);
-	$shour 				= htmlspecialchars(trim($_POST['events_shour'], "\t\n "), ENT_QUOTES);
-	$sminute 			= htmlspecialchars(trim($_POST['events_sminute'], "\t\n "), ENT_QUOTES);
-	$eday 				= htmlspecialchars(trim($_POST['events_eday'], "\t\n "), ENT_QUOTES);
-	$emonth 			= htmlspecialchars(trim($_POST['events_emonth'], "\t\n "), ENT_QUOTES);
-	$eyear 				= htmlspecialchars(trim($_POST['events_eyear'], "\t\n "), ENT_QUOTES);
-	$ehour 				= htmlspecialchars(trim($_POST['events_ehour'], "\t\n "), ENT_QUOTES);
-	$eminute 			= htmlspecialchars(trim($_POST['events_eminute'], "\t\n "), ENT_QUOTES);
-	$priority 			= $_POST['events_priority'];
-	$archive 			= $_POST['events_archive'];
-
-	if (strlen($title)!=0 AND strlen($syear)!=0 AND strlen($sday)!=0 AND strlen($smonth)!=0) {
-		/* Date is sorted here */
-		if(strlen($ehour) == 0) 	$ehour = $shour;
-		if(strlen($eminute) == 0) 	$eminute = $sminute;
-		if(strlen($emonth) == 0) 	$emonth = $smonth;
-		if(strlen($eday) == 0) 		$eday = $sday;
-		if(strlen($eyear) == 0) 	$eyear = $syear;
-		
-		$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
-		$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
-
-		if(strlen($post_event) == 0) $post_event = $eventmsg;
-		
-		if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';			
-			else $title_link = 'N';
-		
-		if(isset($allday)) $allday = 'Y';			
-			else $allday = 'N';
-		
-		if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
-			/* Update an existing event */
-			$postquery = "UPDATE `".$wpdb->prefix."events` SET
-			`title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category',
-			`pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', 
-			`thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', 
-			`author` = '$author'
-			WHERE `id` = '$event_id'";
-			$action = "Update";
+	if(current_user_can($events_config['minlevel'])) {
+		$event_id 			= $_POST['events_event_id'];
+		$eventmsg 			= $events_language['language_past'];
+		$author 			= $_POST['events_username'];
+		$title	 			= htmlspecialchars(trim($_POST['events_title'], "\t\n "), ENT_QUOTES);
+		$title_link	 		= $_POST['events_title_link'];
+		$location 			= htmlspecialchars(trim($_POST['events_location'], "\t\n "), ENT_QUOTES);
+		$category 			= $_POST['events_category'];
+		$pre_event 			= htmlspecialchars(trim($_POST['content'], "\t\n "), ENT_QUOTES);
+		$post_event 		= htmlspecialchars(trim($_POST['events_post_event'], "\t\n "), ENT_QUOTES);
+		$link		 		= htmlspecialchars(trim($_POST['events_link'], "\t\n "), ENT_QUOTES);
+		$allday		 		= $_POST['events_allday'];
+		$sday 				= htmlspecialchars(trim($_POST['events_sday'], "\t\n "), ENT_QUOTES);
+		$smonth 			= htmlspecialchars(trim($_POST['events_smonth'], "\t\n "), ENT_QUOTES);
+		$syear 				= htmlspecialchars(trim($_POST['events_syear'], "\t\n "), ENT_QUOTES);
+		$shour 				= htmlspecialchars(trim($_POST['events_shour'], "\t\n "), ENT_QUOTES);
+		$sminute 			= htmlspecialchars(trim($_POST['events_sminute'], "\t\n "), ENT_QUOTES);
+		$eday 				= htmlspecialchars(trim($_POST['events_eday'], "\t\n "), ENT_QUOTES);
+		$emonth 			= htmlspecialchars(trim($_POST['events_emonth'], "\t\n "), ENT_QUOTES);
+		$eyear 				= htmlspecialchars(trim($_POST['events_eyear'], "\t\n "), ENT_QUOTES);
+		$ehour 				= htmlspecialchars(trim($_POST['events_ehour'], "\t\n "), ENT_QUOTES);
+		$eminute 			= htmlspecialchars(trim($_POST['events_eminute'], "\t\n "), ENT_QUOTES);
+		$priority 			= $_POST['events_priority'];
+		$archive 			= $_POST['events_archive'];
+	
+		if (strlen($title)!=0 AND strlen($syear)!=0 AND strlen($sday)!=0 AND strlen($smonth)!=0) {
+			/* Date is sorted here */
+			if(strlen($ehour) == 0) 	$ehour = $shour;
+			if(strlen($eminute) == 0) 	$eminute = $sminute;
+			if(strlen($emonth) == 0) 	$emonth = $smonth;
+			if(strlen($eday) == 0) 		$eday = $sday;
+			if(strlen($eyear) == 0) 	$eyear = $syear;
+			
+			$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
+			$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
+	
+			if(strlen($post_event) == 0) $post_event = $eventmsg;
+			
+			if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';			
+				else $title_link = 'N';
+			
+			if(isset($allday)) $allday = 'Y';			
+				else $allday = 'N';
+			
+			if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
+				/* Update an existing event */
+				$postquery = "UPDATE `".$wpdb->prefix."events` SET
+				`title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category',
+				`pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', 
+				`thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', 
+				`author` = '$author'
+				WHERE `id` = '$event_id'";
+				$action = "Update";
+			} else {
+				/* New or duplicate event */
+				$postquery = "INSERT INTO `".$wpdb->prefix."events`
+				(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
+				VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
+				$action = "New";
+			}
+			if($wpdb->query($postquery) !== FALSE) {
+				if($events_tracker['register'] == 'Y') { events_send_data($action.' Event'); }
+				events_return(strtolower($action));
+				exit;
+			} else {
+				die(mysql_error());
+			}
 		} else {
-			/* New or duplicate event */
-			$postquery = "INSERT INTO `".$wpdb->prefix."events`
-			(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
-			VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
-			$action = "New";
-		}
-		if($wpdb->query($postquery) !== FALSE) {
-			if($events_tracker['register'] == 'Y') { events_send_data($action.' Event'); }
-			events_return(strtolower($action));
+			events_return('field_error');
 			exit;
-		} else {
-			die(mysql_error());
 		}
 	} else {
-		events_return('field_error');
+		events_return('no_access');
 		exit;
 	}
 }
