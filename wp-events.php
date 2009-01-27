@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.6.2
+Version: 1.7
 Author URI: http://meandmymac.net/
 */
 
@@ -20,9 +20,13 @@ register_deactivation_hook(__FILE__, 'events_deactivate');
 events_check_config();
 
 // Add filters for adding the tags in the WP page/post field
+add_shortcode('events_show', 'events_show');
+
+/* Maintained for backward compatibility */
 add_shortcode('events_list', 'events_list');
 add_shortcode('events_today', 'events_today');
 add_shortcode('events_archive', 'events_archive');
+/* Maintained for backward compatibility */
 
 events_clear_old(); // Remove non archived old events
 
@@ -225,6 +229,28 @@ function events_manage() {
  		</tbody>
 		</table>
 		</form>
+
+		<br class="clear" />
+    	<table class="widefat" style="margin-top: .5em">
+    	
+			<thead>
+			<tr valign="top">
+				<th colspan="4">Events for Excellent!</th>
+			</tr>
+			</thead>
+
+			<tbody>
+	      	<tr>
+		        <td colspan="4">Find me on <a href="http://meandmymac" target="_blank">meandmymac.net</a>.<br />
+		        Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>.<br />
+		        Subscribed to the Meandmymac Data Project? Curious? <a href="http://meandmymac.net/plugins/data-project/" target="_blank">More information</a>. <br />
+		        Want to see your stats? <a href="http://meandmymac.net/wp-admin/" target="_blank">Plugin statistics</a>.<br />
+		        Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>
+	      	</tr>
+	      	</tbody>
+
+		</table>
+
 	</div>
 	<?php	 
 }
@@ -573,6 +599,22 @@ function events_schedule() {
 			      	</tr>
 			      	</tbody>
 			      	
+					<thead>
+					<tr valign="top">
+						<th colspan="4">Events for Excellent!</th>
+					</tr>
+					</thead>
+
+					<tbody>
+			      	<tr>
+				        <td colspan="4">Find me on <a href="http://meandmymac" target="_blank">meandmymac.net</a>.<br />
+				        Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>.<br />
+				        Subscribed to the Meandmymac Data Project? Curious? <a href="http://meandmymac.net/plugins/data-project/" target="_blank">More information</a>. <br />
+				        Want to see your stats? <a href="http://meandmymac.net/wp-admin/" target="_blank">Plugin statistics</a>.<br />
+				        Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>
+			      	</tr>
+			      	</tbody>
+
 		    	</table>
 		    	
 		    	<p class="submit">

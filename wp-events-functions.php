@@ -129,28 +129,29 @@ function events_duration($event_start, $event_end, $allday) {
  Name:      events_sidebar
 
  Purpose:   Show events in the sidebar, also used for widget
- Receive:   -none-
+ Receive:   $cat, $lim
  Return:	$output_sidebar
 -------------------------------------------------------------*/
 function events_sidebar($cat = 0, $limit = 0) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
-	$present = current_time('timestamp');
+	$present = date('U');
 	$daystart = floor($present / 86400) * 86400;
 
-	if($cat == 0) $category = '';
-		else $category = " AND `category` = '$cat'";
+	if($cat == 0 or strlen($cat) < 1) $category = '';
+		else $category = "AND `category` = '$cat'";
 
-	if($limit == 0) $limit = $events_config['amount'];
+	if($lim == 0 or strlen($lim) < 1) $limit = $events_config['amount'];
+		else $limit = $lim;
 
 	if($events_config['sideshow'] == "2") {
-		$sideshow = " AND `thetime` >= '$present'";
+		$sideshow = "AND `thetime` >= '$present'";
 	} else if($events_config['sideshow'] == "3") {
-		$sideshow = " AND `theend` >= '$present'";
+		$sideshow = "AND `theend` >= '$present'";
 	} else if($events_config['sideshow'] == "4") {
-		$sideshow = " AND `thetime` <= '$present'";
+		$sideshow = "AND `thetime` <= '$present'";
 	} else {
-		$sideshow = " AND `theend` >= '$daystart'"; // default behaviour (1)
+		$sideshow = "AND `theend` >= '$daystart'"; // default behaviour (1)
 	}
 
 	$sidebar_header = $events_template['sidebar_h_template'];
@@ -158,7 +159,7 @@ function events_sidebar($cat = 0, $limit = 0) {
 	$output_sidebar = stripslashes(html_entity_decode($sidebar_header));
 	if($events_config['order']){
 		/* Fetch events */
-		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `priority` = 'yes'$sideshow$category ORDER BY ".$events_config['order']." LIMIT ".$limit);
+		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `priority` = 'yes' ".$sideshow." ".$category." ORDER BY ".$events_config['order']." LIMIT ".$limit);
 		/* Start processing data */
 		if(count($events) == 0) {
 			$output_sidebar .= '<em>'.$events_language['language_noevents'].'</em>';
@@ -206,149 +207,83 @@ function events_sidebar($cat = 0, $limit = 0) {
 }
 
 /*-------------------------------------------------------------
- Name:      events_list
+ Name:      events_show
 
- Purpose:   Create list of events for the template using shortcodes
+ Purpose:   Create list of events for the template using [events_show]
  Receive:   $atts, $content
- Return:	$output_page
+ Return:	$output
 -------------------------------------------------------------*/
-function events_list($atts, $content = null) {
+function events_show($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
 	$present = current_time('timestamp');
+	$daystart = floor($present / 86400) * 86400;
+	$dayend = $daystart + 86400;
+
+	if(empty($atts['type'])) $type = "default";
+		else $type = $atts['type'];
 
 	if(empty($atts['amount'])) $amount = "";
 		else $amount = " LIMIT $atts[amount]";
 
 	if(empty($atts['order'])) $order = $events_config['order'];
 		else $amount = $atts['order'];
-
-	if(empty($atts['category'])) $category = '';
-		else $category = " AND `category` = '$atts[category]'";
 
 	if(empty($atts['event'])) $one_event = '';
 		else $one_event = " AND `id` = '$atts[event]'";
 
-	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
+	if(empty($atts['category'])) {
+		$category = ''; 
+	} else { 
+		$category = " AND `category` = '$atts[category]'";
+		$category2 = $atts[category];
+	}
 
-	$page_header = $events_template['page_h_template'];
-	$page_header = str_replace('%category%', $get_category->name, $page_header);
-	$page_footer = $events_template['page_f_template'];
-	$output_page = stripslashes(html_entity_decode($page_header));
-	if($events_config['order']){
-		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` >= $present$category$one_event ORDER BY $order$amount");
-		if ( count($events) == 0 ) {
-			$output_page .= '<em>'.$events_language['language_noevents'].'</em>';
+	if($events_config AND $events_language AND $events_template AND isset($type)){
+		if($type == 'default') {
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` >= $present$category$one_event ORDER BY $order$amount");
+			if(!empty($atts['category'])) {
+				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
+			}
+			
+			$header = $events_template['page_h_template'];
+			$footer = $events_template['page_f_template'];
+		} else if ($type == 'archive') {
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `archive` = 'yes' AND `thetime` <= $present$category$one_event ORDER BY $order$amount");
+			if(!empty($atts['category'])) {
+				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
+			}
+
+			$header = $events_template['archive_h_template'];
+			$footer = $events_template['archive_f_template'];
+		} else if ($type == 'today') {
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)$category$one_event ORDER BY $order$amount");
+			if(!empty($atts['category'])) {
+				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
+			}
+
+			$header = $events_template['daily_h_template'];
+			$footer = $events_template['daily_f_template'];			
+		}
+		
+		$header = str_replace('%category%', $get_category->name, $header);
+		$output = stripslashes(html_entity_decode($header));
+		if (count($events) == 0) {
+			$output .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
-			foreach ( $events as $event ) {
-				$template = events_build_output('list', $get_category->name, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);
-				$output_page .= stripslashes(html_entity_decode($template));
+			foreach($events as $event) {
+				$category_name = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $event->category");
+				$template = events_build_output($type, $category_name->name, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);
+				$output .= stripslashes(html_entity_decode($template));
 			}
 		}
+		$output .= stripslashes(html_entity_decode($footer));
 	} else {
 		/* Configuration is fuxored, output an error */
-		$output_page .= '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
+		$output = '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
 	}
-	$output_page .= stripslashes(html_entity_decode($page_footer));
 
-	return $output_page;
-}
-
-/*-------------------------------------------------------------
- Name:      events_archive
-
- Purpose:   Create list of archived events for the template using shortcodes
- Receive:   $atts, $content
- Return:	$output_archive
--------------------------------------------------------------*/
-function events_archive($atts, $content = null) {
-	global $wpdb, $events_config, $events_language, $events_template;
-
-	$present = current_time('timestamp');
-
-	if(empty($atts['amount'])) $amount = "";
-		else $amount = " LIMIT $atts[amount]";
-
-	if(empty($atts['order'])) $order = $events_config['order_archive'];
-		else $amount = $atts['order'];
-
-	if(empty($atts['category'])) $category = '';
-		else $category = " AND `category` = '$atts[category]'";
-
-	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
-
-	$archive_header = $events_template['archive_h_template'];
-	$archive_header = str_replace('%category%', $get_category->name, $archive_header);
-	$archive_footer = $events_template['archive_f_template'];
-	$output_archive = stripslashes(html_entity_decode($archive_header));
-	if($events_config['order_archive']){
-		/* Archived events */
-		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `archive` = 'yes' AND `thetime` <= $present$category ORDER BY $order$amount");
-		/* Start processing data */
-		if ( count($events) == 0 ) {
-			$output_archive .= '<em>'.$events_language['language_noarchive'].'</em>';
-		} else {
-			foreach ( $events as $event ) {
-				$template = events_build_output('archive', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);
-				$output_archive .= stripslashes(html_entity_decode($template));
-			}
-		}
-	} else {
-		/* Configuration is fuxored, output an error */
-		$output_archive .= '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
-	}
-	$output_archive .= stripslashes(html_entity_decode($archive_footer));
-
-	return $output_archive;
-}
-
-/*-------------------------------------------------------------
- Name:      events_today
-
- Purpose:   Create list of events for today on the template using shortcodes
- Receive:   $atts, $content
- Return:	$output_daily
--------------------------------------------------------------*/
-function events_today($atts, $content = null) {
-	global $wpdb, $events_config, $events_language, $events_template;
-
-	if(empty($atts['amount'])) $amount = "";
-		else $amount = " LIMIT $atts[amount]";
-
-	if(empty($atts['order'])) $order = $events_config['order'];
-		else $amount = $atts['order'];
-
-	if(empty($atts['category'])) $category = '';
-		else $category = " AND `category` = '$atts[category]'";
-
-	$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category");
-
-	$daily_header = $events_template['daily_h_template'];
-	$daily_header = str_replace('%category%', $get_category->name, $daily_header);
-	$daily_footer = $events_template['daily_f_template'];
-	$output_daily = stripslashes(html_entity_decode($daily_header));
-	if($events_config['order']){
-		// Todays events
-		$present = current_time('timestamp');
-		$daystart = floor($present / 86400) * 86400;
-		$dayend = $daystart + 86400;
-		$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)$category ORDER BY $order$amount");
-		// Start processing data
-		if ( count($events) == 0 ) {
-			$output_daily .= '<em>'.$events_language['language_nodaily'].'</em>';
-		} else {
-			foreach ( $events as $event ) {
-				$template = events_build_output('today', $event->category, $event->link, $event->title, $event->title_link, $event->pre_message, $event->post_message, $event->thetime, $event->theend, $event->allday, $event->author, $event->location);
-				$output_daily .= stripslashes(html_entity_decode($template));
-			}
-		}
-	} else {
-		// Configuration is fuxored, output an error
-		$output_daily .= '<em style="color:#f00;">'.$events_language['language_e_config'].'.</em>';
-	}
-	$output_daily .= stripslashes(html_entity_decode($daily_footer));
-
-	return $output_daily;
+	return $output;
 }
 
 /*-------------------------------------------------------------
@@ -361,7 +296,7 @@ function events_today($atts, $content = null) {
 function events_build_output($type, $category, $link, $title, $title_link, $pre_message, $post_message, $thetime, $theend, $allday, $author, $location) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
-	if($type == 'list') $template = $events_template['page_template'];
+	if($type == 'default') $template = $events_template['page_template'];
 	if($type == 'archive') $template = $events_template['archive_template'];
 	if($type == 'today') $template = $events_template['daily_template'];
 
@@ -409,6 +344,69 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 }
 
 /*-------------------------------------------------------------
+ Name:      events_list
+
+ Purpose:   DEPRECIATED, see events_show
+ Receive:   $atts, $content
+ Return:	$events
+-------------------------------------------------------------*/
+function events_list($atts, $content = null) {
+	
+	if(!empty($atts)) {
+		$add = array('type' => 'default');
+		array_push($atts, $add);
+	} else {
+		$atts['type'] = 'default';
+	}
+
+	$events = events_show($atts, $content);
+	
+	return $events;
+}
+
+/*-------------------------------------------------------------
+ Name:      events_archive
+
+ Purpose:   DEPRECIATED, see events_show
+ Receive:   $atts, $content
+ Return:	$events
+-------------------------------------------------------------*/
+function events_archive($atts, $content = null) {
+	
+	if(!empty($atts)) {
+		$add = array('type' => 'archive');
+		array_push($atts, $add);
+	} else {
+		$atts['type'] = 'archive';
+	}
+
+	$events = events_show($atts, $content);
+	
+	return $events;
+}
+
+/*-------------------------------------------------------------
+ Name:      events_today
+
+ Purpose:   DEPRECIATED, see events_show
+ Receive:   $atts, $content
+ Return:	$events
+-------------------------------------------------------------*/
+function events_today($atts, $content = null) {
+	
+	if(!empty($atts)) {
+		$add = array('type' => 'today');
+		array_push($atts, $add);
+	} else {
+		$atts['type'] = 'today';
+	}
+
+	$events = events_show($atts, $content);
+	
+	return $events;
+}
+
+/*-------------------------------------------------------------
  Name:      events_clear_old
 
  Purpose:   Removes old non archived events
@@ -435,7 +433,7 @@ function events_send_data($action) {
 	// Prepare data
 	$date			= date('U');
 	$plugin			= 'Events';
-	$version		= '1.6.2';
+	$version		= '1.7';
 	//$action -> pulled from function args
 
 	// User choose anonymous?
