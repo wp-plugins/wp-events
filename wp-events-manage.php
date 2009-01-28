@@ -18,7 +18,7 @@ function events_editor($content, $id = 'content', $prev_id = 'title') {
 	<?php $the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='40' name='$id' tabindex='4' id='$id'>%s</textarea></div>\n");
 	$the_editor_content = apply_filters('the_editor_content', $content);
 
-	printf($the_editor, $the_editor_content);
+	printf($the_editor, $content);
 
 	?>
 	<script type="text/javascript">
@@ -310,6 +310,7 @@ function events_check_config() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_options_submit() {
+	$buffer = get_option('events_tracker');
 	
 	// Prepare general settings
 	$option['length'] 					= trim($_POST['events_length'], "\t\n ");
@@ -336,6 +337,7 @@ function events_options_submit() {
 		else $tracker['register'] = 'N';
 	if(isset($_POST['events_anonymous'])) $tracker['anonymous'] = 'Y';			
 		else $tracker['anonymous'] = 'N';
+	if($tracker['register'] == 'N' AND $buffer['register'] == 'Y') { events_send_data('Opt-out'); }
 	update_option('events_tracker', $tracker);
 	
 	// Prepare Template settings
