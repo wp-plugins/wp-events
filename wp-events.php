@@ -15,8 +15,10 @@ include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-setup.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-functions.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-manage.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-widget.php');
+
 register_activation_hook(__FILE__, 'events_activate');
 register_deactivation_hook(__FILE__, 'events_deactivate');
+
 events_check_config();
 
 // Add filters for adding the tags in the WP page/post field
@@ -58,7 +60,11 @@ $events_config = get_option('events_config');
 $events_template = get_option('events_template');
 $events_language = get_option('events_language');
 $events_tracker = get_option('events_tracker');
+
+// Localization and Intercrappilization
 setlocale(LC_TIME, $events_config['localization']);	
+$language_domain = 'WP-Events';
+load_plugin_textdomain($language_domain, dirname(plugin_basename(__FILE__)));
 
 /*-------------------------------------------------------------
  Name:      events_dashboard
@@ -68,9 +74,9 @@ setlocale(LC_TIME, $events_config['localization']);
  Return:    -none-
 -------------------------------------------------------------*/
 function events_dashboard() {
-	global $events_config;
+	global $events_config, $language_domain;
 
-	add_submenu_page('edit.php', 'Events > Add/Edit', 'Write Event', $events_config['minlevel'], 'wp-events', 'events_schedule');
+	add_submenu_page('edit.php', _e('Events > Add/Edit', $language_domain), _e('Write Event', $language_domain), $events_config['minlevel'], 'wp-events', 'events_schedule');
 	add_submenu_page('plugins.php', 'Events > Manage', 'Manage Events', $events_config['minlevel'], 'wp-events2', 'events_manage');
 	add_submenu_page('options-general.php', 'Events > Settings', 'Events', $events_config['minlevel'], 'wp-events3', 'events_options');
 }
@@ -98,7 +104,7 @@ function events_manage() {
 	} ?>
 	
 	<div class="wrap">
-		<h2>Manage Events (<a href="edit.php?page=wp-events">add new</a>)</h2>
+		<h2><?php _e('Manage Events (<a href="edit.php?page=wp-events">add new</a>)', $lang_events); ?></h2>
 
 		<?php if ($action == 'delete-event') { ?>
 			<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
