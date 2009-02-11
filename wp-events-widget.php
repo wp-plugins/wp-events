@@ -36,6 +36,4 @@ function widget_wp_events_init() {
 function events_dashboard_init() {
 	wp_add_dashboard_widget( 'events_schedule_widget', 'Events', 'events_schedule_widget' );
 }
- 
-add_action('wp_dashboard_setup', 'events_dashboard_init');
 ?>

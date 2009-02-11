@@ -433,7 +433,7 @@ function events_send_data($action) {
 	// Prepare data
 	$date			= date('U');
 	$plugin			= 'Events';
-	$version		= '1.7';
+	$version		= '1.7.1';
 	//$action -> pulled from function args
 
 	// User choose anonymous?

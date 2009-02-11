@@ -57,7 +57,7 @@ function events_editor($content, $id = 'content', $prev_id = 'title') {
 function events_insert_input() {
 	global $wpdb, $userdata, $events_config, $events_language, $events_tracker;
 	
-	if(current_user_can($events_config['minlevel'])) {
+	if(current_user_can($events_config['editlevel'])) {
 		$event_id 			= $_POST['events_event_id'];
 		$eventmsg 			= $events_language['language_past'];
 		$author 			= $_POST['events_username'];
@@ -84,6 +84,8 @@ function events_insert_input() {
 	
 		if (strlen($title)!=0 AND strlen($syear)!=0 AND strlen($sday)!=0 AND strlen($smonth)!=0) {
 			/* Date is sorted here */
+			if(strlen($shour) == 0) 	$shour = 0;
+			if(strlen($sminute) == 0) 	$sminute = 0;
 			if(strlen($ehour) == 0) 	$ehour = $shour;
 			if(strlen($eminute) == 0) 	$eminute = $sminute;
 			if(strlen($emonth) == 0) 	$emonth = $smonth;
@@ -142,23 +144,28 @@ function events_insert_input() {
  Return:	-None-
 -------------------------------------------------------------*/
 function events_create_category() {
-	global $wpdb, $events_config, $events_tracker, $userdata;
+	global $wpdb, $userdata, $events_config, $events_tracker;
 	
-	$name = $_POST['events_category'];
-	
-	if (strlen($name) != 0) {
-		$postquery = "INSERT INTO `".$wpdb->prefix."events_categories`
-		(`name`)
-		VALUES ('$name')";		
-		if($wpdb->query($postquery) !== FALSE) {
-			if($events_tracker['register'] == 'Y') { events_send_data('New Category'); }
-			events_return('category_new');
-			exit;
+	if(current_user_can($events_config['catlevel'])) {
+		$name = $_POST['events_category'];
+		
+		if (strlen($name) != 0) {
+			$postquery = "INSERT INTO `".$wpdb->prefix."events_categories`
+			(`name`)
+			VALUES ('$name')";		
+			if($wpdb->query($postquery) !== FALSE) {
+				if($events_tracker['register'] == 'Y') { events_send_data('New Category'); }
+				events_return('category_new');
+				exit;
+			} else {
+				die(mysql_error());
+			}
 		} else {
-			die(mysql_error());
+			events_return('category_field_error');
+			exit;
 		}
 	} else {
-		events_return('category_field_error');
+		events_return('no_access');
 		exit;
 	}
 }
@@ -171,24 +178,35 @@ function events_create_category() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_request_delete() {
-	global $wpdb, $events_config, $events_tracker;
+	global $wpdb, $userdata, $events_config, $events_tracker;
 
-	$event_ids = $_POST['eventcheck'];
-	$category_ids = $_POST['categorycheck'];
-	if($event_ids != '') {
-		foreach($event_ids as $event_id) {
-			events_delete($event_id, 'event');
-			if($events_tracker['register'] == 'Y') { events_send_data('Delete Event'); }
+	if(current_user_can($events_config['managelevel'])) {
+		$event_ids = $_POST['eventcheck'];
+		$category_ids = $_POST['categorycheck'];
+		if($event_ids != '') {
+			foreach($event_ids as $event_id) {
+				events_delete($event_id, 'event');
+				if($events_tracker['register'] == 'Y') { events_send_data('Delete Event'); }
+			}
+			events_return('delete-event');
+			exit;
 		}
-		events_return('delete-event');
+	} else {
+		events_return('no_access');
 		exit;
 	}
-	if($category_ids != '') {
-		foreach($category_ids as $category_id) {
-			events_delete($category_id, 'category');
-			if($events_tracker['register'] == 'Y') { events_send_data('Delete Category'); }
+	
+	if(current_user_can($events_config['catlevel'])) {
+		if($category_ids != '') {
+			foreach($category_ids as $category_id) {
+				events_delete($category_id, 'category');
+				if($events_tracker['register'] == 'Y') { events_send_data('Delete Category'); }
+			}
+			events_return('delete-category');
+			exit;
 		}
-		events_return('delete-category');
+	} else {
+		events_return('no_access');
 		exit;
 	}
 }
@@ -204,23 +222,18 @@ function events_delete($id, $what) {
 	global $wpdb, $userdata, $events_config;
 
 	if($id > 0) {
-		if (current_user_can($events_config['managelevel'])) {
-			if($what == 'event') {
-					$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
-					if($wpdb->query($SQL) == FALSE) {
-						die(mysql_error());
-					}
-			} else if ($what == 'category') {
-				$SQL = "DELETE FROM `".$wpdb->prefix."events_categories` WHERE `id` = $id";
+		if($what == 'event') {
+				$SQL = "DELETE FROM `".$wpdb->prefix."events` WHERE `id` = $id";
 				if($wpdb->query($SQL) == FALSE) {
 					die(mysql_error());
 				}
-			} else {
-				events_return('error');
-				exit;
+		} else if ($what == 'category') {
+			$SQL = "DELETE FROM `".$wpdb->prefix."events_categories` WHERE `id` = $id";
+			if($wpdb->query($SQL) == FALSE) {
+				die(mysql_error());
 			}
 		} else {
-			events_return('no_access');
+			events_return('error');
 			exit;
 		}
 	}
@@ -242,8 +255,9 @@ function events_check_config() {
 		$option['linktarget']				= '_blank';
 		$option['amount'] 					= 2;
 		$option['hideend'] 					= 'show';
-		$option['minlevel'] 				= 7;
-		$option['managelevel'] 				= 10;
+		$option['editlevel'] 				= 'edit_pages';
+		$option['catlevel'] 				= 'manage_options';
+		$option['managelevel'] 				= 'manage_options';
 		$option['custom_date_page']			= 'no';
 		$option['custom_date_sidebar']		= 'no';
 		$option['dateformat'] 				= '%d %B %Y';
@@ -317,9 +331,10 @@ function events_options_submit() {
 	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
 	$option['sideshow'] 				= $_POST['events_sideshow'];
 	$option['amount'] 					= trim($_POST['events_amount'], "\t\n ");
-	$option['minlevel'] 				= $_POST['events_minlevel'];
-	$option['hideend']	 				= $_POST['events_hideend'];
+	$option['editlevel'] 				= $_POST['events_editlevel'];
+	$option['catlevel'] 				= $_POST['events_catlevel'];
 	$option['managelevel'] 				= $_POST['events_managelevel'];
+	$option['hideend']	 				= $_POST['events_hideend'];
 	$option['custom_date_page'] 		= $_POST['events_custom_date_page'];
 	$option['custom_date_sidebar']		= $_POST['events_custom_date_sidebar'];
 	$option['dateformat'] 				= htmlspecialchars(trim($_POST['events_dateformat'], "\t\n "), ENT_QUOTES);
@@ -388,43 +403,43 @@ function events_options_submit() {
 function events_return($action) {
 	switch($action) {
 		case "new" :
-			wp_redirect('edit.php?page=wp-events&action=created');
+			wp_redirect('admin.php?page=wp-events&action=created');
 		break;
 		
 		case "update" :
-			wp_redirect('plugins.php?page=wp-events2&action=updated');
+			wp_redirect('admin.php?page=wp-events2&action=updated');
 		break;
 		
 		case "field_error" :
-			wp_redirect('edit.php?page=wp-events&action=field_error');
+			wp_redirect('admin.php?page=wp-events&action=field_error');
 		break;
 		
 		case "error" :
-			wp_redirect('edit.php?page=wp-events&action=error');
+			wp_redirect('admin.php?page=wp-events&action=error');
 		break;
 		
 		case "no_access" :
-			wp_redirect('plugins.php?page=wp-events2&action=no_access');
+			wp_redirect('admin.php?page=wp-events2&action=no_access');
 		break;
 		
 		case "delete-event" :
-			wp_redirect('plugins.php?page=wp-events2&action=delete-event');
+			wp_redirect('admin.php?page=wp-events2&action=delete-event');
 		break;
 		
 		case "delete-category" :
-			wp_redirect('plugins.php?page=wp-events2&action=delete-category');
+			wp_redirect('admin.php?page=wp-events2&action=delete-category');
 		break;
 		
 		case "uninstall" :
-			wp_redirect('plugins.php?deactivate=true');
+			wp_redirect('admin.php?deactivate=true');
 		break;
 		
 		case "category_new" :
-			wp_redirect('plugins.php?page=wp-events2&action=category_new');
+			wp_redirect('admin.php?page=wp-events2&action=category_new');
 		break;
 		
 		case "category_field_error" :
-			wp_redirect('plugins.php?page=wp-events2&action=category_field_error');
+			wp_redirect('admin.php?page=wp-events2&action=category_field_error');
 		break;
 	}
 }

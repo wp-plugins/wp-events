@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.7
+Version: 1.7.1
 Author URI: http://meandmymac.net/
 */
 
@@ -15,10 +15,8 @@ include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-setup.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-functions.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-manage.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-widget.php');
-
 register_activation_hook(__FILE__, 'events_activate');
 register_deactivation_hook(__FILE__, 'events_deactivate');
-
 events_check_config();
 
 // Add filters for adding the tags in the WP page/post field
@@ -32,8 +30,9 @@ add_shortcode('events_archive', 'events_archive');
 
 events_clear_old(); // Remove non archived old events
 
-add_action('widgets_init', 'widget_wp_events_init'); //Initialize the widget
-add_action('admin_menu', 'events_dashboard',1); //Add page menu links
+add_action('widgets_init', 'widget_wp_events_init'); //Initialize sidebar widget
+add_action('wp_dashboard_setup', 'events_dashboard_init'); //Initialize dashboard widget
+add_action('admin_menu', 'events_dashboard', 1); //Add page menu links
 	
 if(isset($_POST['events_submit'])) {
 	add_action('init', 'events_insert_input'); //Save event
@@ -60,11 +59,7 @@ $events_config = get_option('events_config');
 $events_template = get_option('events_template');
 $events_language = get_option('events_language');
 $events_tracker = get_option('events_tracker');
-
-// Localization and Intercrappilization
 setlocale(LC_TIME, $events_config['localization']);	
-$language_domain = 'WP-Events';
-load_plugin_textdomain($language_domain, dirname(plugin_basename(__FILE__)));
 
 /*-------------------------------------------------------------
  Name:      events_dashboard
@@ -74,11 +69,13 @@ load_plugin_textdomain($language_domain, dirname(plugin_basename(__FILE__)));
  Return:    -none-
 -------------------------------------------------------------*/
 function events_dashboard() {
-	global $events_config, $language_domain;
+	global $events_config;
+	
+	add_object_page('Events', 'Events', 'read', 'wp-events', 'events_schedule');
+		add_submenu_page('wp-events', 'Events > Add/Edit', 'Add|Edit Event', $events_config['editlevel'], 'wp-events', 'events_schedule');
+		add_submenu_page('wp-events', 'Events > Manage', 'Manage Events', $events_config['managelevel'], 'wp-events2', 'events_manage');
 
-	add_submenu_page('edit.php', _e('Events > Add/Edit', $language_domain), _e('Write Event', $language_domain), $events_config['minlevel'], 'wp-events', 'events_schedule');
-	add_submenu_page('plugins.php', 'Events > Manage', 'Manage Events', $events_config['minlevel'], 'wp-events2', 'events_manage');
-	add_submenu_page('options-general.php', 'Events > Settings', 'Events', $events_config['minlevel'], 'wp-events3', 'events_options');
+	add_options_page('Events', 'Events', 'manage_options', 'wp-events3', 'events_options');
 }
 
 /*-------------------------------------------------------------
@@ -89,7 +86,7 @@ function events_dashboard() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_manage() {
-	global $wpdb, $userdata, $events_config;
+	global $wpdb, $events_config;
 	
 	$action = $_GET['action'];
 	if(isset($_POST['order'])) { 
@@ -104,7 +101,7 @@ function events_manage() {
 	} ?>
 	
 	<div class="wrap">
-		<h2><?php _e('Manage Events (<a href="edit.php?page=wp-events">add new</a>)', $lang_events); ?></h2>
+		<h2>Manage Events (<a href="admin.php?page=wp-events">add new</a>)</h2>
 
 		<?php if ($action == 'delete-event') { ?>
 			<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
@@ -120,28 +117,25 @@ function events_manage() {
 			<div id="message" class="updated fade"><p>No category name filled in</p></div>
 		<?php } ?>
 
-		<form name="events" id="post" method="post" action="plugins.php?page=wp-events2">
-			<div class="tablenav">
+		<form name="events" id="post" method="post" action="admin.php?page=wp-events2">
+		<div class="tablenav">
 
-				<div class="alignleft actions">
-					<input onclick="return confirm('You are about to delete one or more events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_events" class="button-secondary delete" />
-					<select name='order'>
-				        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending, default)</option>
-				        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending)</option>
-				        <option value="ID ASC" <?php if($order == "ID ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
-				        <option value="ID DESC" <?php if($order == "ID DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
-				        <option value="title ASC" <?php if($order == "title ASC") { echo 'selected'; } ?>>by title (A-Z)</option>
-				        <option value="title DESC" <?php if($order == "title DESC") { echo 'selected'; } ?>>by title (Z-A)</option>
-				        <option value="category ASC" <?php if($order == "category ASC") { echo 'selected'; } ?>>by category (A-Z)</option>
-				        <option value="category DESC" <?php if($order == "category DESC") { echo 'selected'; } ?>>by category (Z-A)</option>
-					</select>
-					<input type="submit" id="post-query-submit" value="Sort" class="button-secondary" />
-				</div>
-	
-				<br class="clear" />
+			<div class="alignleft actions">
+				<input onclick="return confirm('You are about to delete one or more events!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete events" name="delete_events" class="button-secondary delete" />
+				<select name='order'>
+			        <option value="thetime DESC" <?php if($order == "thetime DESC") { echo 'selected'; } ?>>by date (descending, default)</option>
+			        <option value="thetime ASC" <?php if($order == "thetime ASC") { echo 'selected'; } ?>>by date (ascending)</option>
+			        <option value="ID ASC" <?php if($order == "ID ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
+			        <option value="ID DESC" <?php if($order == "ID DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
+			        <option value="title ASC" <?php if($order == "title ASC") { echo 'selected'; } ?>>by title (A-Z)</option>
+			        <option value="title DESC" <?php if($order == "title DESC") { echo 'selected'; } ?>>by title (Z-A)</option>
+			        <option value="category ASC" <?php if($order == "category ASC") { echo 'selected'; } ?>>by category (A-Z)</option>
+			        <option value="category DESC" <?php if($order == "category DESC") { echo 'selected'; } ?>>by category (Z-A)</option>
+				</select>
+				<input type="submit" id="post-query-submit" value="Sort" class="button-secondary" />
 			</div>
+		</div>
 
-			<br class="clear" />
 		<table class="widefat">
   			<thead>
   				<tr>
@@ -182,7 +176,7 @@ function events_manage() {
 		<br />
 		<h2>Categories</h2>
 
-		<form name="groups" id="post" method="post" action="plugins.php?page=wp-events2">
+		<form name="groups" id="post" method="post" action="admin.php?page=wp-events2">
 		<div class="tablenav">
 			<div class="alignleft actions">
 				<input onclick="return confirm('You are about to delete one or more categories! Make sure there are no events in those categories or they will not show on the website\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete category" name="delete_categories" class="button-secondary delete" />
@@ -194,18 +188,15 @@ function events_manage() {
 				</select>
 				<input type="submit" id="post-query-submit" value="Sort" class="button-secondary" />
 			</div>
-
-			<br class="clear" />
 		</div>
 
-		<br class="clear" />
-		<table class="widefat">
+		<table class="widefat" style="margin-top: .5em">
   			<thead>
   				<tr>
 					<th scope="col" class="check-column">&nbsp;</th>
-					<th scope="col" width="5%">ID</th>
+					<th scope="col" width="5%"><center>ID</center></th>
 					<th scope="col">Name</th>
-					<th scope="col" width="20%">Events</th>
+					<th scope="col" width="10%"><center>Events</center></th>
 				</tr>
   			</thead>
   			<tbody>
@@ -218,9 +209,9 @@ function events_manage() {
 					$class = ('alternate' != $class) ? 'alternate' : ''; ?>
 				    <tr id='group-<?php echo $category->id; ?>' class=' <?php echo $class; ?>'>
 						<th scope="row" class="check-column"><input type="checkbox" name="categorycheck[]" value="<?php echo $category->id; ?>" /></th>
-						<td><?php echo $category->id;?></td>
+						<td><center><?php echo $category->id;?></center></td>
 						<td><?php echo $category->name;?></td>
-						<td><?php echo $count;?></td>
+						<td><center><?php echo $count;?></center></td>
 					</tr>
 	 			<?php } ?>
 			<?php 
@@ -230,7 +221,7 @@ function events_manage() {
 		<?php }	?>
 			<tr id='category-new'>
 				<th scope="row" class="check-column">&nbsp;</th>
-				<td colspan="3"><input name="events_category" type="text" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="add_category_submit" value="Add" class="button-secondary" /></td>
+				<td colspan="3"><input name="events_category" type="text" class="search-input" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="add_category_submit" value="Add" class="button-secondary" /></td>
 			</tr>
  		</tbody>
 		</table>
@@ -269,8 +260,8 @@ function events_manage() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_schedule() {
-	global $wpdb, $userdata, $events_config;
-	
+	global $wpdb, $events_config;
+
 	$timezone = get_option('gmt_offset')*3600;
 	
 	$action = $_GET['action']; 
@@ -291,7 +282,7 @@ function events_schedule() {
 		}
 		
 		if ($action == 'created') { ?>
-			<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="plugins.php?page=wp-events2">manage events</a></p></div>
+			<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="admin.php?page=wp-events2">manage events</a></p></div>
 		<?php } else if ($action == 'no_access') { ?>
 			<div id="message" class="updated fade"><p>Action prohibited</p></div>
 		<?php } else if ($action == 'field_error') { ?>
@@ -301,7 +292,7 @@ function events_schedule() {
 		$SQL2 = "SELECT * FROM ".$wpdb->prefix."events_categories ORDER BY id";
 		$categories = $wpdb->get_results($SQL2);
 		if($categories) { ?>
-		  	<form method="post" action="edit.php?page=wp-events">
+		  	<form method="post" action="admin.php?page=wp-events">
 		  	   	<input type="hidden" name="events_submit" value="true" />
 		    	<input type="hidden" name="events_username" value="<?php echo $userdata->display_name;?>" />
 		    	<input type="hidden" name="events_event_id" value="<?php echo $event_edit_id;?>" />
@@ -651,7 +642,7 @@ function events_schedule() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_schedule_widget() {
-	global $wpdb, $userdata, $events_config;
+	global $wpdb, $events_config;
 	
 	$timezone = get_option('gmt_offset')*3600;
 	$url = get_option('siteurl');
@@ -679,20 +670,20 @@ function events_schedule_widget() {
 								
 		    <h4 id="quick-post-title" class="options"><label for="events_sday">When</label></h4>
 		    <div class="options-wrap">
-				<input id="title" name="events_sday" class="search-input" type="text" size="4" maxlength="2" value="<?php echo $sday;?>" tabindex="132" /> / 
+				<input id="title" name="events_sday" class="search-input" type="text" size="4" maxlength="2" tabindex="132" /> / 
 				<select name="events_smonth" tabindex="133">
-					<option value="01" <?php if($smonth == "01") { echo 'selected'; } ?>>January</option>
-					<option value="02" <?php if($smonth == "02") { echo 'selected'; } ?>>February</option>
-					<option value="03" <?php if($smonth == "03") { echo 'selected'; } ?>>March</option>
-					<option value="04" <?php if($smonth == "04") { echo 'selected'; } ?>>April</option>
-					<option value="05" <?php if($smonth == "05") { echo 'selected'; } ?>>May</option>
-					<option value="06" <?php if($smonth == "06") { echo 'selected'; } ?>>June</option>
-					<option value="07" <?php if($smonth == "07") { echo 'selected'; } ?>>July</option>
-					<option value="08" <?php if($smonth == "08") { echo 'selected'; } ?>>August</option>
-					<option value="09" <?php if($smonth == "09") { echo 'selected'; } ?>>September</option>
-					<option value="10" <?php if($smonth == "10") { echo 'selected'; } ?>>October</option>
-					<option value="11" <?php if($smonth == "11") { echo 'selected'; } ?>>November</option>
-					<option value="12" <?php if($smonth == "12") { echo 'selected'; } ?>>December</option>
+					<option value="01">January</option>
+					<option value="02">February</option>
+					<option value="03">March</option>
+					<option value="04">April</option>
+					<option value="05">May</option>
+					<option value="06">June</option>
+					<option value="07">July</option>
+					<option value="08">August</option>
+					<option value="09">September</option>
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
 				</select> / 
 				<input name="events_syear" class="search-input" type="text" size="4" maxlength="4" value="" tabindex="134" />	
 			</div>
@@ -1010,21 +1001,21 @@ function events_options() {
 		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
 		    </p>
 			
-	    	<h3>Management</h3>	    	
+	    	<h3>User access</h3>	    	
 	
 	    	<table class="form-table">
 				<tr valign="top">
 					<td colspan="2">Set these options to prevent certain userlevels from editing, creating or deleting events. The options panel user level cannot be changed.<br />For more information on user roles go to <a href="http://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles" target="_blank">the codex</a>.</td>
 				</tr>
 		      	<tr valign="top">
-			        <th scope="row">Add/edit events?</th>
-			        <td><select name="events_minlevel">
-				        <option value="manage_options" <?php if($events_config['minlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator</option>
-				        <option value="edit_pages" <?php if($events_config['minlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor (default)</option>
-				        <option value="publish_posts" <?php if($events_config['minlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
-				        <option value="edit_posts" <?php if($events_config['minlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
-				        <option value="read" <?php if($events_config['minlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
-					</select> <em>Can add/edit/view events.</em></td>
+			        <th scope="row">Manage events?</th>
+			        <td><select name="events_editlevel">
+				        <option value="manage_options" <?php if($events_config['editlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator</option>
+				        <option value="edit_pages" <?php if($events_config['editlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor (default)</option>
+				        <option value="publish_posts" <?php if($events_config['editlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
+				        <option value="edit_posts" <?php if($events_config['editlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
+				        <option value="read" <?php if($events_config['editlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
+					</select> <em>Can add/edit/review events.</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row">Delete events?</th>
@@ -1034,7 +1025,17 @@ function events_options() {
 				        <option value="publish_posts" <?php if($events_config['managelevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
 				        <option value="edit_posts" <?php if($events_config['managelevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
 				        <option value="read" <?php if($events_config['managelevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
-					</select> <em>Can view/delete events.</em></td>
+					</select> <em>Can review/delete events.</em></td>
+		      	</tr>
+		      	<tr valign="top">
+			        <th scope="row">Manage categories?</th>
+			        <td><select name="events_catlevel">
+				        <option value="manage_options" <?php if($events_config['catlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator (default)</option>
+				        <option value="edit_pages" <?php if($events_config['catlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor</option>
+				        <option value="publish_posts" <?php if($events_config['catlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
+				        <option value="edit_posts" <?php if($events_config['catlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
+				        <option value="read" <?php if($events_config['catlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
+					</select> <em>Can add/remove categories.</em></td>
 		      	</tr>
 			</table>
 		    <p class="submit">
