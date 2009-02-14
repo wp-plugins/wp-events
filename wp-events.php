@@ -627,7 +627,7 @@ function events_schedule() {
 		<?php } else { ?>
 		    <table class="form-table">
 				<tr valign="top">
-					<td bgcolor="#DDD"><strong>You should create atleast one category before adding events! <a href="plugins.php?page=wp-events2">Add a category now</a>.</strong><br />Tip: If you do not want to use categories create one "uncategorized" and put all events in there. You don't have to show the categories on your blog.</td>
+					<td bgcolor="#DDD"><strong>You should create atleast one category before adding events! <a href="admin.php?page=wp-events2">Add a category now</a>.</strong><br />Tip: If you do not want to use categories create one "uncategorized" and put all events in there. You don't have to show the categories on your blog.</td>
 				</tr>
 			</table>
 		<?php } ?>
