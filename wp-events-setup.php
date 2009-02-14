@@ -28,7 +28,7 @@ function events_activate() {
 	  		`author` varchar(60) NOT NULL default '',
 	  		`priority` varchar(4) NOT NULL default 'no',
 	  		`archive` varchar(4) NOT NULL default 'no'
-			);";
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 		if(mysql_query($add1) === true) {
 			$table1 = 1;
 		}
@@ -40,7 +40,7 @@ function events_activate() {
 		$add2 = "CREATE TABLE `".$table_name2."` (
 			`id` mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY,
 			`name` varchar(255) NOT NULL
-			);";
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 			
 		if(mysql_query($add2) === true) {
 			$table2 = 1;
