@@ -431,7 +431,7 @@ function events_return($action) {
 		break;
 		
 		case "uninstall" :
-			wp_redirect('admin.php?deactivate=true');
+			wp_redirect('plugins.php?deactivate=true');
 		break;
 		
 		case "category_new" :
