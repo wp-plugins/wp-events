@@ -55,8 +55,8 @@ function events_editor($content, $id = 'content', $prev_id = 'title') {
  Return:	-None-
 -------------------------------------------------------------*/
 function events_insert_input() {
-	global $wpdb, $userdata, $events_config, $events_language, $events_tracker;
-	
+	global $wpdb, $userdata, $events_config, $events_language;
+
 	if(current_user_can($events_config['editlevel'])) {
 		$event_id 			= $_POST['events_event_id'];
 		$eventmsg 			= $events_language['language_past'];
@@ -81,7 +81,7 @@ function events_insert_input() {
 		$eminute 			= htmlspecialchars(trim($_POST['events_eminute'], "\t\n "), ENT_QUOTES);
 		$priority 			= $_POST['events_priority'];
 		$archive 			= $_POST['events_archive'];
-	
+
 		if (strlen($title)!=0 AND strlen($syear)!=0 AND strlen($sday)!=0 AND strlen($smonth)!=0) {
 			/* Date is sorted here */
 			if(strlen($shour) == 0) 	$shour = 0;
@@ -91,37 +91,36 @@ function events_insert_input() {
 			if(strlen($emonth) == 0) 	$emonth = $smonth;
 			if(strlen($eday) == 0) 		$eday = $sday;
 			if(strlen($eyear) == 0) 	$eyear = $syear;
-			
+
 			$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
 			$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
-	
+
 			if(strlen($post_event) == 0) $post_event = $eventmsg;
-			
-			if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';			
+
+			if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';
 				else $title_link = 'N';
-			
-			if(isset($allday)) $allday = 'Y';			
+
+			if(isset($allday)) $allday = 'Y';
 				else $allday = 'N';
-			
+
 			if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
 				/* Update an existing event */
 				$postquery = "UPDATE `".$wpdb->prefix."events` SET
 				`title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category',
-				`pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', 
-				`thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', 
+				`pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday',
+				`thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive',
 				`author` = '$author'
 				WHERE `id` = '$event_id'";
-				$action = "Update";
+				$action = "update";
 			} else {
 				/* New or duplicate event */
 				$postquery = "INSERT INTO `".$wpdb->prefix."events`
 				(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
-				VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";		
-				$action = "New";
+				VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";
+				$action = "new";
 			}
 			if($wpdb->query($postquery) !== FALSE) {
-				if($events_tracker['register'] == 'Y') { events_send_data($action.' Event'); }
-				events_return(strtolower($action));
+				events_return($action);
 				exit;
 			} else {
 				die(mysql_error());
@@ -144,17 +143,16 @@ function events_insert_input() {
  Return:	-None-
 -------------------------------------------------------------*/
 function events_create_category() {
-	global $wpdb, $userdata, $events_config, $events_tracker;
-	
+	global $wpdb, $userdata, $events_config;
+
 	if(current_user_can($events_config['catlevel'])) {
 		$name = $_POST['events_category'];
-		
+
 		if (strlen($name) != 0) {
 			$postquery = "INSERT INTO `".$wpdb->prefix."events_categories`
 			(`name`)
-			VALUES ('$name')";		
+			VALUES ('$name')";
 			if($wpdb->query($postquery) !== FALSE) {
-				if($events_tracker['register'] == 'Y') { events_send_data('New Category'); }
 				events_return('category_new');
 				exit;
 			} else {
@@ -178,7 +176,7 @@ function events_create_category() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_request_delete() {
-	global $wpdb, $userdata, $events_config, $events_tracker;
+	global $wpdb, $userdata, $events_config;
 
 	if(current_user_can($events_config['managelevel'])) {
 		$event_ids = $_POST['eventcheck'];
@@ -186,7 +184,6 @@ function events_request_delete() {
 		if($event_ids != '') {
 			foreach($event_ids as $event_id) {
 				events_delete($event_id, 'event');
-				if($events_tracker['register'] == 'Y') { events_send_data('Delete Event'); }
 			}
 			events_return('delete-event');
 			exit;
@@ -195,12 +192,11 @@ function events_request_delete() {
 		events_return('no_access');
 		exit;
 	}
-	
+
 	if(current_user_can($events_config['catlevel'])) {
 		if($category_ids != '') {
 			foreach($category_ids as $category_id) {
 				events_delete($category_id, 'category');
-				if($events_tracker['register'] == 'Y') { events_send_data('Delete Category'); }
 			}
 			events_return('delete-category');
 			exit;
@@ -269,13 +265,7 @@ function events_check_config() {
 		$option['localization'] 			= 'en_EN';
 		update_option('events_config', $option);
 	}
-	
-	if ( !$tracker = get_option('events_tracker') ) {
-		$tracker['register']		 		= 'Y';
-		$tracker['anonymous'] 				= 'N';
-		update_option('events_tracker', $tracker);
-	}
-	
+
 	if ( !$template = get_option('events_template') ) {
 		$template['sidebar_template'] 		= '<li>%title% %link% on %startdate% %starttime%<br />%countdown%</li>';
 		$template['sidebar_h_template'] 	= '<h2>Highlighted events</h2><ul>';
@@ -325,7 +315,7 @@ function events_check_config() {
 -------------------------------------------------------------*/
 function events_options_submit() {
 	$buffer = get_option('events_tracker');
-	
+
 	// Prepare general settings
 	$option['length'] 					= trim($_POST['events_length'], "\t\n ");
 	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
@@ -347,14 +337,6 @@ function events_options_submit() {
 	$option['localization'] 			= htmlspecialchars(trim($_POST['events_localization'], "\t\n "), ENT_QUOTES);
 	update_option('events_config', $option);
 
-	// Prepare Tracker settings
-	if(isset($_POST['events_register'])) $tracker['register'] = 'Y';			
-		else $tracker['register'] = 'N';
-	if(isset($_POST['events_anonymous'])) $tracker['anonymous'] = 'Y';			
-		else $tracker['anonymous'] = 'N';
-	if($tracker['register'] == 'N' AND $buffer['register'] == 'Y') { events_send_data('Opt-out'); }
-	update_option('events_tracker', $tracker);
-	
 	// Prepare Template settings
 	$template['sidebar_template'] 		= htmlspecialchars(trim($_POST['sidebar_template'], "\t\n "), ENT_QUOTES);
 	$template['sidebar_h_template'] 	= htmlspecialchars(trim($_POST['sidebar_h_template'], "\t\n "), ENT_QUOTES);
@@ -370,7 +352,7 @@ function events_options_submit() {
 	$template['daily_f_template'] 		= htmlspecialchars(trim($_POST['daily_f_template'], "\t\n "), ENT_QUOTES);
 	$template['location_seperator']		= htmlspecialchars(trim($_POST['location_seperator'], "\t\n"), ENT_QUOTES); // Note, spaces are not filtered
 	update_option('events_template', $template);
-	
+
 	// Prepare language settings
 	$language['language_today'] 		= htmlspecialchars(trim($_POST['events_language_today'], "\t\n "), ENT_QUOTES);
 	$language['language_hours'] 		= htmlspecialchars(trim($_POST['events_language_hours'], "\t\n "), ENT_QUOTES);
@@ -405,39 +387,39 @@ function events_return($action) {
 		case "new" :
 			wp_redirect('admin.php?page=wp-events&action=created');
 		break;
-		
+
 		case "update" :
 			wp_redirect('admin.php?page=wp-events2&action=updated');
 		break;
-		
+
 		case "field_error" :
 			wp_redirect('admin.php?page=wp-events&action=field_error');
 		break;
-		
+
 		case "error" :
 			wp_redirect('admin.php?page=wp-events&action=error');
 		break;
-		
+
 		case "no_access" :
 			wp_redirect('admin.php?page=wp-events2&action=no_access');
 		break;
-		
+
 		case "delete-event" :
 			wp_redirect('admin.php?page=wp-events2&action=delete-event');
 		break;
-		
+
 		case "delete-category" :
 			wp_redirect('admin.php?page=wp-events2&action=delete-category');
 		break;
-		
+
 		case "uninstall" :
 			wp_redirect('plugins.php?deactivate=true');
 		break;
-		
+
 		case "category_new" :
 			wp_redirect('admin.php?page=wp-events2&action=category_new');
 		break;
-		
+
 		case "category_field_error" :
 			wp_redirect('admin.php?page=wp-events2&action=category_field_error');
 		break;

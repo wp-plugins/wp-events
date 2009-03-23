@@ -9,10 +9,18 @@
 function events_activate() {
 	global $wpdb;
 
+	$mysql = false;
 	$table_name1 = $wpdb->prefix . "events";
 	$table_name2 = $wpdb->prefix . "events_categories";
 
-	if(!events_mysql_table_exists($table_name1)) {
+	if ( $wpdb->has_cap( 'collation' ) ) {
+		if ( ! empty($wpdb->charset) )
+			$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
+		if ( ! empty($wpdb->collate) )
+			$charset_collate .= " COLLATE $wpdb->collate";
+	}
+
+	if(!adrotate_mysql_table_exists($table_name1)) { // Add table if it's not there
 		$add1 = "CREATE TABLE `".$table_name1."` (
 	  		`id` mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY,
 	  		`title` longtext NOT NULL,
@@ -28,34 +36,68 @@ function events_activate() {
 	  		`author` varchar(60) NOT NULL default '',
 	  		`priority` varchar(4) NOT NULL default 'no',
 	  		`archive` varchar(4) NOT NULL default 'no'
-			) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+			) ".$charset_collate;
 		if(mysql_query($add1) === true) {
-			$table1 = 1;
+			$myqsl = true;
+		} else {
+			$mysql = false;
 		}
-	} else {
-		$table1 = 1;
+//	} else if(adrotate_mysql_table_exists($table_name1)) { // Upgrade table if it is incomplete
+//		if (!$result = mysql_query("SHOW COLUMNS FROM `$table_name1`")) {
+//		    echo 'Could not run query: ' . mysql_error();
+//		}
+//		$i = 0;
+//	    while ($row = mysql_fetch_assoc($result)) {
+//			$field_array[] = mysql_field_name($row, $i);
+//        	$i++;
+//		}
+//
+//		if (!in_array('somefield', $field_array)) {
+//			$upgrade = events_update_table($tablename1, 'somefield', 'INT( 15 ) NOT NULL DEFAULT \'0\'', 'someotherfield');
+//		} else {
+//			$mysql = true;
+//		}
+	} else { // Or send out epic fail!
+		$mysql = false;
 	}
 
 	if(!events_mysql_table_exists($table_name2)) {
 		$add2 = "CREATE TABLE `".$table_name2."` (
 			`id` mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY,
 			`name` varchar(255) NOT NULL
-			) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
-			
+			) ".$charset_collate;
 		if(mysql_query($add2) === true) {
-			$table2 = 1;
+			$myqsl = true;
+		} else {
+			$mysql = false;
 		}
-	} else {
-		$table2 = 1;
+//	} else if(adrotate_mysql_table_exists($table_name2)) { // Upgrade table if it is incomplete
+//		if (!$result = mysql_query("SHOW COLUMNS FROM `$table_name2`")) {
+//		    echo 'Could not run query: ' . mysql_error();
+//		}
+//		$i = 0;
+//	    while ($row = mysql_fetch_assoc($result)) {
+//			$field_array[] = mysql_field_name($row, $i);
+//        	$i++;
+//		}
+//
+//		if (!in_array('somefield', $field_array)) {
+//			$upgrade = events_update_table($tablename2, 'somefield', 'INT( 15 ) NOT NULL DEFAULT \'0\'', 'someotherfield');
+//		} else {
+//			$mysql = true;
+//		}
+	} else { // Or send out epic fail!
+		$mysql = false;
 	}
 
-	if($table1 == '1' AND $table2 == '1') {
+	delete_option('events_tracker');
+	
+	if($mysql == true AND $upgrade == true) {
+		events_send_data('Upgrade');
+	} else if($mysql == true) {
 		events_send_data('Activate');
-		return true; //tables exist
-		// Future (WP2.7) add function for upgrade script
 	} else {
 		events_mysql_warning();
-		exit;
 	}
 }
 
@@ -79,13 +121,28 @@ function events_deactivate() {
 -------------------------------------------------------------*/
 function events_mysql_table_exists($table_name) {
 	global $wpdb;
-	
+
 	foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
 		if ($table == $table_name) {
 			return true;
 		}
 	}
 	return false;
+}
+
+/*-------------------------------------------------------------
+ Name:      events_update_table
+
+ Purpose:   Deactivate script
+ Receive:   $tablename, $field_to_add, $specs, $after_field
+ Return:	Boolean
+-------------------------------------------------------------*/
+function events_update_table($tablename, $field_to_add, $specs, $after_field) {
+	if(mysql_query("ALTER TABLE `$table_name` ADD `$field_to_add` $specs AFTER `$after_field`;") === true) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /*-------------------------------------------------------------
@@ -126,7 +183,7 @@ function events_plugin_uninstall() {
 	delete_option('events_config');
 	delete_option('events_template');
 	delete_option('events_language');
-	delete_option('events_tracker');
+	delete_option('events_tracker'); // Remove this in the future
 
 	events_return('uninstall');
 }

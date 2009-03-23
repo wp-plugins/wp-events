@@ -27,7 +27,7 @@ function events_countdown($time_start, $time_end, $message, $allday) {
   	if ( $days_left == 0 and $hours_left == 0 and $minutes_left == 0 and $present > $time_end) {
 		$output_countdown .= $message;
 	} else if ( $days_left == 0 ) {
-		$output_countdown .= $events_language['language_in'].', '. $hours_left .':'. $minutes_left .' '.$events_language['language_hours'].'.';
+		$output_countdown .= $events_language['language_in'].' '. $hours_left .':'. $minutes_left .' '.$events_language['language_hours'].'.';
 	} else if ($time_end >= $daystart and $time_start <= $dayend) {
 		$output_countdown .= $events_language['language_today'].'. '.$events_config['in'].' '. $minutes_left .' '.$events_language['language_minutes'].'.';
 	} else {
@@ -70,9 +70,7 @@ function events_countup($time_start, $time_end, $message) {
   	if ( $days_ago == 0 and $hours_ago == 0 and $minutes_ago == 0 and $present > $time_end ) {
 		$output_archive .= $message;
 	} else if ( $days_ago == 0 ) {
-		$output_archive .= $events_language['language_in'].', '. $hours_ago .':'. $minutes_ago .' '.$events_language['language_hours'].' '.$events_language['language_ago'].'.';
-	} else if ($time_end >= $daystart and $time_start <= $dayend) {
-		$output_archive .= $events_language['language_today'].'. '. $minutes_ago .' '.$events_language['language_minutes'].' '.$events_language['language_ago'].'.';
+		$output_archive .= $hours_ago .':'. $minutes_ago .' '.$events_language['language_hours'].' '.$events_language['language_ago'].'.';
 	} else {
 		if($days_ago == 1) {
 			$output_archive .= $days_ago .' '.$events_language['language_day'].' ';
@@ -135,8 +133,10 @@ function events_duration($event_start, $event_end, $allday) {
 function events_sidebar($cat = 0, $limit = 0) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
-	$present = date('U');
-	$daystart = floor($present / 86400) * 86400;
+	$present 		= current_time('timestamp');
+	$daystart 		= floor($present / 86400) * 86400;
+	$dayend 		= $daystart + 86400;
+	$nextsevendays	= $present + 604800;
 
 	if($cat == 0 or strlen($cat) < 1) $category = '';
 		else $category = "AND `category` = '$cat'";
@@ -150,6 +150,10 @@ function events_sidebar($cat = 0, $limit = 0) {
 		$sideshow = "AND `theend` >= '$present'";
 	} else if($events_config['sideshow'] == "4") {
 		$sideshow = "AND `thetime` <= '$present'";
+	} else if($events_config['sideshow'] == "5") {
+		$sideshow = "AND (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)";
+	} else if($events_config['sideshow'] == "6") {
+		$sideshow = "AND (`thetime` >= '$present' AND `thetime` <= '$nextsevendays') OR ($present >= `thetime` AND $present <= `theend`)";
 	} else {
 		$sideshow = "AND `theend` >= '$daystart'"; // default behaviour (1)
 	}
@@ -226,29 +230,39 @@ function events_show($atts, $content = null) {
 	if(empty($atts['amount'])) $amount = "";
 		else $amount = " LIMIT $atts[amount]";
 
-	if(empty($atts['order'])) $order = $events_config['order'];
-		else $amount = $atts['order'];
-
 	if(empty($atts['event'])) $one_event = '';
 		else $one_event = " AND `id` = '$atts[event]'";
 
+	if(empty($atts['order'])) {
+		if($type == "archive") {
+			$order = $events_config['order_archive'];
+		} else {
+			$order = $events_config['order'];
+		}
+	} else {
+		$amount = $atts['order'];
+	}
+
 	if(empty($atts['category'])) {
-		$category = ''; 
-	} else { 
+		$category = '';
+	} else {
 		$category = " AND `category` = '$atts[category]'";
 		$category2 = $atts[category];
 	}
 
 	if($events_config AND $events_language AND $events_template AND isset($type)){
 		if($type == 'default') {
+
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` >= $present$category$one_event ORDER BY $order$amount");
 			if(!empty($atts['category'])) {
 				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
 			}
-			
+
 			$header = $events_template['page_h_template'];
 			$footer = $events_template['page_f_template'];
+
 		} else if ($type == 'archive') {
+
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `archive` = 'yes' AND `thetime` <= $present$category$one_event ORDER BY $order$amount");
 			if(!empty($atts['category'])) {
 				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
@@ -256,16 +270,19 @@ function events_show($atts, $content = null) {
 
 			$header = $events_template['archive_h_template'];
 			$footer = $events_template['archive_f_template'];
+
 		} else if ($type == 'today') {
+
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)$category$one_event ORDER BY $order$amount");
 			if(!empty($atts['category'])) {
 				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
 			}
 
 			$header = $events_template['daily_h_template'];
-			$footer = $events_template['daily_f_template'];			
+			$footer = $events_template['daily_f_template'];
+
 		}
-		
+
 		$header = str_replace('%category%', $get_category->name, $header);
 		$output = stripslashes(html_entity_decode($header));
 		if (count($events) == 0) {
@@ -351,7 +368,7 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
  Return:	$events
 -------------------------------------------------------------*/
 function events_list($atts, $content = null) {
-	
+
 	if(!empty($atts)) {
 		$add = array('type' => 'default');
 		array_push($atts, $add);
@@ -360,7 +377,7 @@ function events_list($atts, $content = null) {
 	}
 
 	$events = events_show($atts, $content);
-	
+
 	return $events;
 }
 
@@ -372,7 +389,7 @@ function events_list($atts, $content = null) {
  Return:	$events
 -------------------------------------------------------------*/
 function events_archive($atts, $content = null) {
-	
+
 	if(!empty($atts)) {
 		$add = array('type' => 'archive');
 		array_push($atts, $add);
@@ -381,7 +398,7 @@ function events_archive($atts, $content = null) {
 	}
 
 	$events = events_show($atts, $content);
-	
+
 	return $events;
 }
 
@@ -393,7 +410,7 @@ function events_archive($atts, $content = null) {
  Return:	$events
 -------------------------------------------------------------*/
 function events_today($atts, $content = null) {
-	
+
 	if(!empty($atts)) {
 		$add = array('type' => 'today');
 		array_push($atts, $add);
@@ -402,7 +419,7 @@ function events_today($atts, $content = null) {
 	}
 
 	$events = events_show($atts, $content);
-	
+
 	return $events;
 }
 
@@ -428,26 +445,18 @@ function events_clear_old() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_send_data($action) {
-	$events_tracker = get_option('events_tracker');
 
 	// Prepare data
 	$date			= date('U');
 	$plugin			= 'Events';
-	$version		= '1.7.1';
+	$version		= '1.7.2';
 	//$action -> pulled from function args
 
 	// User choose anonymous?
-	if($events_tracker['anonymous'] == 'Y') {
-		$ident 		= 'Anonymous';
-		$blogname 	= 'Anonymous';
-		$blogurl	= 'Anonymous';
-		$email		= 'Anonymous';
-	} else {
-		$ident 		= md5(get_option('siteurl'));
-		$blogname	= get_option('blogname');
-		$blogurl	= get_option('siteurl');
-		$email		= get_option('admin_email');
-	}
+	$ident 		= md5(get_option('siteurl'));
+	$blogname	= get_option('blogname');
+	$blogurl	= get_option('siteurl');
+	$email		= get_option('admin_email');
 
 	// Build array of data
 	$post_data = array (

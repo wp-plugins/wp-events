@@ -2,9 +2,9 @@
 Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
 Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
-Requires at least: 2.7
+Requires at least: 2.7, PHP5.2
 Tested up to: 2.7.1
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 
 Create a list with events/appointments/concerts/future happenings and show them on your site. Includes optional widget and advanced page options.
 
@@ -38,6 +38,8 @@ When you create or edit an event you can set it to be archived. So that it remai
 And more, see for yourself...
 
 == Installation ==
+
+Caution: this plugin requires PHP5.2 or newer! Make sure you have PHP5.2 or newer!
 
 Installation with widget:
 
