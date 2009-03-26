@@ -9,9 +9,11 @@
 function events_activate() {
 	global $wpdb;
 
-	$mysql = false;
-	$table_name1 = $wpdb->prefix . "events";
-	$table_name2 = $wpdb->prefix . "events_categories";
+	$mysql1 		= false;
+	$mysql2 		= false;
+	$upgrade 		= false;
+	$table_name1	= $wpdb->prefix . "events";
+	$table_name2 	= $wpdb->prefix . "events_categories";
 
 	if ( $wpdb->has_cap( 'collation' ) ) {
 		if ( ! empty($wpdb->charset) )
@@ -20,7 +22,7 @@ function events_activate() {
 			$charset_collate .= " COLLATE $wpdb->collate";
 	}
 
-	if(!adrotate_mysql_table_exists($table_name1)) { // Add table if it's not there
+	if(!events_mysql_table_exists($table_name1)) { // Add table if it's not there
 		$add1 = "CREATE TABLE `".$table_name1."` (
 	  		`id` mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY,
 	  		`title` longtext NOT NULL,
@@ -38,11 +40,11 @@ function events_activate() {
 	  		`archive` varchar(4) NOT NULL default 'no'
 			) ".$charset_collate;
 		if(mysql_query($add1) === true) {
-			$myqsl = true;
+			$myqsl1 = true;
 		} else {
-			$mysql = false;
+			$mysql1 = false;
 		}
-//	} else if(adrotate_mysql_table_exists($table_name1)) { // Upgrade table if it is incomplete
+//	} else if(events_mysql_table_exists($table_name1)) { // Upgrade table if it is incomplete
 //		if (!$result = mysql_query("SHOW COLUMNS FROM `$table_name1`")) {
 //		    echo 'Could not run query: ' . mysql_error();
 //		}
@@ -53,12 +55,13 @@ function events_activate() {
 //		}
 //
 //		if (!in_array('somefield', $field_array)) {
+//			## REVIEW THE FUNCTION FOR USAGE ##
 //			$upgrade = events_update_table($tablename1, 'somefield', 'INT( 15 ) NOT NULL DEFAULT \'0\'', 'someotherfield');
 //		} else {
-//			$mysql = true;
+//			$mysql1 = true;
 //		}
 	} else { // Or send out epic fail!
-		$mysql = false;
+		$mysql1 = false;
 	}
 
 	if(!events_mysql_table_exists($table_name2)) {
@@ -67,11 +70,11 @@ function events_activate() {
 			`name` varchar(255) NOT NULL
 			) ".$charset_collate;
 		if(mysql_query($add2) === true) {
-			$myqsl = true;
+			$myqsl2 = true;
 		} else {
-			$mysql = false;
+			$mysql2 = false;
 		}
-//	} else if(adrotate_mysql_table_exists($table_name2)) { // Upgrade table if it is incomplete
+//	} else if(events_mysql_table_exists($table_name2)) { // Upgrade table if it is incomplete
 //		if (!$result = mysql_query("SHOW COLUMNS FROM `$table_name2`")) {
 //		    echo 'Could not run query: ' . mysql_error();
 //		}
@@ -82,19 +85,20 @@ function events_activate() {
 //		}
 //
 //		if (!in_array('somefield', $field_array)) {
+//			## REVIEW THE FUNCTION FOR USAGE ##
 //			$upgrade = events_update_table($tablename2, 'somefield', 'INT( 15 ) NOT NULL DEFAULT \'0\'', 'someotherfield');
 //		} else {
-//			$mysql = true;
+//			$mysql2 = true;
 //		}
 	} else { // Or send out epic fail!
-		$mysql = false;
+		$mysql2 = false;
 	}
 
 	delete_option('events_tracker');
 	
-	if($mysql == true AND $upgrade == true) {
+	if($mysql1 == true AND $mysql2 == true AND $upgrade == true) {
 		events_send_data('Upgrade');
-	} else if($mysql == true) {
+	} else if($mysql1 == true AND $mysql2 == true) {
 		events_send_data('Activate');
 	} else {
 		events_mysql_warning();
@@ -141,7 +145,8 @@ function events_update_table($tablename, $field_to_add, $specs, $after_field) {
 	if(mysql_query("ALTER TABLE `$table_name` ADD `$field_to_add` $specs AFTER `$after_field`;") === true) {
 		return true;
 	} else {
-		return false;
+		events_mysql_upgrade_error();
+		die();
 	}
 }
 
@@ -153,7 +158,18 @@ function events_update_table($tablename, $field_to_add, $specs, $after_field) {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_mysql_warning() {
-	echo '<div class="updated"><h3>WARNING! The MySQL table was not created! You cannot store events. Seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a>.</h3></div>';
+	echo '<div class="updated"><h3>WARNING! The MySQL table was not created! You cannot store events. See if you have the right MySQL access rights and check if you can create tables. Contact your webhost/sysadmin if you must. If this brings no joy, seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a>. Please give as much information as you can related to your problem.</h3></div>';
+}
+
+/*-------------------------------------------------------------
+ Name:      events_mysql_upgrade_error
+
+ Purpose:   Database errors if things go wrong
+ Receive:   -none-
+ Return:	-none-
+-------------------------------------------------------------*/
+function events_mysql_upgrade_error() {
+	echo '<div class="updated"><h3>WARNING! The MySQL table was not properly upgrade! Events cannot work properly without this upgrade. Check your MySQL permissions and see if you have ALTER rights (rights to alter existing tables) contact your webhost/sysadmin if you must. If this brings no answers seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a> and mention any errors you saw/got and explain what you were doing!</h3></div>';
 }
 
 /*-------------------------------------------------------------

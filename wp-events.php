@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.7.2
+Version: 1.7.3
 Author URI: http://meandmymac.net/
 */
 
@@ -73,11 +73,12 @@ setlocale(LC_TIME, $events_config['localization']);
 function events_dashboard() {
 	global $events_config;
 
-	add_object_page('Events', 'Events', 'read', 'wp-events', 'events_schedule');
-		add_submenu_page('wp-events', 'Events > Add/Edit', 'Add|Edit Event', $events_config['editlevel'], 'wp-events', 'events_schedule');
-		add_submenu_page('wp-events', 'Events > Manage', 'Manage Events', $events_config['managelevel'], 'wp-events2', 'events_manage');
+	add_object_page('Events', 'Events', 'read', 'wp-events', 'events_manage');
+		add_submenu_page('wp-events', 'Events > Manage', 'Manage Events', $events_config['managelevel'], 'wp-events', 'events_manage');
+		add_submenu_page('wp-events', 'Events > Add/Edit', 'Add|Edit Event', $events_config['editlevel'], 'wp-events2', 'events_schedule');
+		add_submenu_page('wp-events', 'Events > Categories', 'Manage Categories', $events_config['managelevel'], 'wp-events3', 'events_categories');
 
-	add_options_page('Events', 'Events', 'manage_options', 'wp-events3', 'events_options');
+	add_options_page('Events', 'Events', 'manage_options', 'wp-events4', 'events_options');
 }
 
 /*-------------------------------------------------------------
@@ -95,31 +96,19 @@ function events_manage() {
 		$order = $_POST['order'];
 	} else {
 		$order = 'thetime DESC';
-	}
-	if(isset($_POST['catorder'])) {
-		$catorder = $_POST['catorder'];
-	} else {
-		$catorder = 'id ASC';
 	} ?>
-
 	<div class="wrap">
-		<h2>Manage Events (<a href="admin.php?page=wp-events">add new</a>)</h2>
+		<h2>Manage Events</h2>
 
 		<?php if ($action == 'delete-event') { ?>
 			<div id="message" class="updated fade"><p>Event <strong>deleted</strong></p></div>
-		<?php } else if ($action == 'delete-category') { ?>
-			<div id="message" class="updated fade"><p>Category <strong>deleted</strong></p></div>
 		<?php } else if ($action == 'updated') { ?>
 			<div id="message" class="updated fade"><p>Event <strong>updated</strong></p></div>
 		<?php } else if ($action == 'no_access') { ?>
 			<div id="message" class="updated fade"><p>Action prohibited</p></div>
-		<?php } else if ($action == 'category_new') { ?>
-			<div id="message" class="updated fade"><p>Category <strong>created</strong></p></div>
-		<?php } else if ($action == 'category_field_error') { ?>
-			<div id="message" class="updated fade"><p>No category name filled in</p></div>
 		<?php } ?>
 
-		<form name="events" id="post" method="post" action="admin.php?page=wp-events2">
+		<form name="events" id="post" method="post" action="admin.php?page=wp-events">
 		<div class="tablenav">
 
 			<div class="alignleft actions">
@@ -159,7 +148,7 @@ function events_manage() {
 				    <tr id='event-<?php echo $event->id; ?>' class=' <?php echo $class; ?>'>
 						<th scope="row" class="check-column"><input type="checkbox" name="eventcheck[]" value="<?php echo $event->id; ?>" /></th>
 						<td><?php echo gmdate("F d Y H:i", $event->thetime);?></td>
-						<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/admin.php?page=wp-events&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
+						<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/admin.php?page=wp-events2&amp;edit_event='.$event->id;?>" title="Edit"><?php echo stripslashes(html_entity_decode($event->title));?></a></strong></td>
 						<td><?php echo $cat->name; ?></td>
 						<td><?php echo events_countdown($event->thetime, $event->theend, $event->post_message, $event->allday); ?></td>
 					</tr>
@@ -175,10 +164,45 @@ function events_manage() {
 		</table>
 		</form>
 
-		<br />
+		<br class="clear" />
+		<?php events_credits(); ?>
+
+	</div>
+	<?php
+}
+
+/*-------------------------------------------------------------
+ Name:      events_categories
+
+ Purpose:   Admin categories page
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_categories() {
+	global $wpdb, $events_config;
+
+	$action = $_GET['action'];
+
+	if(isset($_POST['catorder'])) {
+		$catorder = $_POST['catorder'];
+	} else {
+		$catorder = 'id ASC';
+	} ?>
+
+	<div class="wrap">
 		<h2>Categories</h2>
 
-		<form name="groups" id="post" method="post" action="admin.php?page=wp-events2">
+		<?php if ($action == 'delete-category') { ?>
+			<div id="message" class="updated fade"><p>Category <strong>deleted</strong></p></div>
+		<?php } else if ($action == 'no_access') { ?>
+			<div id="message" class="updated fade"><p>Action prohibited</p></div>
+		<?php } else if ($action == 'category_new') { ?>
+			<div id="message" class="updated fade"><p>Category <strong>created</strong>. <a href="admin.php?page=wp-events2">Add events</a> now.</p></div>
+		<?php } else if ($action == 'category_field_error') { ?>
+			<div id="message" class="updated fade"><p>No category name filled in</p></div>
+		<?php } ?>
+
+		<form name="groups" id="post" method="post" action="admin.php?page=wp-events3">
 		<div class="tablenav">
 			<div class="alignleft actions">
 				<input onclick="return confirm('You are about to delete one or more categories! Make sure there are no events in those categories or they will not show on the website\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete category" name="delete_categories" class="button-secondary delete" />
@@ -230,28 +254,10 @@ function events_manage() {
 		</form>
 
 		<br class="clear" />
-    	<table class="widefat" style="margin-top: .5em">
-
-			<thead>
-			<tr valign="top">
-				<th colspan="4">Events for Excellent!</th>
-			</tr>
-			</thead>
-
-			<tbody>
-	      	<tr>
-		        <td colspan="4">Find me on <a href="http://meandmymac" target="_blank">meandmymac.net</a>.<br />
-		        Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>.<br />
-		        Subscribed to the Meandmymac Data Project? Curious? <a href="http://meandmymac.net/plugins/data-project/" target="_blank">More information</a>. <br />
-		        Want to see your stats? <a href="http://meandmymac.net/wp-admin/" target="_blank">Plugin statistics</a>.<br />
-		        Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>
-	      	</tr>
-	      	</tbody>
-
-		</table>
+		<?php events_credits(); ?>
 
 	</div>
-	<?php
+<?php
 }
 
 /*-------------------------------------------------------------
@@ -270,6 +276,9 @@ function events_schedule() {
 	if($_GET['edit_event']) {
 		$event_edit_id = $_GET['edit_event'];
 	}
+	if($_GET['duplicate']) {
+		$event_edit_id = $_GET['duplicate'];
+	}
 	?>
 	<div class="wrap">
 		<?php if(!$event_edit_id) { ?>
@@ -284,7 +293,9 @@ function events_schedule() {
 		}
 
 		if ($action == 'created') { ?>
-			<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="admin.php?page=wp-events2">manage events</a></p></div>
+			<div id="message" class="updated fade"><p>Event <strong>created</strong> | <a href="admin.php?page=wp-events">manage events</a></p></div>
+		<?php } else if ($action == 'duplicated') { ?>
+			<div id="message" class="updated fade"><p>Event <strong>duplicated</strong></p></div>
 		<?php } else if ($action == 'no_access') { ?>
 			<div id="message" class="updated fade"><p>Action prohibited</p></div>
 		<?php } else if ($action == 'field_error') { ?>
@@ -294,7 +305,7 @@ function events_schedule() {
 		$SQL2 = "SELECT * FROM ".$wpdb->prefix."events_categories ORDER BY id";
 		$categories = $wpdb->get_results($SQL2);
 		if($categories) { ?>
-		  	<form method="post" action="admin.php?page=wp-events">
+		  	<form method="post" action="admin.php?page=wp-events2">
 		  	   	<input type="hidden" name="events_submit" value="true" />
 		    	<input type="hidden" name="events_username" value="<?php echo $userdata->display_name;?>" />
 		    	<input type="hidden" name="events_event_id" value="<?php echo $event_edit_id;?>" />
@@ -577,12 +588,12 @@ function events_schedule() {
 						</select></td>
 						<th scope="row">Archive this event:</th>
 						<td width="25%"><select name="events_archive" tabindex="17">
-						<?php if($edit_event->archive == "no" OR $edit_event->archive == "") { ?>
-						<option value="no">No</option>
+						<?php if($edit_event->archive == "yes" OR $edit_event->archive == "") { ?>
 						<option value="yes">Yes</option>
+						<option value="no">No</option>
 						<?php } else { ?>
-						<option value="yes">Yes</option>
 						<option value="no">No</option>
+						<option value="yes">Yes</option>
 						<?php } ?>
 						</select></td>
 					</tr>
@@ -598,23 +609,10 @@ function events_schedule() {
 			      	</tr>
 			      	</tbody>
 
-					<thead>
-					<tr valign="top">
-						<th colspan="4">Events for Excellent!</th>
-					</tr>
-					</thead>
+				</table>
 
-					<tbody>
-			      	<tr>
-				        <td colspan="4">Find me on <a href="http://meandmymac" target="_blank">meandmymac.net</a>.<br />
-				        Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>.<br />
-				        Subscribed to the Meandmymac Data Project? Curious? <a href="http://meandmymac.net/plugins/data-project/" target="_blank">More information</a>. <br />
-				        Want to see your stats? <a href="http://meandmymac.net/wp-admin/" target="_blank">Plugin statistics</a>.<br />
-				        Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>
-			      	</tr>
-			      	</tbody>
-
-		    	</table>
+				<br class="clear" />
+				<?php events_credits(); ?>
 
 		    	<p class="submit">
 					<?php if($event_edit_id) { ?>

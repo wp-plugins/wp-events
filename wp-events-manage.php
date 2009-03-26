@@ -82,15 +82,19 @@ function events_insert_input() {
 		$priority 			= $_POST['events_priority'];
 		$archive 			= $_POST['events_archive'];
 
-		if (strlen($title)!=0 AND strlen($syear)!=0 AND strlen($sday)!=0 AND strlen($smonth)!=0) {
+		if (strlen($title) > 0) {
 			/* Date is sorted here */
-			if(strlen($shour) == 0) 	$shour = 0;
-			if(strlen($sminute) == 0) 	$sminute = 0;
-			if(strlen($ehour) == 0) 	$ehour = $shour;
-			if(strlen($eminute) == 0) 	$eminute = $sminute;
-			if(strlen($emonth) == 0) 	$emonth = $smonth;
-			if(strlen($eday) == 0) 		$eday = $sday;
-			if(strlen($eyear) == 0) 	$eyear = $syear;
+			if(strlen($shour) == 0) 	$shour 		= 0;
+			if(strlen($sminute) == 0) 	$sminute 	= 0;
+			if(strlen($smonth) == 0) 	$smonth 	= gmdate('m');
+			if(strlen($sday) == 0) 		$sday 		= gmdate('d');
+			if(strlen($syear) == 0) 	$syear 		= gmdate('Y');
+			
+			if(strlen($ehour) == 0) 	$ehour 		= $shour;
+			if(strlen($eminute) == 0) 	$eminute 	= $sminute;
+			if(strlen($emonth) == 0) 	$emonth 	= $smonth;
+			if(strlen($eday) == 0) 		$eday 		= $sday;
+			if(strlen($eyear) == 0) 	$eyear 		= $syear;
 
 			$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
 			$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
@@ -117,10 +121,14 @@ function events_insert_input() {
 				$postquery = "INSERT INTO `".$wpdb->prefix."events`
 				(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
 				VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";
-				$action = "new";
+				if(isset($_POST['submit_save'])) {
+					$action = "new";
+				} else {
+					$action = "duplicated";
+				}
 			}
 			if($wpdb->query($postquery) !== FALSE) {
-				events_return($action);
+				events_return($action, array($event_id));
 				exit;
 			} else {
 				die(mysql_error());
@@ -379,37 +387,41 @@ function events_options_submit() {
  Name:      events_return
 
  Purpose:   Return to events management
- Receive:   $action
+ Receive:   $action, $arg
  Return:    -none-
 -------------------------------------------------------------*/
-function events_return($action) {
+function events_return($action, $arg = null) {
 	switch($action) {
 		case "new" :
-			wp_redirect('admin.php?page=wp-events&action=created');
+			wp_redirect('admin.php?page=wp-events2&action=created&duplicate='.$arg[0]);
+		break;
+
+		case "duplicated" :
+			wp_redirect('admin.php?page=wp-events2&action=duplicated&duplicate='.$arg[0]);
 		break;
 
 		case "update" :
-			wp_redirect('admin.php?page=wp-events2&action=updated');
+			wp_redirect('admin.php?page=wp-events&action=updated');
 		break;
 
 		case "field_error" :
-			wp_redirect('admin.php?page=wp-events&action=field_error');
+			wp_redirect('admin.php?page=wp-events2&action=field_error');
 		break;
 
 		case "error" :
-			wp_redirect('admin.php?page=wp-events&action=error');
+			wp_redirect('admin.php?page=wp-events2&action=error');
 		break;
 
 		case "no_access" :
-			wp_redirect('admin.php?page=wp-events2&action=no_access');
+			wp_redirect('admin.php?page=wp-events&action=no_access');
 		break;
 
 		case "delete-event" :
-			wp_redirect('admin.php?page=wp-events2&action=delete-event');
+			wp_redirect('admin.php?page=wp-events&action=delete-event');
 		break;
 
 		case "delete-category" :
-			wp_redirect('admin.php?page=wp-events2&action=delete-category');
+			wp_redirect('admin.php?page=wp-events3&action=delete-category');
 		break;
 
 		case "uninstall" :
@@ -417,11 +429,11 @@ function events_return($action) {
 		break;
 
 		case "category_new" :
-			wp_redirect('admin.php?page=wp-events2&action=category_new');
+			wp_redirect('admin.php?page=wp-events3&action=category_new');
 		break;
 
 		case "category_field_error" :
-			wp_redirect('admin.php?page=wp-events2&action=category_field_error');
+			wp_redirect('admin.php?page=wp-events3&action=category_field_error');
 		break;
 	}
 }

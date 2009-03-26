@@ -127,10 +127,10 @@ function events_duration($event_start, $event_end, $allday) {
  Name:      events_sidebar
 
  Purpose:   Show events in the sidebar, also used for widget
- Receive:   $cat, $lim
+ Receive:   $lim, $cat
  Return:	$output_sidebar
 -------------------------------------------------------------*/
-function events_sidebar($cat = 0, $limit = 0) {
+function events_sidebar($lim = 0, $cat = 0) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
 	$present 		= current_time('timestamp');
@@ -449,7 +449,7 @@ function events_send_data($action) {
 	// Prepare data
 	$date			= date('U');
 	$plugin			= 'Events';
-	$version		= '1.7.2';
+	$version		= '1.7.3';
 	//$action -> pulled from function args
 
 	// User choose anonymous?
@@ -477,5 +477,35 @@ function events_send_data($action) {
 	$url = 'http://stats.meandmymac.net/receiver.php';
 
 	wp_remote_post($url, $post_data);
+}
+
+/*-------------------------------------------------------------
+ Name:      events_credits
+
+ Purpose:   Credits
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_credits() {
+	echo '<table class="widefat" style="margin-top: .5em">';
+	
+	echo '<thead>';
+	echo '<tr valign="top">';
+	echo '	<th>Events for Excellent!</th>';
+	echo '</tr>';
+	echo '</thead>';
+
+	echo '<tbody>';
+	echo '<tr>';
+	echo '	<td>Find me on <a href="http://meandmymac.net" target="_blank">meandmymac.net</a>.<br />';
+	echo '	Read about updates! <a href="http://meandmymac.net/tag/events/" target="_blank">http://meandmymac.net/tag/events/</a>.<br />';
+	echo '	Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>.<br />';
+	echo '	Subscribed to the Meandmymac Data Project? Curious? <a href="http://meandmymac.net/plugins/data-project/" target="_blank">More information</a>.<br />';
+	echo '	Want to see your stats? <a href="http://meandmymac.net/wp-admin/" target="_blank">Plugin statistics</a>.<br />';
+	echo '	Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>';
+	echo '</tr>';
+	echo '</tbody>';
+	
+	echo '</table';
 }
 ?>
