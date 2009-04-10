@@ -96,11 +96,7 @@ function events_activate() {
 
 	delete_option('events_tracker');
 	
-	if($mysql1 == true AND $mysql2 == true AND $upgrade == true) {
-		events_send_data('Upgrade');
-	} else if($mysql1 == true AND $mysql2 == true) {
-		events_send_data('Activate');
-	} else {
+	if($mysql1 == false OR $mysql2 == false OR $upgrade == false) {
 		events_mysql_warning();
 	}
 }
@@ -113,7 +109,7 @@ function events_activate() {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_deactivate() {
-	events_send_data('Deactivate');
+	continue;
 }
 
 /*-------------------------------------------------------------
@@ -146,7 +142,6 @@ function events_update_table($tablename, $field_to_add, $specs, $after_field) {
 		return true;
 	} else {
 		events_mysql_upgrade_error();
-		die();
 	}
 }
 

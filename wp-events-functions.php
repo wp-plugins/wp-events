@@ -438,48 +438,6 @@ function events_clear_old() {
 }
 
 /*-------------------------------------------------------------
- Name:      events_send_data
-
- Purpose:   Register events at meandmymac.net's database
- Receive:   $action
- Return:    -none-
--------------------------------------------------------------*/
-function events_send_data($action) {
-
-	// Prepare data
-	$date			= date('U');
-	$plugin			= 'Events';
-	$version		= '1.7.3';
-	//$action -> pulled from function args
-
-	// User choose anonymous?
-	$ident 		= md5(get_option('siteurl'));
-	$blogname	= get_option('blogname');
-	$blogurl	= get_option('siteurl');
-	$email		= get_option('admin_email');
-
-	// Build array of data
-	$post_data = array (
-		'headers'	=> null,
-		'body'		=> array(
-			'ident'		=> $ident,
-			'blogname' 	=> base64_encode($blogname),
-			'blogurl'	=> base64_encode($blogurl),
-			'email'		=> base64_encode($email),
-			'date'		=> $date,
-			'plugin'	=> $plugin,
-			'version'	=> $version,
-			'action'	=> $action,
-		),
-	);
-
-	// Destination
-	$url = 'http://stats.meandmymac.net/receiver.php';
-
-	wp_remote_post($url, $post_data);
-}
-
-/*-------------------------------------------------------------
  Name:      events_credits
 
  Purpose:   Credits
@@ -501,7 +459,6 @@ function events_credits() {
 	echo '	Read about updates! <a href="http://meandmymac.net/tag/events/" target="_blank">http://meandmymac.net/tag/events/</a>.<br />';
 	echo '	Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>.<br />';
 	echo '	Subscribed to the Meandmymac Data Project? Curious? <a href="http://meandmymac.net/plugins/data-project/" target="_blank">More information</a>.<br />';
-	echo '	Want to see your stats? <a href="http://meandmymac.net/wp-admin/" target="_blank">Plugin statistics</a>.<br />';
 	echo '	Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>';
 	echo '</tr>';
 	echo '</tbody>';
