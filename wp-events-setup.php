@@ -109,7 +109,6 @@ function events_activate() {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_deactivate() {
-	continue;
 }
 
 /*-------------------------------------------------------------
@@ -178,7 +177,6 @@ function events_plugin_uninstall() {
 	global $wpdb;
 
 	// Deactivate Plugin
-	events_send_data('Uninstall');
 	$current = get_settings('active_plugins');
     array_splice($current, array_search( "wp-events/wp-events.php", $current), 1 );
 	update_option('active_plugins', $current);

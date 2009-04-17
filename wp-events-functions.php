@@ -223,6 +223,7 @@ function events_show($atts, $content = null) {
 	$present = current_time('timestamp');
 	$daystart = floor($present / 86400) * 86400;
 	$dayend = $daystart + 86400;
+	$nextsevendays	= $present + 604800;
 
 	if(empty($atts['type'])) $type = "default";
 		else $type = $atts['type'];
@@ -251,35 +252,33 @@ function events_show($atts, $content = null) {
 	}
 
 	if($events_config AND $events_language AND $events_template AND isset($type)){
+		if(!empty($atts['category'])) {
+			$get_category = $wpdb->get_row("SELECT `name` FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
+		}
+
 		if($type == 'default') {
 
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` >= $present$category$one_event ORDER BY $order$amount");
-			if(!empty($atts['category'])) {
-				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
-			}
-
 			$header = $events_template['page_h_template'];
 			$footer = $events_template['page_f_template'];
 
 		} else if ($type == 'archive') {
 
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `archive` = 'yes' AND `thetime` <= $present$category$one_event ORDER BY $order$amount");
-			if(!empty($atts['category'])) {
-				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
-			}
-
 			$header = $events_template['archive_h_template'];
 			$footer = $events_template['archive_f_template'];
 
 		} else if ($type == 'today') {
 
-			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)$category$one_event ORDER BY $order$amount");
-			if(!empty($atts['category'])) {
-				$get_category = $wpdb->get_row("SELECT name FROM `".$wpdb->prefix."events_categories` WHERE `id` = $category2");
-			}
-
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE $present >= `thetime` AND $present <= `theend` $category$one_event ORDER BY $order$amount");
 			$header = $events_template['daily_h_template'];
 			$footer = $events_template['daily_f_template'];
+
+		} else if ($type == 'week') {
+
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= '$present' AND `thetime` <= '$nextsevendays') OR ($present >= `thetime` AND $present <= `theend`) $category$one_event ORDER BY $order$amount");
+			$header = $events_template['page_h_template'];
+			$footer = $events_template['page_f_template'];
 
 		}
 
@@ -316,11 +315,18 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 	if($type == 'default') $template = $events_template['page_template'];
 	if($type == 'archive') $template = $events_template['archive_template'];
 	if($type == 'today') $template = $events_template['daily_template'];
+	if($type == 'week') $template = $events_template['page_template'];
 
 	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
 	$template = str_replace('%title%', $title, $template);
-	$template = str_replace('%event%', $pre_message, $template);
-	$template = str_replace('%after%', $post_message, $template);
+
+	if(current_time('timestamp') <= $theend) { 
+		$template = str_replace('%event%', $pre_message, $template);
+		$template = str_replace('%after%', '', $template);
+	} else {
+		$template = str_replace('%event%', '', $template);
+		$template = str_replace('%after%', $post_message, $template);
+	}
 
 	if(strlen($link) > 0) { $template = str_replace('%link%', '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_pagelink'].'</a>', $template); }
 	if(strlen($link) == 0) { $template = str_replace('%link%', '', $template); }
@@ -331,7 +337,7 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 
 	$template = str_replace('%startdate%', gmstrftime($events_config['dateformat'], $thetime), $template);
 
-	if($thetime == $theend and $events_config['hideend'] == 'hide') {
+	if($thetime == $theend AND $events_config['hideend'] == 'hide') {
 		$template = str_replace('%endtime%', '', $template);
 		$template = str_replace('%enddate%', '', $template);
 	} else {

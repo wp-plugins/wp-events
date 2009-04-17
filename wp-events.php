@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.7.4
+Version: 1.7.5
 Author URI: http://meandmymac.net/
 */
 
@@ -271,6 +271,7 @@ function events_schedule() {
 	global $wpdb, $userdata, $events_config;
 
 	$timezone = get_option('gmt_offset')*3600;
+	$thetime 	= current_time('timestamp');
 
 	$action = $_GET['action'];
 	if($_GET['edit_event']) {
@@ -283,11 +284,12 @@ function events_schedule() {
 	<div class="wrap">
 		<?php if(!$event_edit_id) { ?>
 		<h2>Add event</h2>
-		<?php } else { ?>
+		<?php
+			list($sday, $smonth, $syear) = split(" ", gmdate("d m Y", $thetime));
+		} else { ?>
 		<h2>Edit event</h2>
 		<?php
-			$SQL = "SELECT * FROM `".$wpdb->prefix."events` WHERE `id` = $event_edit_id";
-			$edit_event = $wpdb->get_row($SQL);
+			$edit_event = $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."events` WHERE `id` = $event_edit_id");
 			list($sday, $smonth, $syear, $shour, $sminute) = split(" ", gmdate("d m Y H i", $edit_event->thetime));
 			list($eday, $emonth, $eyear, $ehour, $eminute) = split(" ", gmdate("d m Y H i", $edit_event->theend));
 		}
@@ -824,7 +826,7 @@ function events_options() {
 			        <td colspan="3"><input name="events_sidelength" type="text" value="<?php echo $events_config['sidelength'];?>" size="6" /> (default: 120)</td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Options for the page</span></td>
+					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Options for the page lists</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Date format</th>
@@ -947,7 +949,7 @@ function events_options() {
 			        <td><textarea name="sidebar_f_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_f_template']); ?></textarea></td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Page, main list</span></td>
+					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Page, main list. Week, 7 days ahead</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
