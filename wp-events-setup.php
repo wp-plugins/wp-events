@@ -192,7 +192,7 @@ function events_plugin_uninstall() {
 	delete_option('events_config');
 	delete_option('events_template');
 	delete_option('events_language');
-	delete_option('events_tracker'); // Remove this in the future
+	delete_option('events_tracker'); // Remove this in version 2 or so
 
 	events_return('uninstall');
 }

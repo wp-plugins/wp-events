@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.7.5
+Version: 1.7.6
 Author URI: http://meandmymac.net/
 */
 
@@ -46,8 +46,16 @@ if(isset($_POST['delete_events']) OR isset($_POST['delete_categories'])) {
 	add_action('init', 'events_request_delete'); //Delete events/categories
 }
 
-if(isset($_POST['events_submit_options'])) {
-	add_action('init', 'events_options_submit'); //Update Options
+if(isset($_POST['events_submit_general'])) {
+	add_action('init', 'events_general_submit'); //Update Options
+}
+
+if(isset($_POST['events_submit_templates'])) {
+	add_action('init', 'events_templates_submit'); //Update templates
+}
+
+if(isset($_POST['events_submit_language'])) {
+	add_action('init', 'events_language_submit'); //Update language settings
 }
 
 if(isset($_POST['events_uninstall'])) {
@@ -58,7 +66,6 @@ if(isset($_POST['events_uninstall'])) {
 $events_config = get_option('events_config');
 $events_template = get_option('events_template');
 $events_language = get_option('events_language');
-$events_tracker = get_option('events_tracker');
 
 // Set localization
 setlocale(LC_TIME, $events_config['localization']);
@@ -73,10 +80,10 @@ setlocale(LC_TIME, $events_config['localization']);
 function events_dashboard() {
 	global $events_config;
 
-	add_object_page('Events', 'Events', 'read', 'wp-events', 'events_manage');
-		add_submenu_page('wp-events', 'Events > Manage', 'Manage Events', $events_config['managelevel'], 'wp-events', 'events_manage');
+	add_object_page('Events', 'Events', $events_config['editlevel'], 'wp-events', 'events_manage');
+		add_submenu_page('wp-events', 'Events > Manage', 'Manage Events', $events_config['editlevel'], 'wp-events', 'events_manage');
 		add_submenu_page('wp-events', 'Events > Add/Edit', 'Add|Edit Event', $events_config['editlevel'], 'wp-events2', 'events_schedule');
-		add_submenu_page('wp-events', 'Events > Categories', 'Manage Categories', $events_config['managelevel'], 'wp-events3', 'events_categories');
+		add_submenu_page('wp-events', 'Events > Categories', 'Manage Categories', $events_config['editlevel'], 'wp-events3', 'events_categories');
 
 	add_options_page('Events', 'Events', 'manage_options', 'wp-events4', 'events_options');
 }
@@ -749,15 +756,28 @@ function events_options() {
 
 	$gmt_offset = (get_option('gmt_offset')*3600);
 	$timezone = gmdate("U") + $gmt_offset;
+	$view 	= $_GET['view'];
 ?>
 	<div class="wrap">
 	  	<h2>Events options</h2>
 	  	<form method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>&amp;updated=true">
-	    	<input type="hidden" name="events_submit_options" value="true" />
 
+			<div class="tablenav">
+				<div class="alignleft actions">
+					<a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/options-general.php?page=wp-events4&view=main';?>">General</a> | 
+					<a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/options-general.php?page=wp-events4&view=templates';?>">Templates</a> | 
+					<a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/options-general.php?page=wp-events4&view=language';?>">Language</a> | 
+					<a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/options-general.php?page=wp-events4&view=uninstall';?>">Uninstall</a>
+				</div>
+			</div>
+
+	    	<?php if ($view == "" OR $view == "main") { ?>
+	    	
 	    	<h3>Main config</h3>
-
+	    	
+	    	<input type="hidden" name="events_submit_general" value="true" />
 	    	<table class="form-table">
+	    	
 				<tr valign="top">
 					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Options for the sidebar and widget</span></td>
 				</tr>
@@ -885,7 +905,7 @@ function events_options() {
 					</select></td>
 		      	</tr>
 				<tr valign="top">
-					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Global or other options.</span></td>
+					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Global or other options</span></td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Order events</th>
@@ -925,13 +945,52 @@ function events_options() {
 				        <option value="_parent" <?php if($events_config['linktarget'] == "_parent") { echo 'selected'; } ?>>parent window</option>
 					</select></td>
 		      	</tr>
+				<tr valign="top">
+					<td colspan="4"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">User Access</span></td>
+				</tr>
+				<tr valign="top">
+					<td colspan="4">Set these options to prevent certain userlevels from editing, creating or deleting events. The options panel user level cannot be changed.<br />For more information on user roles go to <a href="http://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles" target="_blank">the codex</a>.</td>
+				</tr>
+		      	<tr valign="top">
+			        <th scope="row">Manage events?</th>
+			        <td colspan="3"><select name="events_editlevel">
+				        <option value="manage_options" <?php if($events_config['editlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator</option>
+				        <option value="edit_pages" <?php if($events_config['editlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor (default)</option>
+				        <option value="publish_posts" <?php if($events_config['editlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
+				        <option value="edit_posts" <?php if($events_config['editlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
+				        <option value="read" <?php if($events_config['editlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
+					</select> <em>Can add/edit/review events.</em></td>
+		      	</tr>
+		      	<tr valign="top">
+			        <th scope="row">Delete events?</th>
+			        <td colspan="3"><select name="events_managelevel">
+				        <option value="manage_options" <?php if($events_config['managelevel'] == "manage_options") { echo 'selected'; } ?>>Administrator (default)</option>
+				        <option value="edit_pages" <?php if($events_config['managelevel'] == "edit_pages") { echo 'selected'; } ?>>Editor</option>
+				        <option value="publish_posts" <?php if($events_config['managelevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
+				        <option value="edit_posts" <?php if($events_config['managelevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
+				        <option value="read" <?php if($events_config['managelevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
+					</select> <em>Can review/delete events.</em></td>
+		      	</tr>
+		      	<tr valign="top">
+			        <th scope="row">Manage categories?</th>
+			        <td colspan="3"><select name="events_catlevel">
+				        <option value="manage_options" <?php if($events_config['catlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator (default)</option>
+				        <option value="edit_pages" <?php if($events_config['catlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor</option>
+				        <option value="publish_posts" <?php if($events_config['catlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
+				        <option value="edit_posts" <?php if($events_config['catlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
+				        <option value="read" <?php if($events_config['catlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
+					</select> <em>Can add/remove categories.</em></td>
+		      	</tr>
 			</table>
 		    <p class="submit">
 		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
 		    </p>
 
+		   	<?php } else if($view == "templates") { ?>
+		   	
 		   	<h3>Templates</h3>
 
+	    	<input type="hidden" name="events_submit_templates" value="true" />
 		   	<table class="form-table">
 				<tr valign="top">
 					<td colspan="2"><span style="font-weight: bold; text-decoration: underline; font-size: 12px;">Sidebar and widget</span></td>
@@ -939,7 +998,6 @@ function events_options() {
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
 			        <td><textarea name="sidebar_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_h_template']); ?></textarea></td>
-		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
 			        <td><textarea name="sidebar_template" cols="50" rows="4"><?php echo stripslashes($events_template['sidebar_template']); ?></textarea><br /><em>Options: %title% %event% %link% %countdown% %startdate% %starttime% %author% %location% %category%</em></td>
@@ -955,9 +1013,13 @@ function events_options() {
 			        <th scope="row" valign="top">Header:</th>
 			        <td><textarea name="page_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_h_template']); ?></textarea><br /><em>Options: %category%</em></td>
 		      	</tr>
+		      	</tr>
+			        <th scope="row" valign="top">Default title (optional):</th>
+			        <td><input name="page_title_default" type="text" value="<?php echo $events_template['page_title_default'];?>" size="20" /><br /><em>This only works if you use %category% in the header. No HTML allowed.</em></td>
+		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="page_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location% %category%</em></td>
+			        <td><textarea name="page_template" cols="50" rows="4"><?php echo stripslashes($events_template['page_template']); ?></textarea><br /><em>Options: %title% %event% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location% %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -969,6 +1031,10 @@ function events_options() {
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Header:</th>
 			        <td><textarea name="archive_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['archive_h_template']); ?></textarea><br /><em>Options: %category%</em></td>
+		      	</tr>
+		      	</tr>
+			        <th scope="row" valign="top">Default title (optional):</th>
+			        <td><input name="archive_title_default" type="text" value="<?php echo $events_template['archive_title_default'];?>" size="20" /><br /><em>This only works if you use %category% in the header. No HTML allowed.</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
@@ -985,9 +1051,13 @@ function events_options() {
 			        <th scope="row" valign="top">Header:</th>
 			        <td><textarea name="daily_h_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_h_template']); ?></textarea><br /><em>Options: %category%</em></td>
 		      	</tr>
+		      	</tr>
+			        <th scope="row" valign="top">Default title (optional):</th>
+			        <td><input name="daily_title_default" type="text" value="<?php echo $events_template['daily_title_default'];?>" size="20" /><br /><em>This only works if you use %category% in the header. No HTML allowed.</em></td>
+		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Body:</th>
-			        <td><textarea name="daily_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_template']); ?></textarea><br /><em>Options: %title% %event% %after% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location% %category%</em></td>
+			        <td><textarea name="daily_template" cols="50" rows="4"><?php echo stripslashes($events_template['daily_template']); ?></textarea><br /><em>Options: %title% %event% %link% %startdate% %starttime% %enddate% %endtime% %duration% %countdown% %author% %location% %category%</em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top">Footer:</th>
@@ -1002,52 +1072,14 @@ function events_options() {
 		      	</tr>
 			</table>
 		    <p class="submit">
-		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Templates &raquo;" />
 		    </p>
 
-	    	<h3>User access</h3>
+		   	<?php } else if($view == "language") { ?>
 
-	    	<table class="form-table">
-				<tr valign="top">
-					<td colspan="2">Set these options to prevent certain userlevels from editing, creating or deleting events. The options panel user level cannot be changed.<br />For more information on user roles go to <a href="http://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles" target="_blank">the codex</a>.</td>
-				</tr>
-		      	<tr valign="top">
-			        <th scope="row">Manage events?</th>
-			        <td><select name="events_editlevel">
-				        <option value="manage_options" <?php if($events_config['editlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator</option>
-				        <option value="edit_pages" <?php if($events_config['editlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor (default)</option>
-				        <option value="publish_posts" <?php if($events_config['editlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
-				        <option value="edit_posts" <?php if($events_config['editlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
-				        <option value="read" <?php if($events_config['editlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
-					</select> <em>Can add/edit/review events.</em></td>
-		      	</tr>
-		      	<tr valign="top">
-			        <th scope="row">Delete events?</th>
-			        <td><select name="events_managelevel">
-				        <option value="manage_options" <?php if($events_config['managelevel'] == "manage_options") { echo 'selected'; } ?>>Administrator (default)</option>
-				        <option value="edit_pages" <?php if($events_config['managelevel'] == "edit_pages") { echo 'selected'; } ?>>Editor</option>
-				        <option value="publish_posts" <?php if($events_config['managelevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
-				        <option value="edit_posts" <?php if($events_config['managelevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
-				        <option value="read" <?php if($events_config['managelevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
-					</select> <em>Can review/delete events.</em></td>
-		      	</tr>
-		      	<tr valign="top">
-			        <th scope="row">Manage categories?</th>
-			        <td><select name="events_catlevel">
-				        <option value="manage_options" <?php if($events_config['catlevel'] == "manage_options") { echo 'selected'; } ?>>Administrator (default)</option>
-				        <option value="edit_pages" <?php if($events_config['catlevel'] == "edit_pages") { echo 'selected'; } ?>>Editor</option>
-				        <option value="publish_posts" <?php if($events_config['catlevel'] == "publish_posts") { echo 'selected'; } ?>>Author</option>
-				        <option value="edit_posts" <?php if($events_config['catlevel'] == "edit_posts") { echo 'selected'; } ?>>Contributor</option>
-				        <option value="read" <?php if($events_config['catlevel'] == "read") { echo 'selected'; } ?>>Subscriber</option>
-					</select> <em>Can add/remove categories.</em></td>
-		      	</tr>
-			</table>
-		    <p class="submit">
-		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
-		    </p>
+ 		    <h3>Language</h3>
 
-		    <h3>Language</h3>
-
+	    	<input type="hidden" name="events_submit_language" value="true" />
 		    <table class="form-table">
 		      	<tr valign="top">
 			        <th scope="row">Today:</th>
@@ -1121,28 +1153,22 @@ function events_options() {
 			        <th scope="row">If event is an all-day event:</th>
 			        <td><input name="events_language_allday" type="text" value="<?php echo $events_language['language_allday'];?>" size="45" /> (default: All-day event!)</td>
 		      	</tr>
-			</table>
-		    <p class="submit">
-		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
-		    </p>
-
-	    	<h3>Localization</h3>
-
-	    	<table class="form-table">
 				<tr valign="top">
 					<td colspan="2">Localization can usually be en_EN. Changing this value should translate the dates to your language.<br />
 					On Linux/Mac Osx (Darwin) you should use 'en_EN' in the field. For windows just 'en' should suffice. Your server most likely uses <?php echo PHP_OS; ?>.</td>
 				</tr>
 		      	<tr valign="top">
 			        <th scope="row">Date localization:</th>
-			        <td><input name="events_localization" type="text" value="<?php echo $events_config['localization'];?>" size="10" /> (default: en_EN)</td>
+			        <td><input name="events_localization" type="text" value="<?php echo $events_language['localization'];?>" size="10" /> (default: en_EN)</td>
 		      	</tr>
 	    	</table>
 		    <p class="submit">
-		      	<input type="submit" name="Submit" class="button-primary" value="Update Options &raquo;" />
+		      	<input type="submit" name="Submit" class="button-primary" value="Update Language &raquo;" />
 		    </p>
 
 		</form>
+
+	   	<?php } else if($view == "uninstall") { ?>
 
 	  	<h2>Events Uninstall</h2>
 
@@ -1159,9 +1185,12 @@ function events_options() {
 			</table>
 	  		<p class="submit">
 		    	<input type="hidden" name="events_uninstall" value="true" />
-		    	<input onclick="return confirm('You are about to uninstall the events plugin\n  All scheduled events will be lost!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" name="Submit" class="button-secondary" value="Uninstall Plugin &raquo;" />
+		    	<input onclick="return confirm('You are about to uninstall the events plugin\n  All scheduled events will be lost!\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" name="Submit" class="button-secondary" value="Uninstall Events &raquo;" />
 	  		</p>
 	  	</form>
+	  	
+	   	<?php } ?>
+
 	</div>
 <?php
 }

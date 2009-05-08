@@ -260,29 +260,37 @@ function events_show($atts, $content = null) {
 
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` >= $present$category$one_event ORDER BY $order$amount");
 			$header = $events_template['page_h_template'];
+			$titledefault = $events_template['page_title_default'];
 			$footer = $events_template['page_f_template'];
 
 		} else if ($type == 'archive') {
 
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `archive` = 'yes' AND `thetime` <= $present$category$one_event ORDER BY $order$amount");
 			$header = $events_template['archive_h_template'];
+			$titledefault = $events_template['archive_title_default'];
 			$footer = $events_template['archive_f_template'];
 
 		} else if ($type == 'today') {
 
-			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE $present >= `thetime` AND $present <= `theend` $category$one_event ORDER BY $order$amount");
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`) $category$one_event ORDER BY $order$amount");
 			$header = $events_template['daily_h_template'];
+			$titledefault = $events_template['daily_title_default'];
 			$footer = $events_template['daily_f_template'];
 
 		} else if ($type == 'week') {
 
 			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= '$present' AND `thetime` <= '$nextsevendays') OR ($present >= `thetime` AND $present <= `theend`) $category$one_event ORDER BY $order$amount");
 			$header = $events_template['page_h_template'];
+			$titledefault = $events_template['page_title_default'];
 			$footer = $events_template['page_f_template'];
 
 		}
 
-		$header = str_replace('%category%', $get_category->name, $header);
+		if(!empty($atts['category'])) {
+			$header = str_replace('%category%', $get_category->name, $header);
+		} else {
+			$header = str_replace('%category%', $titledefault, $header);			
+		}
 		$output = stripslashes(html_entity_decode($header));
 		if (count($events) == 0) {
 			$output .= '<em>'.$events_language['language_noevents'].'</em>';
@@ -319,12 +327,11 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 
 	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
 	$template = str_replace('%title%', $title, $template);
+	$template = str_replace('%event%', $pre_message, $template);
 
 	if(current_time('timestamp') <= $theend) { 
-		$template = str_replace('%event%', $pre_message, $template);
 		$template = str_replace('%after%', '', $template);
 	} else {
-		$template = str_replace('%event%', '', $template);
 		$template = str_replace('%after%', $post_message, $template);
 	}
 

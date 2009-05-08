@@ -3,23 +3,22 @@
  Name:      events_editor
 
  Purpose:   Use simple HTML formatting tools to generate events
- Receive:   $content, $id, $prev_id, $tab_index
- Return:	$template
+ Receive:   $content, $id, $prev_id
+ Return:	-None-
 -------------------------------------------------------------*/
 function events_editor($content, $id = 'content', $prev_id = 'title') {
 	$media_buttons = false;
-	$richedit =  user_can_richedit();
+	$richedit = user_can_richedit();
 	?>
 	<div id="quicktags">
-	<?php wp_print_scripts( 'quicktags' ); ?>
-	<script type="text/javascript">edToolbar()</script>
+		<?php wp_print_scripts( 'quicktags' ); ?>
+		<script type="text/javascript">edToolbar()</script>
 	</div>
 
-	<?php $the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='40' name='$id' tabindex='4' id='$id'>%s</textarea></div>\n");
+	<?php 
+	$the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='40' name='$id' tabindex='4' id='$id'>%s</textarea></div>\n");
 	$the_editor_content = apply_filters('the_editor_content', $content);
-
 	printf($the_editor, $content);
-
 	?>
 	<script type="text/javascript">
 	// <![CDATA[
@@ -180,7 +179,7 @@ function events_create_category() {
  Name:      events_request_delete
 
  Purpose:   Prepare removal of banner or category from database
- Receive:   -none-
+ Receive:   $_POST
  Return:    -none-
 -------------------------------------------------------------*/
 function events_request_delete() {
@@ -270,7 +269,6 @@ function events_check_config() {
 		$option['timeformat_sidebar']		= '%H:%M';
 		$option['order'] 					= 'thetime ASC';
 		$option['order_archive'] 			= 'thetime DESC';
-		$option['localization'] 			= 'en_EN';
 		update_option('events_config', $option);
 	}
 
@@ -279,13 +277,16 @@ function events_check_config() {
 		$template['sidebar_h_template'] 	= '<h2>Highlighted events</h2><ul>';
 		$template['sidebar_f_template'] 	= '</ul>';
 		$template['page_template'] 			= '<p><strong>%title%</strong>, %event% on %startdate% %starttime%<br />%countdown%<br />Duration: %duration%<br />%link%</p>';
-		$template['page_h_template'] 		= '<h2>Important events</h2>';
+		$template['page_h_template'] 		= '<h2>%category%</h2>';
+		$template['page_title_default']		= 'Important events';
 		$template['page_f_template'] 		= '';
 		$template['archive_template'] 		= '<p><strong>%title%</strong>, %after% on %startdate% %starttime%<br />%countup%<br />%enddate% %endtime%<br />%link%</p>';
-		$template['archive_h_template'] 	= '<h2>Archive</h2>';
+		$template['archive_h_template'] 	= '<h2>%category%</h2>';
+		$template['archive_title_default']	= 'Archive';
 		$template['archive_f_template'] 	= '';
 		$template['daily_template'] 		= '<p>%title% %event% - %countdown% %link%</p>';
-		$template['daily_h_template'] 		= '<h2>Todays events</h2>';
+		$template['daily_h_template'] 		= '<h2>%category%</h2>';
+		$template['daily_title_default']	= 'Todays events';
 		$template['daily_f_template'] 		= '';
 		$template['location_seperator']		= '@ ';
 		update_option('events_template', $template);
@@ -310,6 +311,7 @@ function events_check_config() {
 		$language['language_noduration'] 	= 'No duration!';
 		$language['language_allday'] 		= 'All-day event!';
 		$language['language_past'] 			= 'Past event!';
+		$language['localization'] 			= 'en_EN';
 		update_option('events_language', $language);
 	}
 }
@@ -321,8 +323,7 @@ function events_check_config() {
  Receive:   $_POST
  Return:    -none-
 -------------------------------------------------------------*/
-function events_options_submit() {
-	$buffer = get_option('events_tracker');
+function events_general_submit() {
 
 	// Prepare general settings
 	$option['length'] 					= trim($_POST['events_length'], "\t\n ");
@@ -342,24 +343,49 @@ function events_options_submit() {
 	$option['order']	 				= $_POST['events_order'];
 	$option['order_archive'] 			= $_POST['events_order_archive'];
 	$option['linktarget'] 				= $_POST['events_linktarget'];
-	$option['localization'] 			= htmlspecialchars(trim($_POST['events_localization'], "\t\n "), ENT_QUOTES);
 	update_option('events_config', $option);
+}
 
+/*-------------------------------------------------------------
+ Name:      events_templates_submit
+
+ Purpose:   Save templates from dashboard
+ Receive:   $_POST
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_templates_submit() {
 	// Prepare Template settings
 	$template['sidebar_template'] 		= htmlspecialchars(trim($_POST['sidebar_template'], "\t\n "), ENT_QUOTES);
 	$template['sidebar_h_template'] 	= htmlspecialchars(trim($_POST['sidebar_h_template'], "\t\n "), ENT_QUOTES);
 	$template['sidebar_f_template'] 	= htmlspecialchars(trim($_POST['sidebar_f_template'], "\t\n "), ENT_QUOTES);
+
 	$template['page_template'] 			= htmlspecialchars(trim($_POST['page_template'], "\t\n "), ENT_QUOTES);
 	$template['page_h_template'] 		= htmlspecialchars(trim($_POST['page_h_template'], "\t\n "), ENT_QUOTES);
+	$template['page_title_default']		= htmlspecialchars(trim($_POST['page_title_default'], "\t\n "), ENT_QUOTES);
 	$template['page_f_template'] 		= htmlspecialchars(trim($_POST['page_f_template'], "\t\n "), ENT_QUOTES);
+
 	$template['archive_template'] 		= htmlspecialchars(trim($_POST['archive_template'], "\t\n "), ENT_QUOTES);
 	$template['archive_h_template'] 	= htmlspecialchars(trim($_POST['archive_h_template'], "\t\n "), ENT_QUOTES);
+	$template['archive_title_default']	= htmlspecialchars(trim($_POST['archive_title_default'], "\t\n "), ENT_QUOTES);
 	$template['archive_f_template'] 	= htmlspecialchars(trim($_POST['archive_f_template'], "\t\n "), ENT_QUOTES);
+
 	$template['daily_template']	 		= htmlspecialchars(trim($_POST['daily_template'], "\t\n "), ENT_QUOTES);
+	$template['daily_title_default']	= htmlspecialchars(trim($_POST['daily_title_default'], "\t\n "), ENT_QUOTES);
 	$template['daily_h_template'] 		= htmlspecialchars(trim($_POST['daily_h_template'], "\t\n "), ENT_QUOTES);
 	$template['daily_f_template'] 		= htmlspecialchars(trim($_POST['daily_f_template'], "\t\n "), ENT_QUOTES);
+
 	$template['location_seperator']		= htmlspecialchars(trim($_POST['location_seperator'], "\t\n"), ENT_QUOTES); // Note, spaces are not filtered
 	update_option('events_template', $template);
+}
+
+/*-------------------------------------------------------------
+ Name:      events_language_submit
+
+ Purpose:   Save language from dashboard
+ Receive:   $_POST
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_language_submit() {
 
 	// Prepare language settings
 	$language['language_today'] 		= htmlspecialchars(trim($_POST['events_language_today'], "\t\n "), ENT_QUOTES);
@@ -380,6 +406,7 @@ function events_options_submit() {
 	$language['language_noduration'] 	= htmlspecialchars(trim($_POST['events_language_noduration'], "\t\n "), ENT_QUOTES);
 	$language['language_allday'] 		= htmlspecialchars(trim($_POST['events_language_allday'], "\t\n "), ENT_QUOTES);
 	$language['language_past'] 			= htmlspecialchars(trim($_POST['events_language_past'], "\t\n "), ENT_QUOTES);
+	$language['localization'] 			= htmlspecialchars(trim($_POST['events_localization'], "\t\n "), ENT_QUOTES);
 	update_option('events_language', $language);
 }
 
