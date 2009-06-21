@@ -80,58 +80,70 @@ function events_insert_input() {
 		$eminute 			= htmlspecialchars(trim($_POST['events_eminute'], "\t\n "), ENT_QUOTES);
 		$priority 			= $_POST['events_priority'];
 		$archive 			= $_POST['events_archive'];
+		$repeat_int			= $_POST['events_repeat'];
+		$repeat_every		= $_POST['events_repeat_every'];
 
-		if (strlen($title) > 0) {
-			/* Date is sorted here */
-			if(strlen($shour) == 0) 	$shour 		= 0;
-			if(strlen($sminute) == 0) 	$sminute 	= 0;
-			if(strlen($smonth) == 0) 	$smonth 	= gmdate('m');
-			if(strlen($sday) == 0) 		$sday 		= gmdate('d');
-			if(strlen($syear) == 0) 	$syear 		= gmdate('Y');
+		if (strlen($title) > 0 and $repeat_int <= 20) {
+			if($repeat_every == "" and $repeat_int > 0) $repeat_int = 0;
 			
-			if(strlen($ehour) == 0) 	$ehour 		= $shour;
-			if(strlen($eminute) == 0) 	$eminute 	= $sminute;
-			if(strlen($emonth) == 0) 	$emonth 	= $smonth;
-			if(strlen($eday) == 0) 		$eday 		= $sday;
-			if(strlen($eyear) == 0) 	$eyear 		= $syear;
+			
+			for($iterator = 0;$iterator <= $repeat_int;$iterator++) {
 
-			$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
-			$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
+				if(strlen($shour) == 0) 	$shour 		= 0;
+				if(strlen($sminute) == 0) 	$sminute 	= 0;
+				if(strlen($smonth) == 0) 	$smonth 	= gmdate('m');
+				if(strlen($sday) == 0) 		$sday 		= gmdate('d');
+				if(strlen($syear) == 0) 	$syear 		= gmdate('Y');
+				
+				if(strlen($ehour) == 0) 	$ehour 		= $shour;
+				if(strlen($eminute) == 0) 	$eminute 	= $sminute;
+				if(strlen($emonth) == 0) 	$emonth 	= $smonth;
+				if(strlen($eday) == 0) 		$eday 		= $sday;
+				if(strlen($eyear) == 0) 	$eyear 		= $syear;
+	
+				$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
+				$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
+	
+				if(strlen($repeat_every) > 0) {
+					$day = 86400;
+					$week = 604800;
+					
+					if($repeat_every == "day") 		$every = $iterator * $day;
+					if($repeat_every == "week") 	$every = $iterator * $week;
+					if($repeat_every == "4week") 	$every = $iterator * (4 * $week);
+					if($repeat_every == "year") 	$every = $iterator * (365 * $day);
+					
+					$startdate = $startdate + $every;
+					$enddate = $enddate + $every;
+				}
 
-			if(strlen($post_event) == 0) $post_event = $eventmsg;
-
-			if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';
-				else $title_link = 'N';
-
-			if(isset($allday)) $allday = 'Y';
-				else $allday = 'N';
-
-			if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
-				/* Update an existing event */
-				$postquery = "UPDATE `".$wpdb->prefix."events` SET
-				`title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category',
-				`pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday',
-				`thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive',
-				`author` = '$author'
-				WHERE `id` = '$event_id'";
-				$action = "update";
-			} else {
-				/* New or duplicate event */
-				$postquery = "INSERT INTO `".$wpdb->prefix."events`
-				(`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`)
-				VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";
-				if(isset($_POST['submit_save'])) {
-					$action = "new";
+				if(strlen($post_event) == 0) $post_event = $eventmsg;
+	
+				if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';
+					else $title_link = 'N';
+	
+				if(isset($allday)) $allday = 'Y';
+					else $allday = 'N';
+						
+				if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
+					/* Update an existing event */
+					$postquery = "UPDATE `".$wpdb->prefix."events` SET `title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category', `pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', `thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', `author` = '$author' WHERE `id` = '$event_id'";
+					$action = "update";
 				} else {
-					$action = "duplicated";
+					/* New or duplicate event */
+					$postquery = "INSERT INTO `".$wpdb->prefix."events` (`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`) VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";
+					if(isset($_POST['submit_save'])) {
+						$action = "new";
+					} else {
+						$action = "duplicated";
+					}
+				}
+				if($wpdb->query($postquery) === FALSE) {
+					die(mysql_error());
 				}
 			}
-			if($wpdb->query($postquery) !== FALSE) {
-				events_return($action, array($event_id));
-				exit;
-			} else {
-				die(mysql_error());
-			}
+			events_return($action, array($event_id));
+			exit;
 		} else {
 			events_return('field_error');
 			exit;
@@ -143,34 +155,34 @@ function events_insert_input() {
 }
 
 /*-------------------------------------------------------------
- Name:      events_create_category
+ Name:      events_insert_category
 
- Purpose:   Add a new category
+ Purpose:   Add or edit a category
  Receive:   $_POST
  Return:	-None-
 -------------------------------------------------------------*/
-function events_create_category() {
-	global $wpdb, $userdata, $events_config;
+function events_insert_category() {
+	global $wpdb;
 
-	if(current_user_can($events_config['catlevel'])) {
-		$name = $_POST['events_category'];
+	$id 	= $_POST['events_id'];
+	$name 	= $_POST['events_cat'];
 
-		if (strlen($name) != 0) {
-			$postquery = "INSERT INTO `".$wpdb->prefix."events_categories`
-			(`name`)
-			VALUES ('$name')";
-			if($wpdb->query($postquery) !== FALSE) {
-				events_return('category_new');
-				exit;
-			} else {
-				die(mysql_error());
-			}
+	if (strlen($name) != 0) {
+		if($id > 0) {
+			$postquery = "UPDATE `".$wpdb->prefix."events_categories` SET `name` = '$name' WHERE `id` = '$id'";
+			$action = "category_edit";
 		} else {
-			events_return('category_field_error');
+			$postquery = "INSERT INTO `".$wpdb->prefix."events_categories` (`name`) VALUES ('$name')";
+			$action = "category_new";
+		}
+		if($wpdb->query($postquery) !== FALSE) {
+			events_return($action);
 			exit;
+		} else {
+			die(mysql_error());
 		}
 	} else {
-		events_return('no_access');
+		events_return('category_field_error');
 		exit;
 	}
 }
@@ -457,6 +469,10 @@ function events_return($action, $arg = null) {
 
 		case "category_new" :
 			wp_redirect('admin.php?page=wp-events3&action=category_new');
+		break;
+
+		case "category_edit" :
+			wp_redirect('admin.php?page=wp-events3&action=category_edit');
 		break;
 
 		case "category_field_error" :

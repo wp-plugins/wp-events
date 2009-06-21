@@ -54,9 +54,9 @@ function events_activate() {
 //        	$i++;
 //		}
 //
-//		if (!in_array('somefield', $field_array)) {
+//		if (!in_array('active', $field_array)) {
 //			## REVIEW THE FUNCTION FOR USAGE ##
-//			$upgrade = events_update_table($tablename1, 'somefield', 'INT( 15 ) NOT NULL DEFAULT \'0\'', 'someotherfield');
+//			$upgrade = events_update_table($tablename1, 'active', 'INT( 5 ) NOT NULL DEFAULT \'1\'', 'archive');
 //		} else {
 //			$mysql1 = true;
 //		}
@@ -93,8 +93,6 @@ function events_activate() {
 	} else { // Or send out epic fail!
 		$mysql2 = false;
 	}
-
-	delete_option('events_tracker');
 	
 	if($mysql1 == false OR $mysql2 == false OR $upgrade == false) {
 		events_mysql_warning();
@@ -192,7 +190,6 @@ function events_plugin_uninstall() {
 	delete_option('events_config');
 	delete_option('events_template');
 	delete_option('events_language');
-	delete_option('events_tracker'); // Remove this in version 2 or so
 
 	events_return('uninstall');
 }

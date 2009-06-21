@@ -374,69 +374,6 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 }
 
 /*-------------------------------------------------------------
- Name:      events_list
-
- Purpose:   DEPRECIATED, see events_show
- Receive:   $atts, $content
- Return:	$events
--------------------------------------------------------------*/
-function events_list($atts, $content = null) {
-
-	if(!empty($atts)) {
-		$add = array('type' => 'default');
-		array_push($atts, $add);
-	} else {
-		$atts['type'] = 'default';
-	}
-
-	$events = events_show($atts, $content);
-
-	return $events;
-}
-
-/*-------------------------------------------------------------
- Name:      events_archive
-
- Purpose:   DEPRECIATED, see events_show
- Receive:   $atts, $content
- Return:	$events
--------------------------------------------------------------*/
-function events_archive($atts, $content = null) {
-
-	if(!empty($atts)) {
-		$add = array('type' => 'archive');
-		array_push($atts, $add);
-	} else {
-		$atts['type'] = 'archive';
-	}
-
-	$events = events_show($atts, $content);
-
-	return $events;
-}
-
-/*-------------------------------------------------------------
- Name:      events_today
-
- Purpose:   DEPRECIATED, see events_show
- Receive:   $atts, $content
- Return:	$events
--------------------------------------------------------------*/
-function events_today($atts, $content = null) {
-
-	if(!empty($atts)) {
-		$add = array('type' => 'today');
-		array_push($atts, $add);
-	} else {
-		$atts['type'] = 'today';
-	}
-
-	$events = events_show($atts, $content);
-
-	return $events;
-}
-
-/*-------------------------------------------------------------
  Name:      events_clear_old
 
  Purpose:   Removes old non archived events
@@ -447,7 +384,7 @@ function events_clear_old() {
 	global $wpdb;
 
 	$removeme = current_time('timestamp') - 86400;
-	$wpdb->query("DELETE FROM `".$wpdb->prefix."events` WHERE `thetime` < ".$removeme." AND `archive` = 'no'");
+	$wpdb->query("DELETE FROM `".$wpdb->prefix."events` WHERE `thetime` <= ".$removeme." AND `archive` = 'no'");
 }
 
 /*-------------------------------------------------------------
@@ -469,13 +406,70 @@ function events_credits() {
 	echo '<tbody>';
 	echo '<tr>';
 	echo '	<td>Find me on <a href="http://meandmymac.net" target="_blank">meandmymac.net</a>.<br />';
-	echo '	Read about updates! <a href="http://meandmymac.net/tag/events/" target="_blank">http://meandmymac.net/tag/events/</a>.<br />';
-	echo '	Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>.<br />';
-	echo '	Subscribed to the Meandmymac Data Project? Curious? <a href="http://meandmymac.net/plugins/data-project/" target="_blank">More information</a>.<br />';
+	echo '	The plugin page at <a href="http://meandmymac.net/plugins/events/" target="_blank">meandmymac.net/plugins/events/</a>. Getting started, manuals and more...<br />';
+	echo '	<a href="http://meandmymac.net/tag/events/" target="_blank">meandmymac.net/tag/events/</a> for updates and notes about Events!<br />';
+	echo '	Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>. Now with a search function!<br />';
+	echo '	Do you require more help than the forum can offer? <a href="http://meandmymac.net/contact-and-support/premium-support/" target="_blank">Premium Support</a> is available!<br />';
 	echo '	Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>';
 	echo '</tr>';
 	echo '</tbody>';
 	
 	echo '</table';
+}
+
+/*-------------------------------------------------------------
+ Name:      meandmymac_rss
+
+ Purpose:   A very simple RSS parser for Meandmymac.net
+ Receive:   $rss, $count
+ Return:    -none-
+-------------------------------------------------------------*/
+if(!function_exists('meandmymac_rss')) {
+	function meandmymac_rss($rss, $count = 10) {
+		if ( is_string( $rss ) ) {
+			require_once(ABSPATH . WPINC . '/rss.php');
+			if ( !$rss = fetch_rss($rss) )
+				return;
+		}
+	
+		if ( is_array( $rss->items ) && !empty( $rss->items ) ) {
+			$rss->items = array_slice($rss->items, 0, $count);
+			$loop = 1;
+			foreach ( (array) $rss->items as $item ) {
+				while ( strstr($item['link'], 'http') != $item['link'] )
+					$item['link'] = substr($item['link'], 1);
+	
+				$link = clean_url(strip_tags($item['link']));
+				$desc = attribute_escape(strip_tags( $item['description']));
+				$title = attribute_escape(strip_tags($item['title']));
+				if ( empty($title) )
+					$title = __('Untitled');
+					
+				if (isset($item['pubdate']))
+					$date = $item['pubdate'];
+				elseif (isset($item['published']))
+					$date = $item['published'];
+	
+				if ($date) {
+					if ($date_stamp = strtotime($date)) {
+						$date = date_i18n( get_option('date_format'), $date_stamp);
+					} else {
+						$date = '';
+					}
+				}				
+					
+				if ( $link == '' ) {
+					$array[$loop] = array ('title' => $title, 'desc' => $desc, 'link' => '', 'date' => $date);
+				} else {
+					$array[$loop] = array ('title' => $title, 'desc' => $desc, 'link' => $link, 'date' => $date);
+				}
+				$loop++;
+			}
+		} else {
+			$array[1] = array('title' => 'An error has occurred; the feed is probably down. Try again later.');
+		}
+		
+		return $array;
+	}
 }
 ?>

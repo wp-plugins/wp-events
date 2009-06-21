@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 1.7.6
+Version: 2.0
 Author URI: http://meandmymac.net/
 */
 
@@ -15,60 +15,51 @@ include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-setup.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-functions.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-manage.php');
 include_once(ABSPATH.'wp-content/plugins/wp-events/wp-events-widget.php');
+
 register_activation_hook(__FILE__, 'events_activate');
 register_deactivation_hook(__FILE__, 'events_deactivate');
 events_check_config();
+events_clear_old();
 
-// Add filters for adding the tags in the WP page/post field
 add_shortcode('events_show', 'events_show');
-
-/* Maintained for backward compatibility */
-add_shortcode('events_list', 'events_list');
-add_shortcode('events_today', 'events_today');
-add_shortcode('events_archive', 'events_archive');
-/* Maintained for backward compatibility */
-
-events_clear_old(); // Remove non archived old events
-
-add_action('widgets_init', 'widget_wp_events_init'); //Initialize sidebar widget
-add_action('wp_dashboard_setup', 'events_dashboard_init'); //Initialize dashboard widget
-add_action('admin_menu', 'events_dashboard', 1); //Add page menu links
+add_action('widgets_init', 'events_widget_sidebar_init');
+add_action('wp_dashboard_setup', 'events_widget_dashboard_init');
+add_action('admin_menu', 'events_dashboard', 1);
 
 if(isset($_POST['events_submit'])) {
-	add_action('init', 'events_insert_input'); //Save event
+	add_action('init', 'events_insert_input');
 }
 
-if(isset($_POST['add_category_submit'])) {
-	add_action('init', 'events_create_category'); //Add a category
+if(isset($_POST['events_category_submit'])) {
+	add_action('init', 'events_insert_category');
 }
 
 if(isset($_POST['delete_events']) OR isset($_POST['delete_categories'])) {
-	add_action('init', 'events_request_delete'); //Delete events/categories
+	add_action('init', 'events_request_delete');
 }
 
 if(isset($_POST['events_submit_general'])) {
-	add_action('init', 'events_general_submit'); //Update Options
+	add_action('init', 'events_general_submit');
 }
 
 if(isset($_POST['events_submit_templates'])) {
-	add_action('init', 'events_templates_submit'); //Update templates
+	add_action('init', 'events_templates_submit');
 }
 
 if(isset($_POST['events_submit_language'])) {
-	add_action('init', 'events_language_submit'); //Update language settings
+	add_action('init', 'events_language_submit');
 }
 
 if(isset($_POST['events_uninstall'])) {
-	add_action('init', 'events_plugin_uninstall'); //Uninstall
+	add_action('init', 'events_plugin_uninstall');
 }
 
-// Load Options
 $events_config = get_option('events_config');
 $events_template = get_option('events_template');
 $events_language = get_option('events_language');
 
-// Set localization
-setlocale(LC_TIME, $events_config['localization']);
+if (strlen($events_config['localization']) < 1) $events_config['localization'] = 'en_EN';
+setlocale(LC_ALL, $events_config['localization']);
 
 /*-------------------------------------------------------------
  Name:      events_dashboard
@@ -189,6 +180,7 @@ function events_categories() {
 	global $wpdb, $events_config;
 
 	$action = $_GET['action'];
+	if($_GET['edit_cat']) $cat_edit_id = $_GET['edit_cat'];
 
 	if(isset($_POST['catorder'])) {
 		$catorder = $_POST['catorder'];
@@ -205,64 +197,123 @@ function events_categories() {
 			<div id="message" class="updated fade"><p>Action prohibited</p></div>
 		<?php } else if ($action == 'category_new') { ?>
 			<div id="message" class="updated fade"><p>Category <strong>created</strong>. <a href="admin.php?page=wp-events2">Add events</a> now.</p></div>
+		<?php } else if ($action == 'category_edit') { ?>
+			<div id="message" class="updated fade"><p>Category <strong>updated</strong></p></div>
 		<?php } else if ($action == 'category_field_error') { ?>
 			<div id="message" class="updated fade"><p>No category name filled in</p></div>
 		<?php } ?>
 
-		<form name="groups" id="post" method="post" action="admin.php?page=wp-events3">
-		<div class="tablenav">
-			<div class="alignleft actions">
-				<input onclick="return confirm('You are about to delete one or more categories! Make sure there are no events in those categories or they will not show on the website\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete category" name="delete_categories" class="button-secondary delete" />
-				<select name='catorder'>
-			        <option value="id ASC" <?php if($catorder == "id ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
-			        <option value="id DESC" <?php if($catorder == "id DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
-			        <option value="name ASC" <?php if($catorder == "name ASC") { echo 'selected'; } ?>>by name (A-Z)</option>
-			        <option value="name DESC" <?php if($catorder == "name DESC") { echo 'selected'; } ?>>by name (Z-A)</option>
-				</select>
-				<input type="submit" id="post-query-submit" value="Sort" class="button-secondary" />
+		<?php if(!$cat_edit_id) { ?>
+			<form name="groups" id="post" method="post" action="admin.php?page=wp-events3">
+			<div class="tablenav">
+				<div class="alignleft actions">
+					<input onclick="return confirm('You are about to delete one or more categories! Make sure there are no events in those categories or they will not show on the website\n\'OK\' to continue, \'Cancel\' to stop.')" type="submit" value="Delete category" name="delete_categories" class="button-secondary delete" />
+					<select name='catorder'>
+				        <option value="id ASC" <?php if($catorder == "id ASC") { echo 'selected'; } ?>>in the order you made them (ascending)</option>
+				        <option value="id DESC" <?php if($catorder == "id DESC") { echo 'selected'; } ?>>in the order you made them (descending)</option>
+				        <option value="name ASC" <?php if($catorder == "name ASC") { echo 'selected'; } ?>>by name (A-Z)</option>
+				        <option value="name DESC" <?php if($catorder == "name DESC") { echo 'selected'; } ?>>by name (Z-A)</option>
+					</select>
+					<input type="submit" id="post-query-submit" value="Sort" class="button-secondary" />
+				</div>
 			</div>
-		</div>
-
-		<table class="widefat" style="margin-top: .5em">
-  			<thead>
-  				<tr>
-					<th scope="col" class="check-column">&nbsp;</th>
-					<th scope="col" width="5%"><center>ID</center></th>
-					<th scope="col">Name</th>
-					<th scope="col" width="10%"><center>Events</center></th>
-				</tr>
-  			</thead>
-  			<tbody>
-		<?php
-		if(events_mysql_table_exists($wpdb->prefix.'events_categories')) {
-			$categories = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events_categories ORDER BY $catorder");
-			if ($categories) {
-				foreach($categories as $category) {
-					$count = $wpdb->get_var("SELECT COUNT(category) FROM " . $wpdb->prefix . "events WHERE category = '". $category->id."' GROUP BY category");
-					$class = ('alternate' != $class) ? 'alternate' : ''; ?>
-				    <tr id='group-<?php echo $category->id; ?>' class=' <?php echo $class; ?>'>
-						<th scope="row" class="check-column"><input type="checkbox" name="categorycheck[]" value="<?php echo $category->id; ?>" /></th>
-						<td><center><?php echo $category->id;?></center></td>
-						<td><?php echo $category->name;?></td>
-						<td><center><?php echo $count;?></center></td>
+	
+			<table class="widefat" style="margin-top: .5em">
+	  			<thead>
+	  				<tr>
+						<th scope="col" class="check-column">&nbsp;</th>
+						<th scope="col" width="5%"><center>ID</center></th>
+						<th scope="col">Name</th>
+						<th scope="col" width="10%"><center>Events</center></th>
 					</tr>
-	 			<?php } ?>
+	  			</thead>
+	  			<tbody>
 			<?php
-			}
-		} else { ?>
-			<tr id='no-id'><td scope="row" colspan="4"><span style="font-weight: bold; color: #f00;">There was an error locating the database table for the Events categories. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
-		<?php }	?>
-			<tr id='category-new'>
-				<th scope="row" class="check-column">&nbsp;</th>
-				<td colspan="3"><input name="events_category" type="text" class="search-input" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="add_category_submit" value="Add" class="button-secondary" /></td>
-			</tr>
- 		</tbody>
-		</table>
-		</form>
+			if(events_mysql_table_exists($wpdb->prefix.'events_categories')) {
+				$categories = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "events_categories ORDER BY $catorder");
+				if ($categories) {
+					foreach($categories as $category) {
+						$count = $wpdb->get_var("SELECT COUNT(category) FROM " . $wpdb->prefix . "events WHERE category = '". $category->id."' GROUP BY category");
+						$class = ('alternate' != $class) ? 'alternate' : ''; ?>
+					    <tr id='group-<?php echo $category->id; ?>' class=' <?php echo $class; ?>'>
+							<th scope="row" class="check-column"><input type="checkbox" name="categorycheck[]" value="<?php echo $category->id; ?>" /></th>
+							<td><center><?php echo $category->id;?></center></td>
+							<td><strong><a class="row-title" href="<?php echo get_option('siteurl').'/wp-admin/admin.php?page=wp-events3&amp;edit_cat='.$category->id;?>" title="Edit"><?php echo $category->name;?></a></strong></td>
+							<td><center><?php echo $count;?></center></td>
+						</tr>
+		 			<?php } ?>
+				<?php
+				}
+			} else { ?>
+				<tr id='no-id'><td scope="row" colspan="4"><span style="font-weight: bold; color: #f00;">There was an error locating the database table for the Events categories. Please deactivate and re-activate Events from the plugin page!!<br />If this does not solve the issue please seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a></span></td></tr>
+			<?php }	?>
+				<tr id='category-new'>
+					<th scope="row" class="check-column">&nbsp;</th>
+					<td colspan="3"><input name="events_category" type="text" class="search-input" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="events_category_submit" value="Add" class="button-secondary" /></td>
+				</tr>
+	 		</tbody>
+			</table>
+			</form>
 
-		<br class="clear" />
-		<?php events_credits(); ?>
+			<br class="clear" />
+			<?php events_credits(); ?>
 
+		<?php } else { ?>
+
+			<?php
+			$edit_cat = $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."events_categories` WHERE `id` = '$cat_edit_id'");
+
+			if ($message == 'field_error') { ?>
+				<div id="message" class="updated fade"><p>Please fill in a name for your category!</p></div>
+			<?php }
+
+			if($cat_edit_id > 0) { ?>
+			  	<form method="post" action="admin.php?page=wp-events3">
+			    	<input type="hidden" name="events_id" value="<?php echo $cat_edit_id;?>" />
+
+			    	<table class="widefat" style="margin-top: .5em">
+
+						<thead>
+						<tr valign="top">
+							<th colspan="2" bgcolor="#DDD">You can change the name of the category here. The ID stays the same!</th>
+						</tr>
+						</thead>
+
+						<tbody>
+				      	<tr>
+					        <th scope="row" width="25%">ID:</th>
+					        <td><?php echo $edit_cat->id;?></td>
+				      	</tr>
+				      	<tr>
+					        <th scope="row" width="25%">Name:</th>
+					        <td><input tabindex="1" name="events_cat" type="text" size="67" class="search-input" autocomplete="off" value="<?php echo $edit_cat->name;?>" /></td>
+				      	</tr>
+				      	</tbody>
+
+					</table>
+
+			    	<p class="submit">
+						<input tabindex="2" type="submit" name="events_category_submit" class="button-primary" value="Save Category" />
+						<a href="admin.php?page=wp-events3" class="button">Cancel</a>
+			    	</p>
+
+			  	</form>
+			<?php } else { ?>
+			    <table class="widefat" style="margin-top: .5em">
+			    	<thead>
+					<tr valign="top">
+						<th>Error!</th>
+					</tr>
+					</thead>
+
+					<tbody>
+			      	<tr>
+				        <td>No valid group ID specified! <a href="admin.php?page=wp-events3">Continue</a>.</td>
+			      	</tr>
+			      	</tbody>
+				</table>
+			<?php } ?>
+		<?php } ?>
 	</div>
 <?php
 }
@@ -318,7 +369,10 @@ function events_schedule() {
 		  	   	<input type="hidden" name="events_submit" value="true" />
 		    	<input type="hidden" name="events_username" value="<?php echo $userdata->display_name;?>" />
 		    	<input type="hidden" name="events_event_id" value="<?php echo $event_edit_id;?>" />
-
+				<?php if($event_edit_id) { ?>
+		    	<input type="hidden" name="events_repeat_int" value="0" />
+				<?php } ?>
+		
 		    	<table class="widefat" style="margin-top: .5em">
 
 					<thead>
@@ -346,8 +400,8 @@ function events_schedule() {
 		    	<table class="widefat" style="margin-top: .5em">
 
 					<thead>
-					<tr valign="top">
-						<td colspan="4" bgcolor="#DDD">Please note that the time field uses a 24 hour clock. This means that 22:00 hour is actually 10:00pm.<br />Hint: If you're used to the AM/PM system and the event takes place/starts after lunch just add 12 hours.</td>
+					<tr valign="top" id="quicktags">
+						<td colspan="4">Please note that the time field uses a 24 hour clock. This means that 22:00 hour is actually 10:00pm.<br />Hint: If you're used to the AM/PM system and the event takes place/starts after lunch just add 12 hours.</td>
 					</tr>
 			      	</thead>
 
@@ -574,11 +628,47 @@ function events_schedule() {
 				        <option value="60" <?php if($eminute == "60") { echo 'selected'; } ?>>60</option>
 					</select></td>
 			      	</tr>
+	      			<?php if(!$event_edit_id) { ?>
+			      	<tr>
+				        <th scope="row">Repeat (optional):</th>
+				        <td width="30%"><select name="events_repeat_every" tabindex="14">
+							<option value="">Don't repeat</option>
+							<option value="day">Every day</option>
+							<option value="week">Every week</option>
+							<option value="4week">Every 4 Weeks</option>
+							<option value="year">Every year</option>
+						</select></td>
+						<th scope="row">This many times (optional)</th>
+				        <td width="30%" valign="top"><select name="events_repeat" tabindex="15">
+							<option value="0">--</option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+							<option value="15">15</option>
+							<option value="16">16</option>
+							<option value="17">17</option>
+							<option value="18">18</option>
+							<option value="19">19</option>
+							<option value="20">20</option>
+						</select></td>
+			      	</tr>
+			      	<?php } ?>
 			      	<tr>
 				        <th scope="row">Location (optional):</th>
-				        <td width="30%"><input name="events_location" class="search-input" type="text" size="25" maxlength="255" value="<?php echo $edit_event->location;?>" tabindex="14" /><br /><em>Maximum 255 characters.</em></td>
+				        <td width="30%"><input name="events_location" class="search-input" type="text" size="25" maxlength="255" value="<?php echo $edit_event->location;?>" tabindex="16" /><br /><em>Maximum 255 characters.</em></td>
 				        <th scope="row">Category:</th>
-				        <td width="30%" valign="top"><select name='events_category' id='cat' class='postform' tabindex="15">
+				        <td width="30%" valign="top"><select name='events_category' id='cat' class='postform' tabindex="17">
 						<?php foreach($categories as $category) { ?>
 						    <option value="<?php echo $category->id; ?>" <?php if($category->id == $edit_event->category) { echo 'selected'; } ?>><?php echo $category->name; ?></option>
 				    	<?php } ?>
@@ -586,7 +676,7 @@ function events_schedule() {
 			      	</tr>
 			      	<tr>
 				        <th scope="row">Show in the sidebar:</th>
-				        <td width="25%"><select name="events_priority" tabindex="16">
+				        <td width="25%"><select name="events_priority" tabindex="18">
 						<?php if($edit_event->priority == "yes" OR $edit_event->priority == "") { ?>
 						<option value="yes">Yes</option>
 						<option value="no">No</option>
@@ -596,7 +686,7 @@ function events_schedule() {
 						<?php } ?>
 						</select></td>
 						<th scope="row">Archive this event:</th>
-						<td width="25%"><select name="events_archive" tabindex="17">
+						<td width="25%"><select name="events_archive" tabindex="19">
 						<?php if($edit_event->archive == "yes" OR $edit_event->archive == "") { ?>
 						<option value="yes">Yes</option>
 						<option value="no">No</option>
@@ -608,12 +698,12 @@ function events_schedule() {
 					</tr>
 			      	<tr>
 				        <th scope="row">Message when event ends (optional):</th>
-				        <td colspan="3"><textarea name="events_post_event" class="search-input" cols="65" rows="2" tabindex="18"><?php echo $edit_event->post_message;?></textarea><br />
+				        <td colspan="3"><textarea name="events_post_event" class="search-input" cols="65" rows="2" tabindex="20"><?php echo $edit_event->post_message;?></textarea><br />
 				        	<em>Maximum <?php echo $events_config['length'];?> characters. HTML allowed.</em></td>
 			      	</tr>
 			      	<tr>
 				        <th scope="row">Link to page (optional):</th>
-				        <td colspan="3"><input name="events_link" class="search-input" type="text" size="65 " maxlength="10000" value="<?php echo $edit_event->link;?>" tabindex="19" /><br />
+				        <td colspan="3"><input name="events_link" class="search-input" type="text" size="65 " maxlength="10000" value="<?php echo $edit_event->link;?>" tabindex="21" /><br />
 				        	<em>Include full url and http://, this can be any page. Required if checkbox above is checked!</em></td>
 			      	</tr>
 			      	</tbody>
@@ -625,11 +715,12 @@ function events_schedule() {
 
 		    	<p class="submit">
 					<?php if($event_edit_id) { ?>
-					<input type="submit" name="submit_save" class="button-primary" value="Edit event" tabindex="20" />
-					<input type="submit" name="submit_new" class="button-primary" value="Duplicate event" tabindex="21" />
+					<input type="submit" name="submit_save" class="button-primary" value="Edit event" tabindex="22" />
+					<input type="submit" name="submit_new" class="button-primary" value="Duplicate event" tabindex="23" />
 					<?php } else { ?>
-					<input type="submit" name="submit_save" class="button-primary" value="Save event" tabindex="20" />
+					<input type="submit" name="submit_save" class="button-primary" value="Save event" tabindex="22" />
 					<?php } ?>
+					<a href="admin.php?page=wp-events" class="button">Cancel</a>
 		    	</p>
 
 		  	</form>
@@ -644,104 +735,6 @@ function events_schedule() {
 <?php }
 
 /*-------------------------------------------------------------
- Name:      events_schedule_widget
-
- Purpose:   Create new or edit events from the dashboard
- Receive:   -none-
- Return:    -none-
--------------------------------------------------------------*/
-function events_schedule_widget() {
-	global $wpdb, $userdata, $events_config;
-
-	$timezone = get_option('gmt_offset')*3600;
-	$url = get_option('siteurl');
-	?>
-	<link rel="stylesheet" href="<?php echo $url.'/wp-content/plugins/wp-events/wp-events.css';?>" type="text/css" media="screen" />
-	<?php
-
-	$SQL2 = "SELECT * FROM ".$wpdb->prefix."events_categories ORDER BY id";
-	$categories = $wpdb->get_results($SQL2);
-	if($categories) { ?>
-		<form method="post" action="index.php" name="events">
-	  	   	<input type="hidden" name="events_submit" value="true" />
-	    	<input type="hidden" name="events_username" value="<?php echo $userdata->display_name;?>" />
-	    	<input type="hidden" name="events_event_id" value="<?php echo $event_edit_id;?>" />
-
-			<h4 id="quick-post-title"><label for="events_title">Title</label></h4>
-			<div class="input-text-wrap">
-				<input type="text" name="events_title" id="title" tabindex="130" autocomplete="off" value="" maxlength="<?php echo $events_config['length'];?>" />
-			</div>
-
-			<h4 id="content-label"><label for="events_pre_event">Event</label></h4>
-			<div class="textarea-wrap">
-				<textarea name="events_pre_event" id="content" class="mceEditor" rows="3" cols="15" tabindex="131"></textarea>
-			</div>
-
-		    <h4 id="quick-post-title" class="options"><label for="events_sday">When</label></h4>
-		    <div class="options-wrap">
-				<input id="title" name="events_sday" class="search-input" type="text" size="4" maxlength="2" tabindex="132" /> /
-				<select name="events_smonth" tabindex="133">
-					<option value="01">January</option>
-					<option value="02">February</option>
-					<option value="03">March</option>
-					<option value="04">April</option>
-					<option value="05">May</option>
-					<option value="06">June</option>
-					<option value="07">July</option>
-					<option value="08">August</option>
-					<option value="09">September</option>
-					<option value="10">October</option>
-					<option value="11">November</option>
-					<option value="12">December</option>
-				</select> /
-				<input name="events_syear" class="search-input" type="text" size="4" maxlength="4" value="" tabindex="134" />
-			</div>
-
-			<h4 id="quick-post-title" class="options"><label for="events_category">Category</label></h4>
-		    <div class="options-wrap">
-				<select name='events_category' tabindex="135">
-				<?php foreach($categories as $category) { ?>
-				    <option value="<?php echo $category->id; ?>" <?php if($category->id == $edit_event->category) { echo 'selected'; } ?>><?php echo $category->name; ?></option>
-			    <?php } ?>
-			    </select>
-			</div>
-
-			<h4 id="quick-post-title" class="options"><label for="events_priority">Sidebar</label></h4>
-		    <div class="options-wrap">
-				<select name="events_priority" tabindex="136">
-				<?php if($edit_event->priority == "yes" OR $edit_event->priority == "") { ?>
-					<option value="yes">Yes, show in the sidebar</option>
-					<option value="no">No, on the event page only</option>
-				<?php } else { ?>
-					<option value="no">No, on the event page only</option>
-					<option value="yes">Yes, show in the sidebar</option>
-				<?php } ?>
-				</select>
-			</div>
-
-			<h4 id="quick-post-title" class="options"><label for="events_archive">Archive</label></h4>
-		    <div class="options-wrap">
-				<select name="events_archive" tabindex="137">
-					<?php if($edit_event->archive == "no" OR $edit_event->archive == "") { ?>
-					<option value="no">No, delete one day after the event ends</option>
-					<option value="yes">Yes, save event for the archive</option>
-					<?php } else { ?>
-					<option value="yes">Yes, save event for the archive</option>
-					<option value="no">No, delete one day after the event ends</option>
-					<?php } ?>
-				</select>
-			</div>
-
-	    	<p class="submit">
-				<input type="submit" name="submit_save" class="button-primary" value="Save event" tabindex="138" /> <span style="padding-left: 10px;"><a href="edit.php?page=wp-events">Advanced</a></span>
-	    	</p>
-		</form>
-	<?php } else { ?>
-		<span style="font-style: italic;">You should create atleast one category before adding events! <a href="plugins.php?page=wp-events2">Add a category now</a>.</span>
-	<?php } ?>
-<?php }
-
-/*-------------------------------------------------------------
  Name:      events_options
 
  Purpose:   Admin options page
@@ -752,11 +745,10 @@ function events_options() {
 	$events_config = get_option('events_config');
 	$events_template = get_option('events_template');
 	$events_language = get_option('events_language');
-	$events_tracker = get_option('events_tracker');
 
 	$gmt_offset = (get_option('gmt_offset')*3600);
-	$timezone = gmdate("U") + $gmt_offset;
-	$view 	= $_GET['view'];
+	$timezone 	= gmdate("U") + $gmt_offset;
+	$view 		= $_GET['view'];
 ?>
 	<div class="wrap">
 	  	<h2>Events options</h2>
@@ -1170,17 +1162,15 @@ function events_options() {
 
 	   	<?php } else if($view == "uninstall") { ?>
 
-	  	<h2>Events Uninstall</h2>
+	  	<h3>Uninstaller</h3>
 
     	<form method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>" name="events_uninstall">
 	    	<table class="form-table">
 				<tr valign="top">
-					<td colspan="2">Events installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.<br />
-					For the techies: Upon un-installation the wp_events table will be dropped along with the events_config record in the wp_options table.</td>
+					<td>Events installs a table in MySQL. When you disable the plugin the table will not be deleted. To delete the table use the button below.<br />
 				</tr>
 		      	<tr valign="top">
-			        <th scope="row">WARNING!</th>
-			        <td><b style="color: #f00;">This process is irreversible and will delete ALL scheduled events!</b></td>
+			        <th scope="row"><b style="color: #f00;">WARNING! This process is irreversible and will delete ALL scheduled events and associated options!</b></td>
 				</tr>
 			</table>
 	  		<p class="submit">
