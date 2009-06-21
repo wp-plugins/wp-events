@@ -249,7 +249,7 @@ function events_categories() {
 			<?php }	?>
 				<tr id='category-new'>
 					<th scope="row" class="check-column">&nbsp;</th>
-					<td colspan="3"><input name="events_category" type="text" class="search-input" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="events_category_submit" value="Add" class="button-secondary" /></td>
+					<td colspan="3"><input name="events_cat" type="text" class="search-input" size="40" maxlength="255" value="" /> <input type="submit" id="post-query-submit" name="events_category_submit" value="Add" class="button-secondary" /></td>
 				</tr>
 	 		</tbody>
 			</table>
