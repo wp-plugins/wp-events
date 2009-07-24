@@ -1,4 +1,4 @@
-<?php
+<?php  
 /*-------------------------------------------------------------
  Name:      events_countdown
 
@@ -374,6 +374,17 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 }
 
 /*-------------------------------------------------------------
+ Name:      events_textdomain
+
+ Purpose:   Initiates Translation files
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_textdomain() {
+	load_plugin_textdomain( 'wpevents', WP_PLUGIN_DIR."/".basename(dirname(__FILE__)), basename(dirname(__FILE__)) );
+}
+
+/*-------------------------------------------------------------
  Name:      events_clear_old
 
  Purpose:   Removes old non archived events
@@ -399,18 +410,21 @@ function events_credits() {
 	
 	echo '<thead>';
 	echo '<tr valign="top">';
-	echo '	<th>Events for Excellent!</th>';
+	echo '	<th>'.__('Events for Excellent!','wpevents').'</th>';
 	echo '</tr>';
 	echo '</thead>';
 
 	echo '<tbody>';
 	echo '<tr>';
-	echo '	<td>Find me on <a href="http://meandmymac.net" target="_blank">meandmymac.net</a>.<br />';
-	echo '	The plugin page at <a href="http://meandmymac.net/plugins/events/" target="_blank">meandmymac.net/plugins/events/</a>. Getting started, manuals and more...<br />';
-	echo '	<a href="http://meandmymac.net/tag/events/" target="_blank">meandmymac.net/tag/events/</a> for updates and notes about Events!<br />';
-	echo '	Need help? <a href="http://forum.at.meandmymac.net" target="_blank">forum.at.meandmymac.net</a>. Now with a search function!<br />';
-	echo '	Do you require more help than the forum can offer? <a href="http://meandmymac.net/contact-and-support/premium-support/" target="_blank">Premium Support</a> is available!<br />';
-	echo '	Like my software? <a href="http://meandmymac.net/donate/" target="_blank">Show your appreciation</a>. Thanks!</td>';
+	echo '<td>';
+	echo    sprintf(__('Find me on <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net" target="_blank', 'meandmymac.net').'<br />';
+	echo    sprintf(__('The plugin page at <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/" target="_blank','meandmymac.net/plugins/events/').' ';
+	echo   sprintf(__('<a href="%s">%s</a> for updates and notes about Events!', 'wpevents'),'http://meandmymac.net/tag/events/" target="_blank', 'meandmymac.net/tag/events/').'<br />';
+	echo   sprintf(__('Need help? <a href="%s">%s</a>. Now with a search function!', 'wpevents'),'http://forum.at.meandmymac.net" target="_blank','forum.at.meandmymac.net').' ';
+	echo   sprintf(__('Do you require more help than the forum can offer? <a href="%s">Premium Support</a> is available!', 'wpevents'),'http://meandmymac.net/contact-and-support/premium-support/" target="_blank').'<br />';
+	echo   sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/" target="_blank');
+	if (get_locale() != "en_US") echo "<br />".__('Translation: ---', 'wpevents');
+	echo '</td>';
 	echo '</tr>';
 	echo '</tbody>';
 	
@@ -428,48 +442,49 @@ if(!function_exists('meandmymac_rss')) {
 	function meandmymac_rss($rss, $count = 10) {
 		if ( is_string( $rss ) ) {
 			require_once(ABSPATH . WPINC . '/rss.php');
-			if ( !$rss = fetch_rss($rss) )
+			if ( !$rss = fetch_rss($rss) ) {
+				echo '<div class="text-wrap"><span class="rsserror">The feed could not be fetched, try again later!</span></div>';
 				return;
+			}
 		}
-	
+
 		if ( is_array( $rss->items ) && !empty( $rss->items ) ) {
 			$rss->items = array_slice($rss->items, 0, $count);
-			$loop = 1;
 			foreach ( (array) $rss->items as $item ) {
-				while ( strstr($item['link'], 'http') != $item['link'] )
+				while ( strstr($item['link'], 'http') != $item['link'] ) {
 					$item['link'] = substr($item['link'], 1);
-	
+				}
+
 				$link = clean_url(strip_tags($item['link']));
 				$desc = attribute_escape(strip_tags( $item['description']));
 				$title = attribute_escape(strip_tags($item['title']));
-				if ( empty($title) )
+				if ( empty($title) ) {
 					$title = __('Untitled');
-					
-				if (isset($item['pubdate']))
+				}
+				
+				if ( empty($link) ) {
+					$link = "#";
+				}
+
+				if (isset($item['pubdate'])) {
 					$date = $item['pubdate'];
-				elseif (isset($item['published']))
+				} elseif (isset($item['published'])) {
 					$date = $item['published'];
-	
+				}
+
 				if ($date) {
 					if ($date_stamp = strtotime($date)) {
 						$date = date_i18n( get_option('date_format'), $date_stamp);
 					} else {
 						$date = '';
 					}
-				}				
-					
-				if ( $link == '' ) {
-					$array[$loop] = array ('title' => $title, 'desc' => $desc, 'link' => '', 'date' => $date);
-				} else {
-					$array[$loop] = array ('title' => $title, 'desc' => $desc, 'link' => $link, 'date' => $date);
 				}
-				$loop++;
+				echo '<div class="text-wrap"><a href="'.$link.'" target="_blank">'.$title.'</a> '.__('on','wpevents').$date.'</div>';
 			}
 		} else {
-			$array[1] = array('title' => 'An error has occurred; the feed is probably down. Try again later.');
+			echo '<div class="text-wrap"><span class="rsserror">The feed appears to be invalid or corrupt!</span></div>';
 		}
-		
-		return $array;
+		return;
 	}
 }
 ?>

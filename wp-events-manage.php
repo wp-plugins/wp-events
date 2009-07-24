@@ -1,4 +1,4 @@
-<?php
+<?php 
 /*-------------------------------------------------------------
  Name:      events_editor
 
@@ -43,7 +43,7 @@ function events_editor($content, $id = 'content', $prev_id = 'title') {
 	<?php } ?>
 	// ]]>
 	</script>
-	<?php
+	<?php 
 }
 
 /*-------------------------------------------------------------
@@ -263,6 +263,7 @@ function events_delete($id, $what) {
 -------------------------------------------------------------*/
 function events_check_config() {
 	if ( !$option = get_option('events_config') ) {
+		wpevents_load_domain();
 		// Default Options
 		$option['length'] 					= 1000;
 		$option['sidelength'] 				= 120;
@@ -285,45 +286,45 @@ function events_check_config() {
 	}
 
 	if ( !$template = get_option('events_template') ) {
-		$template['sidebar_template'] 		= '<li>%title% %link% on %startdate% %starttime%<br />%countdown%</li>';
-		$template['sidebar_h_template'] 	= '<h2>Highlighted events</h2><ul>';
+		$template['sidebar_template'] 		= '<li>%title% %link% '.__('on', 'wpevents').' %startdate% %starttime%<br />%countdown%</li>';
+		$template['sidebar_h_template'] 	= '<h2>'.__('Highlighted events', 'wpevents').'</h2><ul>';
 		$template['sidebar_f_template'] 	= '</ul>';
-		$template['page_template'] 			= '<p><strong>%title%</strong>, %event% on %startdate% %starttime%<br />%countdown%<br />Duration: %duration%<br />%link%</p>';
+		$template['page_template'] 			= '<p><strong>%title%</strong>, %event% '.__('on', 'wpevents').' %startdate% %starttime%<br />%countdown%<br />'.__('Duration', 'wpevents').': %duration%<br />%link%</p>';
 		$template['page_h_template'] 		= '<h2>%category%</h2>';
-		$template['page_title_default']		= 'Important events';
+		$template['page_title_default']		= __('Important events', 'wpevents');
 		$template['page_f_template'] 		= '';
-		$template['archive_template'] 		= '<p><strong>%title%</strong>, %after% on %startdate% %starttime%<br />%countup%<br />%enddate% %endtime%<br />%link%</p>';
+		$template['archive_template'] 		= '<p><strong>%title%</strong>, %after% '.__('on', 'wpevents').' %startdate% %starttime%<br />%countup%<br />%enddate% %endtime%<br />%link%</p>';
 		$template['archive_h_template'] 	= '<h2>%category%</h2>';
-		$template['archive_title_default']	= 'Archive';
+		$template['archive_title_default']	= __('Archive', 'wpevents');
 		$template['archive_f_template'] 	= '';
 		$template['daily_template'] 		= '<p>%title% %event% - %countdown% %link%</p>';
 		$template['daily_h_template'] 		= '<h2>%category%</h2>';
-		$template['daily_title_default']	= 'Todays events';
+		$template['daily_title_default']	= __('Today\'s events', 'wpevents');
 		$template['daily_f_template'] 		= '';
-		$template['location_seperator']		= '@ ';
+		$template['location_seperator']		= __('@', 'wpevents').' ';
 		update_option('events_template', $template);
 	}
 
 	if ( !$language = get_option('events_language') ) {
-		$language['language_today'] 		= 'today';
-		$language['language_hours'] 		= 'hours';
-		$language['language_minutes'] 		= 'minutes';
-		$language['language_day'] 			= 'day';
-		$language['language_days'] 			= 'days';
-		$language['language_and'] 			= 'and';
-		$language['language_on'] 			= 'on';
-		$language['language_in'] 			= 'in';
-		$language['language_ago'] 			= 'ago';
-		$language['language_sidelink']		= 'more &raquo;';
-		$language['language_pagelink']		= 'More information &raquo;';
-		$language['language_noevents'] 		= 'No events to show';
-		$language['language_nodaily'] 		= 'No events today';
-		$language['language_noarchive'] 	= 'No events in the archive';
-		$language['language_e_config'] 		= 'A configuration error has occured';
-		$language['language_noduration'] 	= 'No duration!';
-		$language['language_allday'] 		= 'All-day event!';
-		$language['language_past'] 			= 'Past event!';
-		$language['localization'] 			= 'en_EN';
+		$language['language_today'] 		= __('today', 'wpevents');
+		$language['language_hours'] 		= __('hours', 'wpevents');
+		$language['language_minutes'] 		= __('minutes', 'wpevents');
+		$language['language_day'] 			= __('day', 'wpevents');
+		$language['language_days'] 			= __('days', 'wpevents');
+		$language['language_and'] 			= __('and', 'wpevents');
+		$language['language_on'] 			= __('on', 'wpevents');
+		$language['language_in'] 			= __('in', 'wpevents');
+		$language['language_ago'] 			= __('ago', 'wpevents');
+		$language['language_sidelink']		= __('more', 'wpevents').' &raquo;';
+		$language['language_pagelink']		= __('More information', 'wpevents').' &raquo;';
+		$language['language_noevents'] 		= __('No events to show', 'wpevents');
+		$language['language_nodaily'] 		= __('No events today', 'wpevents');
+		$language['language_noarchive'] 	= __('No events in the archive', 'wpevents');
+		$language['language_e_config'] 		= __('A configuration error occurred', 'wpevents');
+		$language['language_noduration'] 	= __('No duration!', 'wpevents');
+		$language['language_allday'] 		= __('All-day event!', 'wpevents');
+		$language['language_past'] 			= __('Past event!', 'wpevents');
+		$language['localization'] 			= get_locale();
 		update_option('events_language', $language);
 	}
 }
@@ -418,7 +419,6 @@ function events_language_submit() {
 	$language['language_noduration'] 	= htmlspecialchars(trim($_POST['events_language_noduration'], "\t\n "), ENT_QUOTES);
 	$language['language_allday'] 		= htmlspecialchars(trim($_POST['events_language_allday'], "\t\n "), ENT_QUOTES);
 	$language['language_past'] 			= htmlspecialchars(trim($_POST['events_language_past'], "\t\n "), ENT_QUOTES);
-	$language['localization'] 			= htmlspecialchars(trim($_POST['events_localization'], "\t\n "), ENT_QUOTES);
 	update_option('events_language', $language);
 }
 

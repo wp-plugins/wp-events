@@ -150,7 +150,7 @@ function events_update_table($tablename, $field_to_add, $specs, $after_field) {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_mysql_warning() {
-	echo '<div class="updated"><h3>WARNING! The MySQL table was not created! You cannot store events. See if you have the right MySQL access rights and check if you can create tables. Contact your webhost/sysadmin if you must. If this brings no joy, seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a>. Please give as much information as you can related to your problem.</h3></div>';
+	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not created! You cannot store events. See if you have the right MySQL access rights and check if you can create tables.', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://forum.at.meandmymac.net', 'http://forum.at.meandmymac.net').'. '.__('Please give as much information as you can related to your problem.', 'wpevents').'</h3></div>';
 }
 
 /*-------------------------------------------------------------
@@ -161,9 +161,9 @@ function events_mysql_warning() {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_mysql_upgrade_error() {
-	echo '<div class="updated"><h3>WARNING! The MySQL table was not properly upgrade! Events cannot work properly without this upgrade. Check your MySQL permissions and see if you have ALTER rights (rights to alter existing tables) contact your webhost/sysadmin if you must. If this brings no answers seek support at <a href="http://forum.at.meandmymac.net">http://forum.at.meandmymac.net</a> and mention any errors you saw/got and explain what you were doing!</h3></div>';
-}
 
+	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not properly upgrade! Events cannot work properly without this upgrade. Check your MySQL permissions and see if you have ALTER rights (rights to alter existing tables).', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://forum.at.meandmymac.net', 'http://forum.at.meandmymac.net').' '.__('and mention any errors you saw/got and explain what you were doing!', 'wpevents').'</h3></div>';
+	}
 /*-------------------------------------------------------------
  Name:      events_plugin_uninstall
 
@@ -182,9 +182,9 @@ function events_plugin_uninstall() {
 
 	// Drop MySQL Tables
 	$SQL = "DROP TABLE `".$wpdb->prefix."events`";
-	mysql_query($SQL) or die("An unexpected error occured.<br />".mysql_error());
+	mysql_query($SQL) or die(__('An unexpected error occured')."<br />".mysql_error());
 	$SQL2 = "DROP TABLE `".$wpdb->prefix."events_categories`";
-	mysql_query($SQL2) or die("An unexpected error occured.<br />".mysql_error());
+	mysql_query($SQL2) or die(__('An unexpected error occured')."<br />".mysql_error());
 
 	// Delete Option
 	delete_option('events_config');
