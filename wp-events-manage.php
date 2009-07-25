@@ -263,7 +263,7 @@ function events_delete($id, $what) {
 -------------------------------------------------------------*/
 function events_check_config() {
 	if ( !$option = get_option('events_config') ) {
-		wpevents_load_domain();
+		events_textdomain();
 		// Default Options
 		$option['length'] 					= 1000;
 		$option['sidelength'] 				= 120;
