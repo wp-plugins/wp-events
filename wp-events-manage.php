@@ -3,10 +3,10 @@
  Name:      the_event_editor
 
  Purpose:   Use simple HTML formatting tools to generate events
- Receive:   $content, $id, $prev_id, $tab_index
+ Receive:   $content
  Return:	$template
 -------------------------------------------------------------*/
-function the_event_editor($content, $dashboard = true) {
+function the_event_editor($content) {
 	if($dashboard == true) { ?>
 		<div id="quicktags">
 			<?php wp_print_scripts( 'quicktags' ); ?>
