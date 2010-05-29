@@ -109,9 +109,9 @@ function events_widget_dashboard() {
 				<input type="text" name="events_title" id="title" tabindex="130" autocomplete="off" value="" maxlength="<?php echo $events_config['length'];?>" />
 			</div>
 
-			<h4 id="content-label"><label for="events_pre_event"><?php _e('Event', 'wpevents'); ?></label></h4>
+			<h4 id="content-label"><label for="content"><?php _e('Event', 'wpevents'); ?></label></h4>
 			<div class="textarea-wrap">
-				<textarea name="events_pre_event" id="content" class="mceEditor" rows="3" cols="15" tabindex="131"></textarea>
+				<textarea name="content" id="content" class="mceEditor" rows="3" cols="15" tabindex="131"></textarea>
 			</div>
 
 		    <h4 id="quick-post-title" class="options"><label for="events_sday"><?php _e('When', 'wpevents'); ?></label></h4>
@@ -174,7 +174,7 @@ function events_widget_dashboard() {
 	    	</p>
 		</form>
 	<?php } else { ?>
-		<span style="font-style: italic;"><?php _e('You should create at least one category before adding events!', 'wpevents'); ?> <a href="admin.php?page=wp-events3"><?php _e('Add a category now', 'wpevents'); ?></a>.</span>
+		<span style="font-style: italic;"><?php _e('You should create at least one category before adding events!', 'wpevents'); ?> <a href="admin.php?page=wp-events2"><?php _e('Add a category now', 'wpevents'); ?></a>.</span>
 	<?php } ?>
 <?php }
 

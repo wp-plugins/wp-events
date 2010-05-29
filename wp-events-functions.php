@@ -1,4 +1,4 @@
-<?php  
+<?php
 /*-------------------------------------------------------------
  Name:      events_countdown
 
@@ -154,6 +154,8 @@ function events_sidebar($lim = 0, $cat = 0) {
 		$sideshow = "AND (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)";
 	} else if($events_config['sideshow'] == "6") {
 		$sideshow = "AND (`thetime` >= '$present' AND `thetime` <= '$nextsevendays') OR ($present >= `thetime` AND $present <= `theend`)";
+	} else if($events_config['sideshow'] == "7") {
+		$sideshow = "AND ('thetime' <= '$present' OR 'thetime' >= '$present')";
 	} else {
 		$sideshow = "AND `theend` >= '$daystart'"; // default behaviour (1)
 	}
@@ -188,6 +190,18 @@ function events_sidebar($lim = 0, $cat = 0) {
 					$template = str_replace('%starttime%', str_replace('00:00', '', gmstrftime($events_config['timeformat_sidebar'], $event->thetime)), $template);
 				}
 				$template = str_replace('%startdate%', gmstrftime($events_config['dateformat_sidebar'], $event->thetime), $template);
+				
+				if(($event->thetime == $event->theend AND $events_config['hideendsidebar'] == 'hide') OR $events_config['hideendsidebar'] == 'never') {
+					$template = str_replace('%endtime%', '', $template);
+					$template = str_replace('%enddate%', '', $template);
+				} else {
+					if($event->allday == "Y") {
+						$template = str_replace('%endtime%', '', $template);
+					} else {
+						$template = str_replace('%endtime%', str_replace('00:00', '', gmstrftime($events_config['timeformat_sidebar'], $event->theend)), $template);
+					}
+					$template = str_replace('%enddate%', gmstrftime($events_config['dateformat_sidebar'], $event->theend), $template);
+				}
 
 				$template = str_replace('%author%', $event->author, $template);
 				$template = str_replace('%category%', $get_category->name, $template);
@@ -209,7 +223,7 @@ function events_sidebar($lim = 0, $cat = 0) {
 
 	return $output_sidebar;
 }
-
+ 
 /*-------------------------------------------------------------
  Name:      events_show
 
@@ -221,13 +235,16 @@ function events_show($atts, $content = null) {
 	global $wpdb, $events_config, $events_language, $events_template;
 
 	$present = current_time('timestamp');
+	$nextsevendays	= $present + 604800;
+	$monthstart = gmmktime(0, 0, 0, date('m'), 1, date('Y'));
+    $days_in_month = date("t", $monthstart);
+	$monthend = $monthstart + (86400 * $days_in_month);
 	$daystart = floor($present / 86400) * 86400;
 	$dayend = $daystart + 86400;
-	$nextsevendays	= $present + 604800;
-
+	
 	if(empty($atts['type'])) $type = "default";
 		else $type = $atts['type'];
-
+	
 	if(empty($atts['amount'])) $amount = "";
 		else $amount = " LIMIT $atts[amount]";
 
@@ -248,7 +265,7 @@ function events_show($atts, $content = null) {
 		$category = '';
 	} else {
 		$category = " AND `category` = '$atts[category]'";
-		$category2 = $atts[category];
+		$category2 = $atts['category'];
 	}
 
 	if($events_config AND $events_language AND $events_template AND isset($type)){
@@ -258,7 +275,7 @@ function events_show($atts, $content = null) {
 
 		if($type == 'default') {
 
-			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `thetime` >= $present$category$one_event ORDER BY $order$amount");
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE `theend` >= $present$category$one_event ORDER BY $order$amount");
 			$header = $events_template['page_h_template'];
 			$titledefault = $events_template['page_title_default'];
 			$footer = $events_template['page_f_template'];
@@ -272,14 +289,21 @@ function events_show($atts, $content = null) {
 
 		} else if ($type == 'today') {
 
-			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`) $category$one_event ORDER BY $order$amount");
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE ((`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)) $category$one_event ORDER BY $order$amount");
 			$header = $events_template['daily_h_template'];
 			$titledefault = $events_template['daily_title_default'];
 			$footer = $events_template['daily_f_template'];
 
 		} else if ($type == 'week') {
 
-			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE (`thetime` >= '$present' AND `thetime` <= '$nextsevendays') OR ($present >= `thetime` AND $present <= `theend`) $category$one_event ORDER BY $order$amount");
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE ((`thetime` >= '$present' AND `thetime` <= '$nextsevendays') OR ($present >= `thetime` AND $present <= `theend`)) $category$one_event ORDER BY $order$amount");
+			$header = $events_template['page_h_template'];
+			$titledefault = $events_template['page_title_default'];
+			$footer = $events_template['page_f_template'];
+
+		} else if ($type == 'month') {
+
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE ((`thetime` >= '$monthstart' AND `thetime` <= '$monthend') OR ($present >= `thetime` AND $present <= `theend`)) $category$one_event ORDER BY $order$amount");
 			$header = $events_template['page_h_template'];
 			$titledefault = $events_template['page_title_default'];
 			$footer = $events_template['page_f_template'];
@@ -292,6 +316,7 @@ function events_show($atts, $content = null) {
 			$header = str_replace('%category%', $titledefault, $header);			
 		}
 		$output = stripslashes(html_entity_decode($header));
+
 		if (count($events) == 0) {
 			$output .= '<em>'.$events_language['language_noevents'].'</em>';
 		} else {
@@ -324,9 +349,11 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 	if($type == 'archive') $template = $events_template['archive_template'];
 	if($type == 'today') $template = $events_template['daily_template'];
 	if($type == 'week') $template = $events_template['page_template'];
+	if($type == 'month') $template = $events_template['page_template'];
 
 	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
 	$template = str_replace('%title%', $title, $template);
+	$pre_message = nl2br($pre_message);
 	$template = str_replace('%event%', $pre_message, $template);
 
 	if(current_time('timestamp') <= $theend) { 
@@ -415,17 +442,18 @@ function events_credits() {
 	echo '</thead>';
 
 	echo '<tbody>';
-	echo '<tr>';
-	echo '<td>';
-	echo    sprintf(__('Find me on <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net" target="_blank', 'meandmymac.net').'<br />';
-	echo    sprintf(__('The plugin page at <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/" target="_blank','meandmymac.net/plugins/events/').' ';
-	echo   sprintf(__('<a href="%s">%s</a> for updates and notes about Events!', 'wpevents'),'http://meandmymac.net/tag/events/" target="_blank', 'meandmymac.net/tag/events/').'<br />';
-	echo   sprintf(__('Need help? <a href="%s">%s</a>. Now with a search function!', 'wpevents'),'http://forum.at.meandmymac.net" target="_blank','forum.at.meandmymac.net').' ';
-	echo   sprintf(__('Do you require more help than the forum can offer? <a href="%s">Premium Support</a> is available!', 'wpevents'),'http://meandmymac.net/contact-and-support/premium-support/" target="_blank').'<br />';
-	echo   sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/" target="_blank');
-	if (get_locale() != "en_US") echo "<br />".__('Translation: ---', 'wpevents');
-	echo '</td>';
-	echo '</tr>';
+	echo '<tr><td>';
+	echo sprintf(__('Find me on <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net" target="_blank', 'meandmymac.net').'<br />';
+	echo sprintf(__('The plugin page at <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/" target="_blank','meandmymac.net/plugins/events/').' ';
+	echo sprintf(__('<a href="%s">%s</a> for updates and notes about Events!', 'wpevents'),'http://meandmymac.net/tag/events/" target="_blank', 'meandmymac.net/tag/events/').'<br />';
+	echo sprintf(__('Need help? <a href="%s">%s</a>. Use the knowledgebase!', 'wpevents'),'http://meandmymac.net/support/" target="_blank','http://meandmymac.net/support/').'<br />';
+	echo sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/" target="_blank');
+	if (get_locale() != "en_US") { 
+		echo "<br />".__('Translation: ---', 'wpevents');
+	} else {
+		echo "<br />".sprintf(__('Want Events in your language? Check <a href="%s">here</a>!', 'wpevents'), 'http://meandmymac.net/plugins/events/#lang');
+	}
+	echo '</td></tr>';
 	echo '</tbody>';
 	
 	echo '</table';
@@ -439,7 +467,7 @@ function events_credits() {
  Return:    -none-
 -------------------------------------------------------------*/
 if(!function_exists('meandmymac_rss')) {
-	function meandmymac_rss($rss, $count = 10) {
+	function meandmymac_rss($rss, $count = 10, $showdates = 'yes') {
 		if ( is_string( $rss ) ) {
 			require_once(ABSPATH . WPINC . '/rss.php');
 			if ( !$rss = fetch_rss($rss) ) {
@@ -479,7 +507,9 @@ if(!function_exists('meandmymac_rss')) {
 						$date = '';
 					}
 				}
-				echo '<div class="text-wrap"><a href="'.$link.'" target="_blank">'.$title.'</a> '.__('on','wpevents').$date.'</div>';
+				echo '<div class="text-wrap"><a href="'.$link.'" target="_blank">'.$title.'</a> ';
+				if($showdates == "yes") echo __('on','wpevents').' '.$date;
+				echo '</div>';
 			}
 		} else {
 			echo '<div class="text-wrap"><span class="rsserror">The feed appears to be invalid or corrupt!</span></div>';

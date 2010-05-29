@@ -56,7 +56,7 @@ function events_editor($content, $id = 'content', $prev_id = 'title') {
 function events_insert_input() {
 	global $wpdb, $userdata, $events_config, $events_language;
 
-	if(current_user_can($events_config['editlevel'])) {
+	if(current_user_can($events_config['addlevel'])) {
 		$event_id 			= $_POST['events_event_id'];
 		$eventmsg 			= $events_language['language_past'];
 		$author 			= $_POST['events_username'];
@@ -86,7 +86,14 @@ function events_insert_input() {
 		if (strlen($title) > 0 and $repeat_int <= 20) {
 			if($repeat_every == "" and $repeat_int > 0) $repeat_int = 0;
 			
-			
+			if(strlen($post_event) == 0) $post_event = $eventmsg;
+
+			if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';
+				else $title_link = 'N';
+
+			if(isset($allday)) $allday = 'Y';
+				else $allday = 'N';
+	
 			for($iterator = 0;$iterator <= $repeat_int;$iterator++) {
 
 				if(strlen($shour) == 0) 	$shour 		= 0;
@@ -117,21 +124,13 @@ function events_insert_input() {
 					$enddate = $enddate + $every;
 				}
 
-				if(strlen($post_event) == 0) $post_event = $eventmsg;
-	
-				if(isset($title_link) AND strlen($link) != 0) $title_link = 'Y';
-					else $title_link = 'N';
-	
-				if(isset($allday)) $allday = 'Y';
-					else $allday = 'N';
-						
 				if(strlen($event_id) != 0 AND isset($_POST['submit_save'])) {
 					/* Update an existing event */
 					$postquery = "UPDATE `".$wpdb->prefix."events` SET `title` = '$title', `title_link` = '$title_link', `location` = '$location', `category` = '$category', `pre_message` = '$pre_event', `post_message` = '$post_event', `link` = '$link', `allday` = '$allday', `thetime` = '$startdate', `theend` = '$enddate', `priority` = '$priority', `archive` = '$archive', `author` = '$author' WHERE `id` = '$event_id'";
 					$action = "update";
 				} else {
 					/* New or duplicate event */
-					$postquery = "INSERT INTO `".$wpdb->prefix."events` (`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`) VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";
+					$postquery = "INSERT INTO `".$wpdb->prefix."events` (`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`, `review`) VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive', '$review')";
 					if(isset($_POST['submit_save'])) {
 						$action = "new";
 					} else {
@@ -262,8 +261,9 @@ function events_delete($id, $what) {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_check_config() {
+	events_textdomain();
+
 	if ( !$option = get_option('events_config') ) {
-		events_textdomain();
 		// Default Options
 		$option['length'] 					= 1000;
 		$option['sidelength'] 				= 120;
@@ -271,6 +271,8 @@ function events_check_config() {
 		$option['linktarget']				= '_blank';
 		$option['amount'] 					= 2;
 		$option['hideend'] 					= 'show';
+		$option['hideendsidebar'] 			= 'never';
+		$option['addlevel'] 				= 'edit_posts';
 		$option['editlevel'] 				= 'edit_pages';
 		$option['catlevel'] 				= 'manage_options';
 		$option['managelevel'] 				= 'manage_options';
@@ -301,6 +303,9 @@ function events_check_config() {
 		$template['daily_h_template'] 		= '<h2>%category%</h2>';
 		$template['daily_title_default']	= __('Today\'s events', 'wpevents');
 		$template['daily_f_template'] 		= '';
+		$template['calendar_template'] 		= '<p><strong>%title%</strong>, %event% '.__('on', 'wpevents').' %startdate% %starttime%<br />%countdown%<br />'.__('Duration', 'wpevents').': %duration%<br />%link%</p>';
+		$template['calendar_h_template'] 	= '<h2>'.__('Highlighted events', 'wpevents').'</h2>';
+		$template['calendar_f_template'] 	= '';
 		$template['location_seperator']		= __('@', 'wpevents').' ';
 		update_option('events_template', $template);
 	}
@@ -343,10 +348,12 @@ function events_general_submit() {
 	$option['sidelength'] 				= trim($_POST['events_sidelength'], "\t\n ");
 	$option['sideshow'] 				= $_POST['events_sideshow'];
 	$option['amount'] 					= trim($_POST['events_amount'], "\t\n ");
+	$option['addlevel'] 				= $_POST['events_addlevel'];
 	$option['editlevel'] 				= $_POST['events_editlevel'];
 	$option['catlevel'] 				= $_POST['events_catlevel'];
 	$option['managelevel'] 				= $_POST['events_managelevel'];
 	$option['hideend']	 				= $_POST['events_hideend'];
+	$option['hideendsidebar']			= $_POST['events_hideendsidebar'];
 	$option['custom_date_page'] 		= $_POST['events_custom_date_page'];
 	$option['custom_date_sidebar']		= $_POST['events_custom_date_sidebar'];
 	$option['dateformat'] 				= htmlspecialchars(trim($_POST['events_dateformat'], "\t\n "), ENT_QUOTES);
@@ -386,6 +393,10 @@ function events_templates_submit() {
 	$template['daily_title_default']	= htmlspecialchars(trim($_POST['daily_title_default'], "\t\n "), ENT_QUOTES);
 	$template['daily_h_template'] 		= htmlspecialchars(trim($_POST['daily_h_template'], "\t\n "), ENT_QUOTES);
 	$template['daily_f_template'] 		= htmlspecialchars(trim($_POST['daily_f_template'], "\t\n "), ENT_QUOTES);
+
+	$template['calendar_template']	 	= htmlspecialchars(trim($_POST['calendar_template'], "\t\n "), ENT_QUOTES);
+	$template['calendar_h_template'] 	= htmlspecialchars(trim($_POST['calendar_h_template'], "\t\n "), ENT_QUOTES);
+	$template['calendar_f_template'] 	= htmlspecialchars(trim($_POST['calendar_f_template'], "\t\n "), ENT_QUOTES);
 
 	$template['location_seperator']		= htmlspecialchars(trim($_POST['location_seperator'], "\t\n"), ENT_QUOTES); // Note, spaces are not filtered
 	update_option('events_template', $template);

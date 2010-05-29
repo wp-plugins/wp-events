@@ -9,9 +9,6 @@
 function events_activate() {
 	global $wpdb;
 
-	$mysql1 		= false;
-	$mysql2 		= false;
-	$upgrade 		= false;
 	$table_name1	= $wpdb->prefix . "events";
 	$table_name2 	= $wpdb->prefix . "events_categories";
 
@@ -39,29 +36,11 @@ function events_activate() {
 	  		`priority` varchar(4) NOT NULL default 'no',
 	  		`archive` varchar(4) NOT NULL default 'no'
 			) ".$charset_collate;
-		if(mysql_query($add1) === true) {
-			$myqsl1 = true;
-		} else {
-			$mysql1 = false;
+		if(mysql_query($add1) !== true) {
+			events_mysql_warning();
 		}
-//	} else if(events_mysql_table_exists($table_name1)) { // Upgrade table if it is incomplete
-//		if (!$result = mysql_query("SHOW COLUMNS FROM `$table_name1`")) {
-//		    echo 'Could not run query: ' . mysql_error();
-//		}
-//		$i = 0;
-//	    while ($row = mysql_fetch_assoc($result)) {
-//			$field_array[] = mysql_field_name($row, $i);
-//        	$i++;
-//		}
-//
-//		if (!in_array('active', $field_array)) {
-//			## REVIEW THE FUNCTION FOR USAGE ##
-//			$upgrade = events_update_table($tablename1, 'active', 'INT( 5 ) NOT NULL DEFAULT \'1\'', 'archive');
-//		} else {
-//			$mysql1 = true;
-//		}
 	} else { // Or send out epic fail!
-		$mysql1 = false;
+		events_mysql_warning();
 	}
 
 	if(!events_mysql_table_exists($table_name2)) {
@@ -69,33 +48,29 @@ function events_activate() {
 			`id` mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY,
 			`name` varchar(255) NOT NULL
 			) ".$charset_collate;
-		if(mysql_query($add2) === true) {
-			$myqsl2 = true;
-		} else {
-			$mysql2 = false;
+		if(mysql_query($add2) !== true) {
+			events_mysql_warning();
 		}
-//	} else if(events_mysql_table_exists($table_name2)) { // Upgrade table if it is incomplete
-//		if (!$result = mysql_query("SHOW COLUMNS FROM `$table_name2`")) {
-//		    echo 'Could not run query: ' . mysql_error();
-//		}
-//		$i = 0;
-//	    while ($row = mysql_fetch_assoc($result)) {
-//			$field_array[] = mysql_field_name($row, $i);
-//        	$i++;
-//		}
-//
-//		if (!in_array('somefield', $field_array)) {
-//			## REVIEW THE FUNCTION FOR USAGE ##
-//			$upgrade = events_update_table($tablename2, 'somefield', 'INT( 15 ) NOT NULL DEFAULT \'0\'', 'someotherfield');
-//		} else {
-//			$mysql2 = true;
-//		}
 	} else { // Or send out epic fail!
-		$mysql2 = false;
-	}
-	
-	if($mysql1 == false OR $mysql2 == false OR $upgrade == false) {
 		events_mysql_warning();
+	}
+
+	if(events_mysql_table_exists($table_name1)) {
+		if (!$result = mysql_query("SHOW COLUMNS FROM `$table_name1`")) {
+		    echo 'Could not run query: ' . mysql_error();
+		}
+		$i = 0;
+	    while ($row = mysql_fetch_assoc($result)) {
+			$field_array[] = mysql_field_name($row, $i);
+        	$i++;
+		}
+
+		if (!in_array('archive', $field_array)) {
+			mysql_query("ALTER TABLE `$table_name1` ADD `review` VARCHAR( 4 ) NOT NULL DEFAULT 'no' AFTER `archive`;");
+		}
+
+	} else { // Or send out epic fail!
+		events_mysql_upgrade_error();
 	}
 }
 
@@ -128,21 +103,6 @@ function events_mysql_table_exists($table_name) {
 }
 
 /*-------------------------------------------------------------
- Name:      events_update_table
-
- Purpose:   Deactivate script
- Receive:   $tablename, $field_to_add, $specs, $after_field
- Return:	Boolean
--------------------------------------------------------------*/
-function events_update_table($tablename, $field_to_add, $specs, $after_field) {
-	if(mysql_query("ALTER TABLE `$table_name` ADD `$field_to_add` $specs AFTER `$after_field`;") === true) {
-		return true;
-	} else {
-		events_mysql_upgrade_error();
-	}
-}
-
-/*-------------------------------------------------------------
  Name:      events_mysql_warning
 
  Purpose:   Database errors if things go wrong
@@ -150,7 +110,7 @@ function events_update_table($tablename, $field_to_add, $specs, $after_field) {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_mysql_warning() {
-	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not created! You cannot store events. See if you have the right MySQL access rights and check if you can create tables.', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://forum.at.meandmymac.net', 'http://forum.at.meandmymac.net').'. '.__('Please give as much information as you can related to your problem.', 'wpevents').'</h3></div>';
+	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not created! You cannot store events. See if you have the right MySQL access rights and check if you can create tables.', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://meandmymac.net/support/', 'http://meandmymac.net/support/').'. '.__('Please give as much information as you can related to your problem.', 'wpevents').'</h3></div>';
 }
 
 /*-------------------------------------------------------------
@@ -161,9 +121,9 @@ function events_mysql_warning() {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_mysql_upgrade_error() {
+	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not properly upgraded! Events cannot work properly without this upgrade. Check your MySQL permissions and see if you have ALTER rights (rights to alter existing tables).', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://meandmymac.net/support/', 'http://meandmymac.net/support/').' '.__('and mention any errors you saw/got and explain what you were doing!', 'wpevents').'</h3></div>';
+}
 
-	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not properly upgrade! Events cannot work properly without this upgrade. Check your MySQL permissions and see if you have ALTER rights (rights to alter existing tables).', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://forum.at.meandmymac.net', 'http://forum.at.meandmymac.net').' '.__('and mention any errors you saw/got and explain what you were doing!', 'wpevents').'</h3></div>';
-	}
 /*-------------------------------------------------------------
  Name:      events_plugin_uninstall
 
