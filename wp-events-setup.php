@@ -65,8 +65,8 @@ function events_activate() {
         	$i++;
 		}
 
-		if (!in_array('archive', $field_array)) {
-			mysql_query("ALTER TABLE `$table_name1` ADD `review` VARCHAR( 4 ) NOT NULL DEFAULT 'no' AFTER `archive`;");
+		if (in_array('review', $field_array)) {
+			mysql_query("ALTER TABLE `$table_name1` DROP `review`;");
 		}
 
 	} else { // Or send out epic fail!

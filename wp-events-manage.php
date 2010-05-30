@@ -130,7 +130,7 @@ function events_insert_input() {
 					$action = "update";
 				} else {
 					/* New or duplicate event */
-					$postquery = "INSERT INTO `".$wpdb->prefix."events` (`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`, `review`) VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive', '$review')";
+					$postquery = "INSERT INTO `".$wpdb->prefix."events` (`title`, `title_link`, `location`, `category`, `pre_message`, `post_message`, `link`, `allday`, `thetime`, `theend`, `author`, `priority`, `archive`) VALUES ('$title', '$title_link', '$location', '$category', '$pre_event', '$post_event', '$link', '$allday', '$startdate', '$enddate', '$author', '$priority', '$archive')";
 					if(isset($_POST['submit_save'])) {
 						$action = "new";
 					} else {
