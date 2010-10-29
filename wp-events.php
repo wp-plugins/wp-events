@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 2.2.1
+Version: 2.2.2
 Author URI: http://meandmymac.net/
 */
 
@@ -336,7 +336,7 @@ function events_schedule() {
 		}
 
 		if ($action == 'created') { ?>
-			<div id="message" class="updated fade"><p><?php _e('Event <strong>created</strong>', 'wpevents'); ?> | <a href="admin.php?page=wp-events2"><?php _e('Manage Events', 'wpevents'); ?></a></p></div>
+			<div id="message" class="updated fade"><p><?php _e('Event <strong>created</strong>', 'wpevents'); ?> | <a href="admin.php?page=wp-events"><?php _e('Manage Events', 'wpevents'); ?></a></p></div>
 		<?php } else if ($action == 'duplicated') { ?>
 			<div id="message" class="updated fade"><p><?php _e('Event <strong>duplicated</strong>', 'wpevents'); ?></p></div>
 		<?php } else if ($action == 'no_access') { ?>

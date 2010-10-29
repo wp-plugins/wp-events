@@ -110,6 +110,8 @@ function events_insert_input() {
 	
 				$startdate 	= gmmktime($shour, $sminute, 0, $smonth, $sday, $syear);
 				$enddate 	= gmmktime($ehour, $eminute, 0, $emonth, $eday, $eyear);
+
+				if($enddate < $startdate) 	$enddate = $startdate;
 	
 				if(strlen($repeat_every) > 0) {
 					$day = 86400;

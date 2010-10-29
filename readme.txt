@@ -3,7 +3,7 @@ Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
 Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
 Requires at least: 2.7, PHP5.2
-Tested up to: 2.9
+Tested up to: 3.0.1
 Stable tag: 2.2.1
 
 Create a list with events/appointments/concerts/future happenings and show them on your site. Includes optional widget and advanced page options.
@@ -13,6 +13,10 @@ Create a list with events/appointments/concerts/future happenings and show them 
 The plugin features a straightforward user interface in the Wordpress dashboard to add/edit and delete events and set some options. 
 Events allows you to list Events on a seperate page or in the sidebar, or both. Here you can list Old (archived) events future events and if you want, events happening today.
 When you create or edit an event you can set it to be archived. So that it remains listed. Optionally non-archived events are automatically deleted one day (24 hours) after they expire. Many more options are available and Events is completely customizable to your theme in an easy and flexible manner.
+
+For help and instructions, go to the [support](http://meandmymac.net/support/) pages.
+
+If you're upgrading from version 2.1.1 or older [read this](http://meandmymac.net/support/knowledgebase.php?article=11)!
 
 **Features**
 
@@ -35,7 +39,7 @@ When you create or edit an event you can set it to be archived. So that it remai
 * Management page
 * Set amount of events to show in the sidebar
 * Un-install option to remove the database table
-And more, see for yourself...
+* And more, see for yourself...
 
 == Installation ==
 
@@ -50,10 +54,8 @@ Installation with widget:
 1. Once an event is saved you can manage them from Events > Manage.
 1. Make a donation. It’s well appreciated!
 
-For more instructions and additional information review the [detailed install instructions](http://meandmymac.net/plugins/events/#install).
+For more instructions and additional information review the [detailed install instructions](http://meandmymac.net/support/knowledgebase.php?category=4).
 Find out how to implement Events on pages, without a widget and many more options...
-
-For upgrading **ALWAYS ALWAYS** review the details on [the plugin page](http://meandmymac.net/plugins/events/#upgrade) !!!!!
 
 For help, go to the [support](http://meandmymac.net/support/) pages.
 

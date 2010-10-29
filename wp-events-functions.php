@@ -178,7 +178,7 @@ function events_sidebar($lim = 0, $cat = 0) {
 				$event->title = substr($event->title, 0 , $events_config['sidelength']);
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$template = str_replace('%title%', $event->title, $template);
-				$template = str_replace('%event%', substr($event->pre_message, 0 , $events_config['sidelength']), $template);
+				$template = str_replace('%event%', substr(nl2br($event->pre_message), 0 , $events_config['sidelength']), $template);
 
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_sidelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
@@ -198,6 +198,9 @@ function events_sidebar($lim = 0, $cat = 0) {
 					if($event->allday == "Y") {
 						$template = str_replace('%endtime%', '', $template);
 					} else {
+						if ($events_config['hideendsidebar'] == 'hide') {
+							$template = str_replace('%enddate%', '', $template);
+						}
 						$template = str_replace('%endtime%', str_replace('00:00', '', gmstrftime($events_config['timeformat_sidebar'], $event->theend)), $template);
 					}
 					$template = str_replace('%enddate%', gmstrftime($events_config['dateformat_sidebar'], $event->theend), $template);
@@ -236,10 +239,11 @@ function events_show($atts, $content = null) {
 
 	$present = current_time('timestamp');
 	$nextsevendays	= $present + 604800;
-	$monthstart = gmmktime(0, 0, 0, date('m'), 1, date('Y'));
+	$monthstart = gmmktime(0, 0, 0, gmdate('m'), 1, gmdate('Y'));
     $days_in_month = date("t", $monthstart);
 	$monthend = $monthstart + (86400 * $days_in_month);
-	$daystart = floor($present / 86400) * 86400;
+	// $daystart = floor($present / 86400) * 86400;
+	$daystart = gmmktime(0, 0, 0, gmdate('m'), gmdate('d'), gmdate('Y'));
 	$dayend = $daystart + 86400;
 	
 	if(empty($atts['type'])) $type = "default";
@@ -378,6 +382,9 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 		if($allday == "Y") {
 			$template = str_replace('%endtime%', '', $template);
 		} else {
+			if ($events_config['hideendsidebar'] == 'hide') {
+				$template = str_replace('%enddate%', '', $template);
+			}
 			$template = str_replace('%endtime%', str_replace('00:00', '', gmstrftime($events_config['timeformat'], $theend)), $template);
 		}
 		$template = str_replace('%enddate%', gmstrftime($events_config['dateformat'], $theend), $template);
