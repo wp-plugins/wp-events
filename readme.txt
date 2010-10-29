@@ -67,8 +67,12 @@ For help, go to the [support](http://meandmymac.net/support/) pages.
 
 == Changelog ==
 
-**Review the changelog here:**
-[Changelog](http://meandmymac.net/plugins/events/2/)
+[Review the changelog here](http://meandmymac.net/plugins/events/2/)
+
+== Upgrade Notice ==
+
+= 2.2.2 =
+Bug fix release, recommended for all users using version 2.2.1 or older.
 
 == Screenshots ==
 
