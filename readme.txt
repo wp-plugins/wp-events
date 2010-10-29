@@ -65,6 +65,11 @@ For help, go to the [support](http://meandmymac.net/support/) pages.
 **Visit here for support:**
 [Support!](http://meandmymac.net/support/)
 
+== Changelog ==
+
+**Review the changelog here:**
+[Changelog](http://meandmymac.net/plugins/events/2/)
+
 == Screenshots ==
 
 1. The screen where you add events
