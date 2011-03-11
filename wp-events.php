@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 2.2.2
+Version: 2.2.3
 Author URI: http://meandmymac.net/
 */
 
@@ -1042,7 +1042,7 @@ function events_options() {
 		      	</tr>
 		      	</tr>
 			        <th scope="row" valign="top"><?php _e('Default title', 'wpevents'); ?> (<?php _e('optional', 'wpevents'); ?>):</th>
-			        <td><input name="page_title_default" type="text" value="<?php echo $events_template['page_title_default'];?>" size="20" /><br /><em><?php _e('This only works if you use %category% in the header.', 'wpevents'); ?> <?php _e('No HTML allowed.', 'wpevents'); ?></em></td>
+			        <td><input name="page_title_default" type="text" value="<?php echo stripslashes($events_template['page_title_default']);?>" size="20" /><br /><em><?php _e('This only works if you use %category% in the header.', 'wpevents'); ?> <?php _e('No HTML allowed.', 'wpevents'); ?></em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top"><?php _e('Body', 'wpevents'); ?>:</th>
@@ -1065,7 +1065,7 @@ function events_options() {
 		      	</tr>
 		      	</tr>
 			        <th scope="row" valign="top"><?php _e('Default title', 'wpevents'); ?> (<?php _e('optional', 'wpevents'); ?>):</th>
-			        <td><input name="archive_title_default" type="text" value="<?php echo $events_template['archive_title_default'];?>" size="20" /><br /><em><?php _e('This only works if you use %category% in the header.', 'wpevents'); ?> <?php _e('No HTML allowed.', 'wpevents'); ?></em></td>
+			        <td><input name="archive_title_default" type="text" value="<?php echo stripslashes($events_template['archive_title_default']);?>" size="20" /><br /><em><?php _e('This only works if you use %category% in the header.', 'wpevents'); ?> <?php _e('No HTML allowed.', 'wpevents'); ?></em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top"><?php _e('Body', 'wpevents'); ?>:</th>
@@ -1088,7 +1088,7 @@ function events_options() {
 		      	</tr>
 		      	</tr>
 			        <th scope="row" valign="top"><?php _e('Default title', 'wpevents'); ?> (<?php _e('optional', 'wpevents'); ?>):</th>
-			        <td><input name="daily_title_default" type="text" value="<?php echo $events_template['daily_title_default'];?>" size="20" /><br /><em><?php _e('This only works if you use %category% in the header.', 'wpevents'); ?> <?php _e('No HTML allowed.', 'wpevents'); ?></em></td>
+			        <td><input name="daily_title_default" type="text" value="<?php echo stripslashes($events_template['daily_title_default']);?>" size="20" /><br /><em><?php _e('This only works if you use %category% in the header.', 'wpevents'); ?> <?php _e('No HTML allowed.', 'wpevents'); ?></em></td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row" valign="top"><?php _e('Body', 'wpevents'); ?>:</th>
@@ -1102,7 +1102,7 @@ function events_options() {
 		      	
 		      	<tr valign="top">
 			        <th scope="row" valign="top"><?php _e('Location separator', 'wpevents'); ?>:</th>
-			        <td><input name="location_seperator" type="text" value="<?php echo $events_template['location_seperator'];?>" size="6" /> (<?php _e('default', 'wpevents'); ?>: @ )<br /><em><?php _e('Can be text also.', 'wpevents'); ?> <?php _e('Ending spaces allowed.', 'wpevents'); ?></em></td>
+			        <td><input name="location_seperator" type="text" value="<?php echo stripslashes($events_template['location_seperator']);?>" size="6" /> (<?php _e('default', 'wpevents'); ?>: @ )<br /><em><?php _e('Can be text also.', 'wpevents'); ?> <?php _e('Ending spaces allowed.', 'wpevents'); ?></em></td>
 		      	</tr>
 			</table>
 		    <p class="submit">
@@ -1117,75 +1117,75 @@ function events_options() {
 		    <table class="form-table">
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Today', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_today" type="text" value="<?php echo $events_language['language_today'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('today', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_today" type="text" value="<?php echo stripslashes($events_language['language_today']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('today', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Hours', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_hours" type="text" value="<?php echo $events_language['language_hours'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('hours', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_hours" type="text" value="<?php echo stripslashes($events_language['language_hours']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('hours', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Minutes', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_minutes" type="text" value="<?php echo $events_language['language_minutes'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('minutes', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_minutes" type="text" value="<?php echo stripslashes($events_language['language_minutes']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('minutes', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Day', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_day" type="text" value="<?php echo $events_language['language_day'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('day', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_day" type="text" value="<?php echo stripslashes($events_language['language_day']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('day', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Days', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_days" type="text" value="<?php echo $events_language['language_days'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('days', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_days" type="text" value="<?php echo stripslashes($events_language['language_days']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('days', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('And', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_and" type="text" value="<?php echo $events_language['language_and'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('and', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_and" type="text" value="<?php echo stripslashes($events_language['language_and']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('and', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('On', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_on" type="text" value="<?php echo $events_language['language_on'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('on', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_on" type="text" value="<?php echo stripslashes($events_language['language_on']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('on', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('In', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_in" type="text" value="<?php echo $events_language['language_in'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('in', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_in" type="text" value="<?php echo stripslashes($events_language['language_in']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('in', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Ago', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_ago" type="text" value="<?php echo $events_language['language_ago'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('ago', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_ago" type="text" value="<?php echo stripslashes($events_language['language_ago']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('ago', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Sidebar link', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_sidelink" type="text" value="<?php echo $events_language['language_sidelink'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('more', 'wpevents'); ?> &raquo;)</td>
+			        <td><input name="events_language_sidelink" type="text" value="<?php echo stripslashes($events_language['language_sidelink']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('more', 'wpevents'); ?> &raquo;)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('Page link', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_pagelink" type="text" value="<?php echo $events_language['language_pagelink'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('More information', 'wpevents'); ?> &raquo;)</td>
+			        <td><input name="events_language_pagelink" type="text" value="<?php echo stripslashes($events_language['language_pagelink']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('More information', 'wpevents'); ?> &raquo;)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('If there are no events to show', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_noevents" type="text" value="<?php echo $events_language['language_noevents'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No events to show', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_noevents" type="text" value="<?php echo stripslashes($events_language['language_noevents']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No events to show', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('If the event already happened', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_past" type="text" value="<?php echo $events_language['language_past'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('Past event!', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_past" type="text" value="<?php echo stripslashes($events_language['language_past']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('Past event!', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('If there are no events today', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_nodaily" type="text" value="<?php echo $events_language['language_nodaily'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No events today', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_nodaily" type="text" value="<?php echo stripslashes($events_language['language_nodaily']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No events today', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('If the archive is empty', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_noarchive" type="text" value="<?php echo $events_language['language_noarchive'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No events in the archive', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_noarchive" type="text" value="<?php echo stripslashes($events_language['language_noarchive']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No events in the archive', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('If there is an error', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_e_config" type="text" value="<?php echo $events_language['language_e_config'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('A configuration error occurred', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_e_config" type="text" value="<?php echo stripslashes($events_language['language_e_config']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('A configuration error occurred', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('If no duration is set for an event', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_noduration" type="text" value="<?php echo $events_language['language_noduration'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No duration!', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_noduration" type="text" value="<?php echo stripslashes($events_language['language_noduration']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('No duration!', 'wpevents'); ?>)</td>
 		      	</tr>
 		      	<tr valign="top">
 			        <th scope="row"><?php _e('If event is an all-day event', 'wpevents'); ?>:</th>
-			        <td><input name="events_language_allday" type="text" value="<?php echo $events_language['language_allday'];?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('All-day event!', 'wpevents'); ?>)</td>
+			        <td><input name="events_language_allday" type="text" value="<?php echo stripslashes($events_language['language_allday']);?>" size="45" /> (<?php _e('default', 'wpevents'); ?>: <?php _e('All-day event!', 'wpevents'); ?>)</td>
 		      	</tr>
 	    	</table>
 		    <p class="submit">

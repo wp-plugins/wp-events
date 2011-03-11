@@ -54,8 +54,14 @@ function events_widget_sidebar_init() {
  Return:    -none-
 -------------------------------------------------------------*/
 function events_widget_dashboard_init() {
-	wp_add_dashboard_widget( 'events_schedule_widget', __('Events', 'wpevents'), 'events_widget_dashboard' );
-	wp_add_dashboard_widget( 'meandmymac_rss_widget', __('Meandmymac.net RSS Feed', 'wpevents'), 'meandmymac_rss_widget' );
+	global $events_config;
+
+	if(current_user_can($events_config['addlevel'])) {
+		wp_add_dashboard_widget( 'events_schedule_widget', __('Events', 'wpevents'), 'events_widget_dashboard' );
+	}
+	if(current_user_can('manage_options')) {
+		wp_add_dashboard_widget('meandmymac_rss_widget', __('Meandmymac.net RSS Feed', 'wpevents'), 'meandmymac_rss_widget');
+	}
 }
 
 /*-------------------------------------------------------------
@@ -184,9 +190,19 @@ function events_widget_dashboard() {
  Purpose:   Shows the Meandmymac RSS feed on the dashboard
  Receive:   -none-
  Return:    -none-
+ Since:		2.4.3
 -------------------------------------------------------------*/
 if(!function_exists('meandmymac_rss_widget')) {
-	function meandmymac_rss_widget() {
+	function meandmymac_rss_widget($amount = 10) {
+
+	/* Changelog:
+	// Dec 8 2010 - Now uses SimplePIE RSS parser
+	// Dec 19 2010 - Simplyfied parsing
+	*/
+
+		include_once(ABSPATH . WPINC . '/feed.php');
+		$feed		= array('http://meandmymac.net/feed/'
+							);
 		?>
 			<style type="text/css" media="screen">
 			#meandmymac_rss_widget .text-wrap {
@@ -196,10 +212,27 @@ if(!function_exists('meandmymac_rss_widget')) {
 			}
 			#meandmymac_rss_widget .text-wrap .rsserror {
 				color: #f00;
-				border: none;
 			}
 			</style>
-		<?php meandmymac_rss('http://meandmymac.net/feed/');
+		<?php
+		$rss = fetch_feed($feed);
+		if (!is_wp_error($rss)) { 
+		    $maxitems = $rss->get_item_quantity($amount); 
+		    $rss_items = $rss->get_items(0, $maxitems); 
+		}
+		echo '<ul>';
+		if(is_array($rss_items) AND $rss_items) {
+			if ($maxitems == 0) {
+				echo '<li class="text-wrap">No items</li>';
+			} else {
+				foreach ($rss_items as $item) {
+			        echo '<li class="text-wrap">- <a href='.$item->get_permalink().' title="'.$item->get_title().'">'.$item->get_title().'</a> on '.$item->get_date('j F Y \a\t g:i a').'</li>';
+				}
+			}
+		} else {
+			echo '<li class="text-wrap"><span class="rsserror">The feed appears to be invalid or corrupt!</span></li>';
+		}
+		echo '</ul>';
 	}
 }
 ?>

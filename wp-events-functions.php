@@ -357,8 +357,7 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 
 	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
 	$template = str_replace('%title%', $title, $template);
-	$pre_message = nl2br($pre_message);
-	$template = str_replace('%event%', $pre_message, $template);
+	$template = str_replace('%event%', nl2br($pre_message), $template);
 
 	if(current_time('timestamp') <= $theend) { 
 		$template = str_replace('%after%', '', $template);
@@ -464,64 +463,5 @@ function events_credits() {
 	echo '</tbody>';
 	
 	echo '</table';
-}
-
-/*-------------------------------------------------------------
- Name:      meandmymac_rss
-
- Purpose:   A very simple RSS parser for Meandmymac.net
- Receive:   $rss, $count
- Return:    -none-
--------------------------------------------------------------*/
-if(!function_exists('meandmymac_rss')) {
-	function meandmymac_rss($rss, $count = 10, $showdates = 'yes') {
-		if ( is_string( $rss ) ) {
-			require_once(ABSPATH . WPINC . '/rss.php');
-			if ( !$rss = fetch_rss($rss) ) {
-				echo '<div class="text-wrap"><span class="rsserror">The feed could not be fetched, try again later!</span></div>';
-				return;
-			}
-		}
-
-		if ( is_array( $rss->items ) && !empty( $rss->items ) ) {
-			$rss->items = array_slice($rss->items, 0, $count);
-			foreach ( (array) $rss->items as $item ) {
-				while ( strstr($item['link'], 'http') != $item['link'] ) {
-					$item['link'] = substr($item['link'], 1);
-				}
-
-				$link = clean_url(strip_tags($item['link']));
-				$desc = attribute_escape(strip_tags( $item['description']));
-				$title = attribute_escape(strip_tags($item['title']));
-				if ( empty($title) ) {
-					$title = __('Untitled');
-				}
-				
-				if ( empty($link) ) {
-					$link = "#";
-				}
-
-				if (isset($item['pubdate'])) {
-					$date = $item['pubdate'];
-				} elseif (isset($item['published'])) {
-					$date = $item['published'];
-				}
-
-				if ($date) {
-					if ($date_stamp = strtotime($date)) {
-						$date = date_i18n( get_option('date_format'), $date_stamp);
-					} else {
-						$date = '';
-					}
-				}
-				echo '<div class="text-wrap"><a href="'.$link.'" target="_blank">'.$title.'</a> ';
-				if($showdates == "yes") echo __('on','wpevents').' '.$date;
-				echo '</div>';
-			}
-		} else {
-			echo '<div class="text-wrap"><span class="rsserror">The feed appears to be invalid or corrupt!</span></div>';
-		}
-		return;
-	}
 }
 ?>
