@@ -14,9 +14,7 @@ The plugin features a straightforward user interface in the Wordpress dashboard 
 Events allows you to list Events on a seperate page or in the sidebar, or both. Here you can list Old (archived) events future events and if you want, events happening today.
 When you create or edit an event you can set it to be archived. So that it remains listed. Optionally non-archived events are automatically deleted one day (24 hours) after they expire. Many more options are available and Events is completely customizable to your theme in an easy and flexible manner.
 
-For help and instructions, go to the [support](http://meandmymac.net/support/) pages.
-
-If you're upgrading from version 2.1.1 or older [read this](http://meandmymac.net/support/knowledgebase.php?article=11)!
+For help and instructions, go to the [forum](http://forum.at.meandmymac.net/support/).
 
 **Features**
 
@@ -54,16 +52,16 @@ Installation with widget:
 1. Once an event is saved you can manage them from Events > Manage.
 1. Make a donation. It’s well appreciated!
 
-For more instructions and additional information review the [detailed install instructions](http://meandmymac.net/support/knowledgebase.php?category=4).
+For more instructions and additional information review [this forum](http://forum.at.meandmymac.net/forum/8/usage-configuration/).
 Find out how to implement Events on pages, without a widget and many more options...
 
-For help, go to the [support](http://meandmymac.net/support/) pages.
+For help, go to the [forum](http://forum.at.meandmymac.net/).
 
 
 == Frequently Asked Questions ==
 
 **Visit here for support:**
-[Support!](http://meandmymac.net/support/)
+For help, go to the [forum](http://forum.at.meandmymac.net/).
 
 == Screenshots ==
 
