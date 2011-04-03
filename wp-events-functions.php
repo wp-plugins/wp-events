@@ -452,7 +452,7 @@ function events_credits() {
 	echo sprintf(__('Find me on <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net" target="_blank', 'meandmymac.net').'<br />';
 	echo sprintf(__('The plugin page at <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/" target="_blank','meandmymac.net/plugins/events/').' ';
 	echo sprintf(__('<a href="%s">%s</a> for updates and notes about Events!', 'wpevents'),'http://meandmymac.net/tag/events/" target="_blank', 'meandmymac.net/tag/events/').'<br />';
-	echo sprintf(__('Need help? <a href="%s">%s</a>. Use the knowledgebase!', 'wpevents'),'http://meandmymac.net/support/" target="_blank','http://meandmymac.net/support/').'<br />';
+	echo sprintf(__('Need help? <a href="%s">%s</a>. Use the forum!', 'wpevents'),'http://forum.at.meandmymac.net/" target="_blank','http://forum.at.meandmymac.net/').'<br />';
 	echo sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/" target="_blank');
 	if (get_locale() != "en_US") { 
 		echo "<br />".__('Translation: ---', 'wpevents');
