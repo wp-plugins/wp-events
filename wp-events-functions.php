@@ -293,7 +293,7 @@ function events_show($atts, $content = null) {
 
 		} else if ($type == 'today') {
 
-			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE ((`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)) $category$one_event ORDER BY $order$amount");
+			$events = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."events` WHERE ((`thetime` >= $daystart AND `thetime` <= $dayend) OR (`theend` >= $daystart AND `theend` <= $dayend) OR (`thetime` >= $daystart AND `theend` <= $dayend) OR ($present >= `thetime` AND $present <= `theend`)) $category$one_event ORDER BY $order$amount");
 			$header = $events_template['daily_h_template'];
 			$titledefault = $events_template['daily_title_default'];
 			$footer = $events_template['daily_f_template'];
@@ -407,6 +407,31 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 }
 
 /*-------------------------------------------------------------
+ Name:      events_editor_admin_init
+
+ Purpose:   Loads JS for the add events editor form
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_editor_admin_init() {
+  wp_enqueue_script('word-count');
+  wp_enqueue_script('post');
+  wp_enqueue_script('editor');
+  wp_enqueue_script('media-upload');
+}
+
+/*-------------------------------------------------------------
+ Name:      events_editor_admin_head
+
+ Purpose:   Loads TinyMCE for adding events
+ Receive:   -none-
+ Return:    -none-
+-------------------------------------------------------------*/
+function events_editor_admin_head() {
+  wp_tiny_mce();
+}
+
+/*-------------------------------------------------------------
  Name:      events_textdomain
 
  Purpose:   Initiates Translation files
@@ -452,7 +477,7 @@ function events_credits() {
 	echo sprintf(__('Find me on <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net" target="_blank', 'meandmymac.net').'<br />';
 	echo sprintf(__('The plugin page at <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/" target="_blank','meandmymac.net/plugins/events/').' ';
 	echo sprintf(__('<a href="%s">%s</a> for updates and notes about Events!', 'wpevents'),'http://meandmymac.net/tag/events/" target="_blank', 'meandmymac.net/tag/events/').'<br />';
-	echo sprintf(__('Need help? <a href="%s">%s</a>. Use the forum!', 'wpevents'),'http://forum.at.meandmymac.net/" target="_blank','http://forum.at.meandmymac.net/').'<br />';
+	echo sprintf(__('Need help? <a href="%s">%s</a>. Use the knowledgebase!', 'wpevents'),'http://meandmymac.net/support/" target="_blank','http://meandmymac.net/support/').'<br />';
 	echo sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/" target="_blank');
 	if (get_locale() != "en_US") { 
 		echo "<br />".__('Translation: ---', 'wpevents');

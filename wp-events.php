@@ -4,7 +4,7 @@ Plugin Name: Events
 Plugin URI: http://meandmymac.net/plugins/events/
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Author: Arnan de Gans
-Version: 2.2.3
+Version: 2.2.4
 Author URI: http://meandmymac.net/
 */
 
@@ -27,6 +27,9 @@ setlocale(LC_ALL, get_locale().'.'.DB_CHARSET);
 add_action('init', 'events_textdomain'); 
 add_action('widgets_init', 'events_widget_sidebar_init');
 add_action('wp_dashboard_setup', 'events_widget_dashboard_init');
+
+add_action('admin_init', 'events_editor_admin_init');
+add_action('admin_head', 'events_editor_admin_head');
 add_action('admin_menu', 'events_dashboard', 1);
 
 add_shortcode('events_show', 'events_show');
@@ -376,8 +379,8 @@ function events_schedule() {
 					</table>
 	
 					<br class="clear" />
-					<div id="postdivrich" class="postarea">
-						<?php events_editor($edit_event->pre_message, 'content', 'events_title'); ?>
+					<div id="poststuff">
+						<?php the_editor($edit_event->pre_message, 'content', 'events_allday', false, 4); ?>
 					</div>
 	
 					<br class="clear" />

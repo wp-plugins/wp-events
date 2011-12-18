@@ -1,52 +1,5 @@
 <?php 
 /*-------------------------------------------------------------
- Name:      events_editor
-
- Purpose:   Use simple HTML formatting tools to generate events
- Receive:   $content, $id, $prev_id
- Return:	-None-
--------------------------------------------------------------*/
-function events_editor($content, $id = 'content', $prev_id = 'title') {
-	$media_buttons = false;
-	$richedit = user_can_richedit();
-	?>
-	<div id="quicktags">
-		<?php wp_print_scripts( 'quicktags' ); ?>
-		<script type="text/javascript">edToolbar()</script>
-	</div>
-
-	<?php 
-	$the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='6' cols='40' name='$id' tabindex='4' id='$id'>%s</textarea></div>\n");
-	$the_editor_content = apply_filters('the_editor_content', $content);
-	printf($the_editor, $content);
-	?>
-	<script type="text/javascript">
-	// <![CDATA[
-	edCanvas = document.getElementById('<?php echo $id; ?>');
-	<?php if ( user_can_richedit() && $prev_id ) { ?>
-	var dotabkey = true;
-	// If tinyMCE is defined.
-	if ( typeof tinyMCE != 'undefined' ) {
-		// This code is meant to allow tabbing from Title to Post (TinyMCE).
-		jQuery('#<?php echo $prev_id; ?>')[jQuery.browser.opera ? 'keypress' : 'keydown'](function (e) {
-			if (e.which == 9 && !e.shiftKey && !e.controlKey && !e.altKey) {
-				if ( (jQuery("#post_ID").val() < 1) && (jQuery("#title").val().length > 0) ) { autosave(); }
-				if ( tinyMCE.activeEditor && ! tinyMCE.activeEditor.isHidden() && dotabkey ) {
-					e.preventDefault();
-					dotabkey = false;
-					tinyMCE.activeEditor.focus();
-					return false;
-				}
-			}
-		});
-	}
-	<?php } ?>
-	// ]]>
-	</script>
-	<?php 
-}
-
-/*-------------------------------------------------------------
  Name:      events_insert_input
 
  Purpose:   Prepare and insert data on saving new or updating event
@@ -64,7 +17,7 @@ function events_insert_input() {
 		$title_link	 		= $_POST['events_title_link'];
 		$location 			= htmlspecialchars(trim($_POST['events_location'], "\t\n "), ENT_QUOTES);
 		$category 			= $_POST['events_category'];
-		$pre_event 			= htmlspecialchars(trim($_POST['content'], "\t\n "), ENT_QUOTES);
+		$pre_event 			= trim($_POST['content'], "\t\n "); // specialchars done in the_editor()
 		$post_event 		= htmlspecialchars(trim($_POST['events_post_event'], "\t\n "), ENT_QUOTES);
 		$link		 		= htmlspecialchars(trim($_POST['events_link'], "\t\n "), ENT_QUOTES);
 		$allday		 		= $_POST['events_allday'];
