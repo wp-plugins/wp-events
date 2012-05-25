@@ -193,46 +193,17 @@ function events_widget_dashboard() {
  Since:		2.4.3
 -------------------------------------------------------------*/
 if(!function_exists('meandmymac_rss_widget')) {
-	function meandmymac_rss_widget($amount = 10) {
-
-	/* Changelog:
-	// Dec 8 2010 - Now uses SimplePIE RSS parser
-	// Dec 19 2010 - Simplyfied parsing
-	*/
-
-		include_once(ABSPATH . WPINC . '/feed.php');
-		$feed		= array('http://meandmymac.net/feed/'
-							);
-		?>
-			<style type="text/css" media="screen">
-			#meandmymac_rss_widget .text-wrap {
-				padding-top: 5px;
-				margin: 0.5em;
-				display: block;
-			}
-			#meandmymac_rss_widget .text-wrap .rsserror {
-				color: #f00;
-			}
-			</style>
-		<?php
-		$rss = fetch_feed($feed);
-		if (!is_wp_error($rss)) { 
-		    $maxitems = $rss->get_item_quantity($amount); 
-		    $rss_items = $rss->get_items(0, $maxitems); 
-		}
-		echo '<ul>';
-		if(is_array($rss_items) AND $rss_items) {
-			if ($maxitems == 0) {
-				echo '<li class="text-wrap">No items</li>';
-			} else {
-				foreach ($rss_items as $item) {
-			        echo '<li class="text-wrap">- <a href='.$item->get_permalink().' title="'.$item->get_title().'">'.$item->get_title().'</a> on '.$item->get_date('j F Y \a\t g:i a').'</li>';
-				}
-			}
-		} else {
-			echo '<li class="text-wrap"><span class="rsserror">The feed appears to be invalid or corrupt!</span></li>';
-		}
-		echo '</ul>';
+	function meandmymac_rss_widget() {
+		echo '<div class="rss-widget">';
+		wp_widget_rss_output(array(
+			'url' => 'http://meandmymac.net/feed/',
+			'title' => 'Events Plugin Updates & Authors Blog',
+			'items' => 4,
+			'show_summary' => 1, 
+			'show_author' => 0,
+			'show_date' => 1
+		));
+		echo "</div>";
 	}
 }
 ?>

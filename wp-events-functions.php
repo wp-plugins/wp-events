@@ -178,7 +178,7 @@ function events_sidebar($lim = 0, $cat = 0) {
 				$event->title = substr($event->title, 0 , $events_config['sidelength']);
 				if($event->title_link == 'Y') { $event->title = '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$event->title.'</a>'; }
 				$template = str_replace('%title%', $event->title, $template);
-				$template = str_replace('%event%', substr(nl2br($event->pre_message), 0 , $events_config['sidelength']), $template);
+				$template = str_replace('%event%', substr($event->pre_message, 0 , $events_config['sidelength']), $template);
 
 				if(strlen($event->link) > 0) { $template = str_replace('%link%', '<a href="'.$event->link.'" target="'.$events_config['linktarget'].'">'.$events_language['language_sidelink'].'</a>', $template); }
 				if(strlen($event->link) == 0) { $template = str_replace('%link%', '', $template); }
@@ -357,7 +357,7 @@ function events_build_output($type, $category, $link, $title, $title_link, $pre_
 
 	if($title_link == 'Y') { $title = '<a href="'.$link.'" target="'.$events_config['linktarget'].'">'.$title.'</a>'; }
 	$template = str_replace('%title%', $title, $template);
-	$template = str_replace('%event%', nl2br($pre_message), $template);
+	$template = str_replace('%event%', $pre_message, $template);
 
 	if(current_time('timestamp') <= $theend) { 
 		$template = str_replace('%after%', '', $template);
@@ -477,7 +477,7 @@ function events_credits() {
 	echo sprintf(__('Find me on <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net" target="_blank', 'meandmymac.net').'<br />';
 	echo sprintf(__('The plugin page at <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/" target="_blank','meandmymac.net/plugins/events/').' ';
 	echo sprintf(__('<a href="%s">%s</a> for updates and notes about Events!', 'wpevents'),'http://meandmymac.net/tag/events/" target="_blank', 'meandmymac.net/tag/events/').'<br />';
-	echo sprintf(__('Need help? <a href="%s">%s</a>. Use the knowledgebase!', 'wpevents'),'http://meandmymac.net/support/" target="_blank','http://meandmymac.net/support/').'<br />';
+	echo sprintf(__('Need help? <a href="%s">%s</a>.', 'wpevents'),'http://wordpress.org/support/plugin/wp-events" target="_blank','http://wordpress.org/support/plugin/wp-events').'<br />';
 	echo sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/" target="_blank');
 	if (get_locale() != "en_US") { 
 		echo "<br />".__('Translation: ---', 'wpevents');
