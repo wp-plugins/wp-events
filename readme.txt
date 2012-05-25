@@ -15,7 +15,7 @@ Events allows you to list Events on a seperate page or in the sidebar, or both. 
 When you create or edit an event you can set it to be archived. So that it remains listed. Optionally non-archived events are automatically deleted one day (24 hours) after they expire. Many more options are available and Events is completely customizable to your theme in an easy and flexible manner.
 
 For support, go to the [forum](http://wordpress.org/support/plugin/wp-events).
-For usage instructions, go to the [plugin](http://wordpress.org/support/plugin/wp-events) pages.
+For usage instructions, go to the [plugin](http://meandmymac.net/plugins/events/2/) pages.
 
 **Features**
 
@@ -53,16 +53,16 @@ Installation with widget:
 1. Once an event is saved you can manage them from Events > Manage.
 1. Make a donation. It’s well appreciated!
 
-For more instructions and additional information review the [detailed install instructions](http://meandmymac.net/support/knowledgebase.php?category=4).
+For more instructions and additional information review the [Plugin page](http://meandmymac.net/plugins/events/2/).
 Find out how to implement Events on pages, without a widget and many more options...
 
-For help, go to the [support](http://meandmymac.net/support/) pages.
+For help, go to the [support](http://wordpress.org/support/plugin/wp-events) pages.
 
 
 == Frequently Asked Questions ==
 
 **Visit here for support:**
-[Support!](http://meandmymac.net/support/)
+[Support!](http://wordpress.org/support/plugin/wp-events)
 
 == Screenshots ==
 
