@@ -1,5 +1,5 @@
 === Events ===
-Contributors: Arnan de Gans
+Contributors: adegans
 Donate link: http://meandmymac.net/donate/
 Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
 Requires at least: 3.0
