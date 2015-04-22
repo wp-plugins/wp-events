@@ -2,9 +2,9 @@
 Contributors: Arnan de Gans
 Donate link: http://meandmymac.net/donate/
 Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
-Requires at least: 3.0, PHP5.2
-Tested up to: 3.3.2
-Stable tag: 2.2.4.1
+Requires at least: 3.0
+Tested up to: 4.1.2
+Stable tag: 2.3
 
 Create a list with events/appointments/concerts/future happenings and show them on your site. Includes optional widget and advanced page options.
 
