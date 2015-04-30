@@ -1,6 +1,6 @@
 === Events ===
 Contributors: adegans
-Donate link: http://meandmymac.net/donate/?pk_campaign=wordpress.org-wpevents_readme&pk_kwd=donatelink
+Donate link: http://meandmymac.net/donate/?pk_campaign=wpevents-readme&pk_kwd=donatelink
 Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
 Requires at least: 3.5
 Tested up to: 4.2.1
@@ -15,7 +15,7 @@ Events allows you to list Events on a seperate page or in the sidebar, or both. 
 When you create or edit an event you can set it to be archived. So that it remains listed. Optionally non-archived events are automatically deleted one day (24 hours) after they expire. Many more options are available and Events is completely customizable to your theme in an easy and flexible manner.
 
 For support, go to the [forum](http://wordpress.org/support/plugin/wp-events).
-For usage instructions, go to the [plugin](http://meandmymac.net/plugins/events/2/?pk_campaign=wordpress.org-wpevents_readme&pk_kwd=installation) pages.
+For usage instructions, go to the [plugin](http://meandmymac.net/plugins/events/2/?pk_campaign=wpevents-readme&pk_kwd=installation) pages.
 
 **Features**
 
@@ -53,7 +53,7 @@ Installation with widget:
 1. Once an event is saved you can manage them from Events > Manage.
 1. Make a donation. It’s well appreciated!
 
-For more instructions and additional information review the [Plugin page](http://meandmymac.net/plugins/events/2/?pk_campaign=wordpress.org-wpevents_readme&pk_kwd=installation).
+For more instructions and additional information review the [Plugin page](http://meandmymac.net/plugins/events/2/?pk_campaign=wpevents-readme&pk_kwd=installation).
 Find out how to implement Events on pages, without a widget and many more options...
 
 For help, go to the [support](http://wordpress.org/support/plugin/wp-events) pages.
