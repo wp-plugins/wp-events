@@ -474,10 +474,10 @@ function events_credits() {
 
 	echo '<tbody>';
 	echo '<tr><td>';
-	echo sprintf(__('Follow me on my blog <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net" target="_blank', 'meandmymac.net').'<br />';
-	echo sprintf(__('The plugin page is <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/" target="_blank','meandmymac.net/plugins/events/').'<br />';
+	echo sprintf(__('Follow me on my blog <a href="%s">%s</a>.', 'wpevents'),'http://meandmymac.net?pk_campaign=wpevents-credits" target="_blank', 'meandmymac.net').'<br />';
+	echo sprintf(__('The plugin page is <a href="%s">%s</a>. Getting started, manuals and more...', 'wpevents'),'http://meandmymac.net/plugins/events/?pk_campaign=wpevents-credits&pk_kwd=eventspage" target="_blank','meandmymac.net/plugins/events/').'<br />';
 	echo sprintf(__('Need help? <a href="%s">%s</a>.', 'wpevents'),'http://wordpress.org/support/plugin/wp-events" target="_blank','http://wordpress.org/support/plugin/wp-events').'<br />';
-	echo sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/" target="_blank');
+	echo sprintf(__('Like my software? <a href="%s">Show your appreciation</a>. Thanks!', 'wpevents'),'http://meandmymac.net/donate/?pk_campaign=wpevents-credits&pk_kwd=donatelink" target="_blank');
 	echo '</td></tr>';
 	echo '</tbody>';
 	

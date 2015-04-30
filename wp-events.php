@@ -1,11 +1,11 @@
 <?php 
 /*
 Plugin Name: Events
-Plugin URI: http://meandmymac.net/plugins/events/
+Plugin URI: https://ajdg.solutions/?pk_campaign=wpevents-pluginpage&pk_kwd=pluginurl
+Author: Arnan de Gans from AJdG Solutions
+Author URI: http://meandmymac.net?pk_campaign=wpevents-pluginpage&pk_kwd=authorurl
 Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
-Author: Arnan de Gans
 Version: 2.3
-Author URI: http://meandmymac.net/
 */
 
 #---------------------------------------------------
@@ -143,7 +143,7 @@ function events_manage() {
 			<?php 
 			}
 		} else { ?>
-			<tr id='no-id'><td scope="row" colspan="5"><span style="font-weight: bold; color: #f00;"><?php _e('There was an error locating the main database table for Events.', 'wpevents'); _e('Please deactivate and re-activate Events from the plugin page!!', 'wpevents'); ?><br /><?php echo sprintf(__('If this does not solve the issue please seek support at <a href="%s">%s</a>.', 'wpevents'), 'http://meandmymac.net/support/', 'http://meandmymac.net/support/'); ?></span></td></tr>
+			<tr id='no-id'><td scope="row" colspan="5"><span style="font-weight: bold; color: #f00;"><?php _e('There was an error locating the main database table for Events.', 'wpevents'); _e('Please deactivate and re-activate Events from the plugin page!!', 'wpevents'); ?><br /><?php echo sprintf(__('If this does not solve the issue please seek support at <a href="%s">%s</a>.', 'wpevents'), 'http://meandmymac.net/contact-and-support/?pk_campaign=wpevents-eventslist&pk_kwd=databaseerror', 'http://meandmymac.net/support/'); ?></span></td></tr>
 
 		<?php }	?>
 			</tbody>
@@ -235,7 +235,7 @@ function events_categories() {
 				<?php 
 				}
 			} else { ?>
-				<tr id='no-id'><td scope="row" colspan="4"><span style="font-weight: bold; color: #f00;"><?php _e('There was an error locating the database table for the Events categories.', 'wpevents'); _e('Please deactivate and re-activate Events from the plugin page!!', 'wpevents'); ?><br /><?php echo sprintf(__('If this does not solve the issue please seek support at <a href="%s">%s</a>.', 'wpevents'), 'http://meandmymac.net/support/', 'http://meandmymac.net/support/'); ?></a></span></td></tr>
+				<tr id='no-id'><td scope="row" colspan="4"><span style="font-weight: bold; color: #f00;"><?php _e('There was an error locating the database table for the Events categories.', 'wpevents'); _e('Please deactivate and re-activate Events from the plugin page!!', 'wpevents'); ?><br /><?php echo sprintf(__('If this does not solve the issue please seek support at <a href="%s">%s</a>.', 'wpevents'), 'http://meandmymac.net/contact-and-support/?pk_campaign=wpevents-categories&pk_kwd=databaseerror', 'http://meandmymac.net/support/'); ?></a></span></td></tr>
 			<?php }	?>
 				<tr id='category-new'>
 					<th scope="row" class="check-column">&nbsp;</th>

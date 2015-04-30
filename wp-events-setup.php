@@ -82,7 +82,7 @@ function events_mysql_table_exists($table_name) {
  Return:	-none-
 -------------------------------------------------------------*/
 function events_mysql_warning() {
-	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not created! You cannot store events. See if you have the right MySQL access rights and check if you can create tables.', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://meandmymac.net/support/', 'http://meandmymac.net/support/').'. '.__('Please give as much information as you can related to your problem.', 'wpevents').'</h3></div>';
+	echo '<div class="updated"><h3>'.__('WARNING!', 'wpevents').' '.__('The MySQL table was not created! You cannot store events. See if you have the right MySQL access rights and check if you can create tables.', 'wpevents').' '.__('Contact your webhost/sysadmin if you must.', 'wpevents').' '.sprintf(__('If this brings no answers seek support at <a href="%s">%s</a>', 'wpevents'),'http://meandmymac.net/contact-and-support/?pk_campaign=wpevents-databaseerror&pk_kwd=support', 'http://meandmymac.net/support/').'. '.__('Please give as much information as you can related to your problem.', 'wpevents').'</h3></div>';
 }
 
 /*-------------------------------------------------------------

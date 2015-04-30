@@ -195,7 +195,7 @@ if(!function_exists('meandmymac_rss_widget')) {
 	function meandmymac_rss_widget() {
 		echo '<div class="rss-widget">';
 		wp_widget_rss_output(array(
-			'url' => 'http://meandmymac.net/feed/',
+			'url' => array( 'http://ajdg.solutions/news/', 'http://meandmymac.net/feed/'),
 			'title' => 'Events Plugin Updates & Authors Blog',
 			'items' => 4,
 			'show_summary' => 1, 
