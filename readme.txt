@@ -3,7 +3,7 @@ Contributors: adegans
 Donate link: http://meandmymac.net/donate/?pk_campaign=wpevents-readme&pk_kwd=donatelink
 Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
 Requires at least: 3.5
-Tested up to: 4.2.1
+Tested up to: 4.2.2
 Stable tag: 2.3
 
 Create a list with events/appointments/concerts/future happenings and show them on your site. Includes optional widget and advanced page options.
