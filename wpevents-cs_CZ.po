@@ -1,0 +1,1155 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Events v2.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-04-22 23:20+0100\n"
+"PO-Revision-Date: 2015-04-22 23:20+0100\n"
+"Last-Translator: Arnan de Gans <info@ajdg.net>\n"
+"Language-Team: Honza <jansin@atlas.cz>\n"
+"Language: cs_CZ\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;__ngettext_noop:1,2;_c\n"
+"X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 1.7.5\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: wp-events-functions.php:471
+msgid "Events for Excellent!"
+msgstr "Události pro dokonalost!"
+
+#: wp-events-functions.php:477
+#, php-format
+msgid "Follow me on my blog <a href=\"%s\">%s</a>."
+msgstr ""
+
+#: wp-events-functions.php:478
+#, php-format
+msgid ""
+"The plugin page is <a href=\"%s\">%s</a>. Getting started, manuals and "
+"more..."
+msgstr ""
+
+#: wp-events-functions.php:479
+#, php-format
+msgid "Need help? <a href=\"%s\">%s</a>."
+msgstr ""
+
+#: wp-events-functions.php:480
+#, php-format
+msgid "Like my software? <a href=\"%s\">Show your appreciation</a>. Thanks!"
+msgstr "Líbí se vám můj software? <a href=\"%s\">Přispějte</a>. Díky!"
+
+#: wp-events-manage.php:248 wp-events-manage.php:251 wp-events-manage.php:255
+#: wp-events-manage.php:263 wp-events-manage.php:277 wp-events.php:1156
+msgid "on"
+msgstr "na"
+
+#: wp-events-manage.php:249 wp-events-manage.php:264
+msgid "Highlighted events"
+msgstr "Nejvýznamnější události"
+
+#: wp-events-manage.php:251 wp-events-manage.php:263
+msgid "Duration"
+msgstr "Trvání"
+
+#: wp-events-manage.php:253
+msgid "Important events"
+msgstr "Důležité události"
+
+#: wp-events-manage.php:257 wp-events-widget.php:164
+msgid "Archive"
+msgstr "Archiv"
+
+#: wp-events-manage.php:261
+msgid "Today's events"
+msgstr "Dnešní události"
+
+#: wp-events-manage.php:266
+msgid "@"
+msgstr "@"
+
+#: wp-events-manage.php:271 wp-events.php:1132
+msgid "today"
+msgstr "dnes"
+
+#: wp-events-manage.php:272 wp-events.php:1136
+msgid "hours"
+msgstr "hodin"
+
+#: wp-events-manage.php:273 wp-events.php:1140
+msgid "minutes"
+msgstr "minut"
+
+#: wp-events-manage.php:274 wp-events.php:1144
+msgid "day"
+msgstr "den"
+
+#: wp-events-manage.php:275 wp-events.php:1148
+msgid "days"
+msgstr "dnů"
+
+#: wp-events-manage.php:276 wp-events.php:1152
+msgid "and"
+msgstr "a"
+
+#: wp-events-manage.php:278 wp-events.php:1160
+msgid "in"
+msgstr "za"
+
+#: wp-events-manage.php:279 wp-events.php:1164
+msgid "ago"
+msgstr "před"
+
+#: wp-events-manage.php:280 wp-events.php:1168
+msgid "more"
+msgstr "další"
+
+#: wp-events-manage.php:281 wp-events.php:1172
+msgid "More information"
+msgstr "Další informace"
+
+#: wp-events-manage.php:282 wp-events.php:1176
+msgid "No events to show"
+msgstr "Žádné události k zobrazení"
+
+#: wp-events-manage.php:283 wp-events.php:1184
+msgid "No events today"
+msgstr "Dnes žádné události"
+
+#: wp-events-manage.php:284 wp-events.php:1188
+msgid "No events in the archive"
+msgstr "Žádné události v archivu"
+
+#: wp-events-manage.php:285 wp-events.php:1192
+msgid "A configuration error occurred"
+msgstr "Došlo k chybě konfigurace"
+
+#: wp-events-manage.php:286 wp-events.php:1196
+msgid "No duration!"
+msgstr "Není určena doba trvání!"
+
+#: wp-events-manage.php:287 wp-events.php:1200
+msgid "All-day event!"
+msgstr "Celodenní událost!"
+
+#: wp-events-manage.php:288 wp-events.php:1180
+msgid "Past event!"
+msgstr "Uskutečnilo se"
+
+#: wp-events-setup.php:85 wp-events.php:1220
+msgid "WARNING!"
+msgstr "VAROVÁNÍ!"
+
+#: wp-events-setup.php:85
+msgid ""
+"The MySQL table was not created! You cannot store events. See if you have "
+"the right MySQL access rights and check if you can create tables."
+msgstr ""
+"Tabulka MySQL nebyla vytvořena! Nelze ukládat události. Ověřte, zda máte "
+"správná práva přístupu k MySQL a zkontrolujte, zda můžete vytvářet tabulky."
+
+#: wp-events-setup.php:85
+msgid "Contact your webhost/sysadmin if you must."
+msgstr ""
+"V případě nutnosti se obraťte na správce hostování webu/správce systému."
+
+#: wp-events-setup.php:85
+#, php-format
+msgid "If this brings no answers seek support at <a href=\"%s\">%s</a>"
+msgstr ""
+"Pokud to nepovede k nápravě, vyhledejte podporu na stránkách <a href=\"%s\">"
+"%s</a>"
+
+#: wp-events-setup.php:85
+msgid "Please give as much information as you can related to your problem."
+msgstr "Poskytněte co nejvíce informací týkajících se daného problému."
+
+#: wp-events-widget.php:41
+#, php-format
+msgid "Options are found <a href=\"%s\">here</a>"
+msgstr "Volby je možné nastavit <a href=\"%s\">zde</a>"
+
+#: wp-events-widget.php:41
+msgid "Save your other widget settings first!"
+msgstr "Nejprve uložte ostatní nastavení widgetu!"
+
+#: wp-events-widget.php:44
+msgid "Add a list of Events to your Sidebar"
+msgstr "Přidání seznamu událostí do postranního panelu"
+
+#: wp-events-widget.php:45 wp-events-widget.php:46
+msgid "Events List"
+msgstr "Seznam událostí"
+
+#: wp-events-widget.php:60 wp-events.php:60 wp-events.php:61 wp-events.php:62
+#: wp-events.php:63 wp-events.php:65 wp-events.php:216
+msgid "Events"
+msgstr "Události"
+
+#: wp-events-widget.php:63
+msgid "Meandmymac.net RSS Feed"
+msgstr "Zdroj odběru RSS Meandmymac.net"
+
+#: wp-events-widget.php:112 wp-events.php:119 wp-events.php:379
+msgid "Title"
+msgstr "Název"
+
+#: wp-events-widget.php:117
+msgid "Event"
+msgstr "Událost"
+
+#: wp-events-widget.php:122
+msgid "When"
+msgstr "Čas"
+
+#: wp-events-widget.php:126 wp-events.php:408 wp-events.php:519
+msgid "January"
+msgstr "ledna"
+
+#: wp-events-widget.php:127 wp-events.php:409 wp-events.php:520
+msgid "February"
+msgstr "února"
+
+#: wp-events-widget.php:128 wp-events.php:410 wp-events.php:521
+msgid "March"
+msgstr "března"
+
+#: wp-events-widget.php:129 wp-events.php:411 wp-events.php:522
+msgid "April"
+msgstr "dubna"
+
+#: wp-events-widget.php:130 wp-events.php:412 wp-events.php:523
+msgid "May"
+msgstr "května"
+
+#: wp-events-widget.php:131 wp-events.php:413 wp-events.php:524
+msgid "June"
+msgstr "června"
+
+#: wp-events-widget.php:132 wp-events.php:414 wp-events.php:525
+msgid "July"
+msgstr "července"
+
+#: wp-events-widget.php:133 wp-events.php:415 wp-events.php:526
+msgid "August"
+msgstr "srpna"
+
+#: wp-events-widget.php:134 wp-events.php:416 wp-events.php:527
+msgid "September"
+msgstr "září"
+
+#: wp-events-widget.php:135 wp-events.php:417 wp-events.php:528
+msgid "October"
+msgstr "října"
+
+#: wp-events-widget.php:136 wp-events.php:418 wp-events.php:529
+msgid "November"
+msgstr "listopadu"
+
+#: wp-events-widget.php:137 wp-events.php:419 wp-events.php:530
+msgid "December"
+msgstr "prosince"
+
+#: wp-events-widget.php:142 wp-events.php:120 wp-events.php:668
+msgid "Category"
+msgstr "Kategorie"
+
+#: wp-events-widget.php:151
+msgid "Sidebar"
+msgstr "Postranní panel"
+
+#: wp-events-widget.php:155 wp-events-widget.php:159
+msgid "Yes, show in the sidebar"
+msgstr "Ano, zobrazit v postranním panelu"
+
+#: wp-events-widget.php:156 wp-events-widget.php:158
+msgid "No, on the event page only"
+msgstr "Ne, pouze na stránce událostí"
+
+#: wp-events-widget.php:168 wp-events-widget.php:172
+msgid "No, delete one day after the event ends"
+msgstr "Ne, vymazat jeden den po skončení události"
+
+#: wp-events-widget.php:169 wp-events-widget.php:171
+msgid "Yes, save event for the archive"
+msgstr "Ano, uložit událost do archivu"
+
+#: wp-events-widget.php:178 wp-events.php:713 wp-events.php:716
+msgid "Save event"
+msgstr "Uložit událost"
+
+#: wp-events-widget.php:178 wp-events.php:336
+msgid "Add event"
+msgstr "Přidat událost"
+
+#: wp-events-widget.php:178 wp-events.php:826 wp-events.php:828
+#: wp-events.php:890 wp-events.php:892
+msgid "advanced"
+msgstr "další"
+
+#: wp-events-widget.php:178 wp-events.php:61 wp-events.php:86
+#: wp-events.php:349
+msgid "Manage Events"
+msgstr "Správa událostí"
+
+#: wp-events-widget.php:182 wp-events.php:726
+msgid "You should create at least one category before adding events!"
+msgstr "Před přidáváním událostí byste měli vytvořit alespoň jednu kategorii!"
+
+#: wp-events-widget.php:182 wp-events.php:726
+msgid "Add a category now"
+msgstr "Přidat kategorii"
+
+#: wp-events.php:61
+msgid "Manage"
+msgstr "Správa"
+
+#: wp-events.php:62
+msgid "Add/Edit"
+msgstr "Přidat/Upravit"
+
+#: wp-events.php:62
+msgid "Add|Edit Event"
+msgstr "Přidat/Upravit událost"
+
+#: wp-events.php:63 wp-events.php:181
+msgid "Categories"
+msgstr "Kategorie"
+
+#: wp-events.php:63
+msgid "Manage Categories"
+msgstr "Správa kategorií"
+
+#: wp-events.php:89
+msgid "Event <strong>deleted</strong>"
+msgstr "Událost <strong>odstraněna</strong>"
+
+#: wp-events.php:91
+msgid "Event <strong>updated</strong>"
+msgstr "Událost <strong>aktualizována</strong>"
+
+#: wp-events.php:93 wp-events.php:186 wp-events.php:353
+msgid "Action prohibited"
+msgstr "Událost zakázána"
+
+#: wp-events.php:100
+msgid "You are about to delete one or more events!"
+msgstr "Bude odstraněna jedna nebo více událostí!"
+
+#: wp-events.php:100 wp-events.php:199 wp-events.php:1225
+msgid "[OK] to continue, [Cancel] to stop."
+msgstr "Pokračujte tlačítkem [OK], ukončete tlačítkem [Cancel]."
+
+#: wp-events.php:100
+msgid "Delete events"
+msgstr "Odstranit události"
+
+#: wp-events.php:102 wp-events.php:103 wp-events.php:931 wp-events.php:932
+#: wp-events.php:946 wp-events.php:947
+msgid "by date"
+msgstr "podle data"
+
+#: wp-events.php:102 wp-events.php:105 wp-events.php:202 wp-events.php:932
+#: wp-events.php:934 wp-events.php:947 wp-events.php:949
+msgid "descending"
+msgstr "sestupně"
+
+#: wp-events.php:102 wp-events.php:787 wp-events.php:792 wp-events.php:807
+#: wp-events.php:825 wp-events.php:829 wp-events.php:837 wp-events.php:856
+#: wp-events.php:872 wp-events.php:889 wp-events.php:893 wp-events.php:901
+#: wp-events.php:919 wp-events.php:980 wp-events.php:990 wp-events.php:999
+#: wp-events.php:1009 wp-events.php:1116 wp-events.php:1132 wp-events.php:1136
+#: wp-events.php:1140 wp-events.php:1144 wp-events.php:1148 wp-events.php:1152
+#: wp-events.php:1156 wp-events.php:1160 wp-events.php:1164 wp-events.php:1168
+#: wp-events.php:1172 wp-events.php:1176 wp-events.php:1180 wp-events.php:1184
+#: wp-events.php:1188 wp-events.php:1192 wp-events.php:1196 wp-events.php:1200
+msgid "default"
+msgstr "výchozí"
+
+#: wp-events.php:103 wp-events.php:104 wp-events.php:201 wp-events.php:931
+#: wp-events.php:933 wp-events.php:946 wp-events.php:948
+msgid "ascending"
+msgstr "vzestupně"
+
+#: wp-events.php:104 wp-events.php:105 wp-events.php:201 wp-events.php:202
+#: wp-events.php:933 wp-events.php:934 wp-events.php:948 wp-events.php:949
+msgid "in the order you made them"
+msgstr "v pořadí podle vytvoření"
+
+#: wp-events.php:106 wp-events.php:107 wp-events.php:937 wp-events.php:938
+#: wp-events.php:952 wp-events.php:953
+msgid "by title"
+msgstr "podle názvu"
+
+#: wp-events.php:108 wp-events.php:109
+msgid "by category"
+msgstr "podle kategorie"
+
+#: wp-events.php:111 wp-events.php:206
+msgid "Sort"
+msgstr "Uspořádat"
+
+#: wp-events.php:118
+msgid "Date"
+msgstr "Datum"
+
+#: wp-events.php:121
+msgid "Starts when"
+msgstr "Začátek"
+
+#: wp-events.php:136 wp-events.php:231
+msgid "Edit"
+msgstr "Upravit"
+
+#: wp-events.php:142
+msgid "No Events yet!"
+msgstr "Zatím žádné události!"
+
+#: wp-events.php:146
+msgid "There was an error locating the main database table for Events."
+msgstr "Došlo k problému při hledání hlavní databázové tabulky pro Události."
+
+#: wp-events.php:146 wp-events.php:238
+msgid "Please deactivate and re-activate Events from the plugin page!!"
+msgstr "Deaktivujte a znovu aktivujte Události v panelu pluginů!!"
+
+#: wp-events.php:146 wp-events.php:238
+#, php-format
+msgid ""
+"If this does not solve the issue please seek support at <a href=\"%s\">%s</"
+"a>."
+msgstr ""
+"Pokud to nevyřeší problém, vyhledejte podporu na stránkách <a href=\"%s\">"
+"%s</a>."
+
+#: wp-events.php:184
+msgid "Category <strong>deleted</strong>"
+msgstr "Kategorie <strong>odstraněna</strong>"
+
+#: wp-events.php:188
+msgid "Category <strong>created</strong>"
+msgstr "Kategorie <strong>vytvořena</strong>"
+
+#: wp-events.php:188
+msgid "Add events now"
+msgstr "Nyní přidejte události"
+
+#: wp-events.php:190
+msgid "Category <strong>updated</strong>"
+msgstr "Kategorie <strong>aktualizována</strong>"
+
+#: wp-events.php:192
+msgid "No category name filled in"
+msgstr "Není vyplněn žádný název kategorie"
+
+#: wp-events.php:199
+msgid ""
+"You are about to delete one or more categories! Make sure there are no "
+"events in those categories or they will not show on the website"
+msgstr ""
+"Tím odstraníte jednu nebo více kategorií! Zkontrolujte, zda v těchto "
+"kategoriích nejsou žádné události, jinak se na stránkách nebudou zobrazovat"
+
+#: wp-events.php:199
+msgid "Delete category"
+msgstr "Odstranit kategorii"
+
+#: wp-events.php:203 wp-events.php:204
+msgid "by name"
+msgstr "podle názvu"
+
+#: wp-events.php:214 wp-events.php:275
+msgid "ID"
+msgstr "ID"
+
+#: wp-events.php:215 wp-events.php:279
+msgid "Name"
+msgstr "Název"
+
+#: wp-events.php:238
+msgid ""
+"There was an error locating the database table for the Events categories."
+msgstr "Došlo k chybě při hledání databázové tabulky pro kategorie Událostí."
+
+#: wp-events.php:242
+msgid "Add"
+msgstr "Přidat"
+
+#: wp-events.php:258
+msgid "Please fill in a name for your category!"
+msgstr "Zadejte název kategorie!"
+
+#: wp-events.php:269
+msgid "You can change the name of the category here. The ID stays the same!"
+msgstr "Zde můžete změnit název kategorie. ID zůstane stejné!"
+
+#: wp-events.php:287
+msgid "Save Category"
+msgstr "Uložit kategorii"
+
+#: wp-events.php:288 wp-events.php:718
+msgid "Cancel"
+msgstr "Zrušit"
+
+#: wp-events.php:296
+msgid "Error!"
+msgstr "Chyba!"
+
+#: wp-events.php:302
+msgid "No valid group ID specified!"
+msgstr "Nebylo zadáno platné ID skupiny!"
+
+#: wp-events.php:302
+msgid "Continue"
+msgstr "Pokračovat"
+
+#: wp-events.php:341
+msgid "Edit event"
+msgstr "Upravit událost"
+
+#: wp-events.php:349
+msgid "Event <strong>created</strong>"
+msgstr "Událost <strong>vytvořena</strong>"
+
+#: wp-events.php:351
+msgid "Event <strong>duplicated</strong>"
+msgstr "Vytvořena <strong>kopie</strong> události"
+
+#: wp-events.php:355
+msgid "Not all fields met the requirements"
+msgstr "Všechna pole nesplnila požadavky"
+
+#: wp-events.php:373
+msgid "Enter your event details below."
+msgstr "Sem zadejte podrobnosti události."
+
+#: wp-events.php:380 wp-events.php:700
+#, php-format
+msgid "Maximum %s characters."
+msgstr "Maximálně %s znaků."
+
+#: wp-events.php:381
+msgid "Make title a link."
+msgstr "Učinit z názvu odkaz."
+
+#: wp-events.php:381
+msgid "Use the field below."
+msgstr "Použijte následující pole."
+
+#: wp-events.php:381
+msgid "All-day event."
+msgstr "Celodenní událost."
+
+#: wp-events.php:398
+msgid ""
+"Please note that the time field uses a 24 hour clock. This means that 22:00 "
+"hour is actually 10:00pm."
+msgstr ""
+"Všimněte si, že pole času používají 24-hodinový formát. To znamená, že 22:00 "
+"je ve skutečnosti 10:00 večer."
+
+#: wp-events.php:398
+msgid ""
+"Hint: If you're used to the AM/PM system and the event takes place/starts "
+"after lunch just add 12 hours."
+msgstr ""
+"Rada: Pokud jste zvyklí na systém času AM/PM (dop./odp.) a událost se "
+"odehrává/začíná po obědě, jednoduše přičtěte 12 hodin."
+
+#: wp-events.php:404
+msgid "Startdate"
+msgstr "Datum zahájení"
+
+#: wp-events.php:404 wp-events.php:514 wp-events.php:805 wp-events.php:809
+#: wp-events.php:813 wp-events.php:869 wp-events.php:873 wp-events.php:877
+#: wp-events.php:1143
+msgid "Day"
+msgstr "Den"
+
+#: wp-events.php:404 wp-events.php:514 wp-events.php:805 wp-events.php:809
+#: wp-events.php:813 wp-events.php:869 wp-events.php:873 wp-events.php:877
+msgid "Month"
+msgstr "Měsíc"
+
+#: wp-events.php:404 wp-events.php:514 wp-events.php:805 wp-events.php:809
+#: wp-events.php:813 wp-events.php:869 wp-events.php:873 wp-events.php:877
+msgid "Year"
+msgstr "Rok"
+
+#: wp-events.php:423 wp-events.php:533
+msgid "Hour"
+msgstr "Hodina"
+
+#: wp-events.php:423 wp-events.php:533 wp-events.php:1139
+msgid "Minutes"
+msgstr "Minuta"
+
+#: wp-events.php:423 wp-events.php:514 wp-events.php:533 wp-events.php:627
+#: wp-events.php:635 wp-events.php:666 wp-events.php:698 wp-events.php:703
+#: wp-events.php:1057 wp-events.php:1080 wp-events.php:1103
+msgid "optional"
+msgstr "volitelné"
+
+#: wp-events.php:514
+msgid "Enddate"
+msgstr "Koncové datum"
+
+#: wp-events.php:627
+msgid "Repeat"
+msgstr "Opakuje se"
+
+#: wp-events.php:629
+msgid "Don't repeat"
+msgstr "Neopakuje se"
+
+#: wp-events.php:630
+msgid "Every day"
+msgstr "Každý den"
+
+#: wp-events.php:631
+msgid "Every week"
+msgstr "Každý týden"
+
+#: wp-events.php:632
+msgid "Every 4 Weeks"
+msgstr "Každé 4 týdny"
+
+#: wp-events.php:633
+msgid "Every year"
+msgstr "Každý rok"
+
+#: wp-events.php:635
+msgid "This many times"
+msgstr "Počet opakování"
+
+#: wp-events.php:666
+msgid "Location"
+msgstr "Místo"
+
+#: wp-events.php:667
+msgid "Maximum 255 characters."
+msgstr "Maximálně 255 znaků."
+
+#: wp-events.php:676
+msgid "Show in the sidebar"
+msgstr "Zobrazit v postranním panelu"
+
+#: wp-events.php:679 wp-events.php:683 wp-events.php:689 wp-events.php:693
+msgid "Yes"
+msgstr "Ano"
+
+#: wp-events.php:680 wp-events.php:682 wp-events.php:690 wp-events.php:692
+msgid "No"
+msgstr "Ne"
+
+#: wp-events.php:686
+msgid "Archive this event"
+msgstr "Archivovat tuto událost"
+
+#: wp-events.php:698
+msgid "Message when event ends"
+msgstr "Zpráva po skončení události"
+
+#: wp-events.php:700
+msgid "HTML allowed"
+msgstr "Povoleno HTML"
+
+#: wp-events.php:703
+msgid "Link to page"
+msgstr "Odkaz na stránku"
+
+#: wp-events.php:705
+msgid "Include full url and http://, this can be any page."
+msgstr "Zadejte úplnou adresu http://, může to být jakákoli stránka."
+
+#: wp-events.php:705
+msgid "Required if checkbox above is checked!"
+msgstr "Vyžadováno, pokud je zaškrtnuto předchozí políčko!"
+
+#: wp-events.php:714
+msgid "Save as Duplicate"
+msgstr ""
+
+#: wp-events.php:726
+msgid ""
+"Tip: If you do not want to use categories create one \"uncategorized\" and "
+"put all events in there. You don't have to show the categories on your blog."
+msgstr ""
+"Tip: Pokud nechcete používat kategorie, vytvořte jednu \"Nezařazené\" a "
+"všechny události zařaďte sem. Na stránkách nemusíte nechávat kategorie "
+"zobrazit."
+
+#: wp-events.php:733
+msgid "This is not an event created by you. Therefor you cannot edit it."
+msgstr "Toto není událost vytvořená vámi. Proto ji nemůžete upravovat."
+
+#: wp-events.php:761
+msgid "Events options"
+msgstr "Volby Událostí"
+
+#: wp-events.php:766
+msgid "General"
+msgstr "Obecné"
+
+#: wp-events.php:767 wp-events.php:1023
+msgid "Templates"
+msgstr "Šablony"
+
+#: wp-events.php:768 wp-events.php:1126
+msgid "Language"
+msgstr "Jazyk"
+
+#: wp-events.php:769
+msgid "Uninstall"
+msgstr "Odinstalace"
+
+#: wp-events.php:775
+msgid "Main config"
+msgstr "Hlavní konfigurace"
+
+#: wp-events.php:781
+msgid "Options for the sidebar and widget"
+msgstr "Volby postranního panelu a widgetu"
+
+#: wp-events.php:786
+msgid "Show this many events"
+msgstr "Zobrazit tento počet událostí"
+
+#: wp-events.php:790
+msgid "Show"
+msgstr "Zobrazit"
+
+#: wp-events.php:792
+msgid "Future events including events that happen today"
+msgstr "Budoucí události včetně událostí odehrávajících se dnes"
+
+#: wp-events.php:793
+msgid "Events that didn't start yet"
+msgstr "Události, které dosud nebyly zahájeny"
+
+#: wp-events.php:794
+msgid "Events that didn't end yet"
+msgstr "Události, které dosud neskončily"
+
+#: wp-events.php:795
+msgid "The archive"
+msgstr "Archiv"
+
+#: wp-events.php:796
+msgid "Just today's events"
+msgstr "Události právě dnes"
+
+#: wp-events.php:797
+msgid "The next 7 days"
+msgstr "Následujících 7 dnů"
+
+#: wp-events.php:798
+msgid "Upcoming and/or Archived events"
+msgstr "Nadcházející a/nebo archivované události"
+
+#: wp-events.php:802 wp-events.php:866
+msgid "Date format"
+msgstr "Formát data"
+
+#: wp-events.php:813 wp-events.php:877
+msgid "Weekday"
+msgstr "Den v týdnu"
+
+#: wp-events.php:816 wp-events.php:842 wp-events.php:880 wp-events.php:906
+msgid "Preferred by locale"
+msgstr "Podle místního a jazykového nastavení"
+
+#: wp-events.php:820 wp-events.php:884
+msgid "Careful what you put here!"
+msgstr "Dejte pozor na to, co sem zadáváte!"
+
+#: wp-events.php:820 wp-events.php:884
+msgid "Learn"
+msgstr "Prostudujte si"
+
+#: wp-events.php:820 wp-events.php:884
+msgid "php manual"
+msgstr "příručku php"
+
+#: wp-events.php:822 wp-events.php:886
+msgid "Date system"
+msgstr "Systém dat"
+
+#: wp-events.php:831 wp-events.php:895
+msgid "Save options to see the result!"
+msgstr "Výsledek se zobrazí po uložení voleb!"
+
+#: wp-events.php:834 wp-events.php:898
+msgid "Time format"
+msgstr "Formát času"
+
+#: wp-events.php:836 wp-events.php:900
+msgid "24-hour clock"
+msgstr "24-hodinový formát času"
+
+#: wp-events.php:839 wp-events.php:903
+msgid "12-hour clock"
+msgstr "12-hodinový formát času"
+
+#: wp-events.php:847 wp-events.php:911
+msgid "Date parsing"
+msgstr "Analýza data"
+
+#: wp-events.php:849
+msgid "Never show the ending date/time (Default)"
+msgstr "Nikdy nezobrazovat datum/čas ukončení (výchozí)"
+
+#: wp-events.php:850 wp-events.php:913
+msgid "Hide the ending date if it's the same as the starting date"
+msgstr "Skrýt datum ukončení, pokud je stejné jako datum zahájení"
+
+#: wp-events.php:851 wp-events.php:914
+msgid "Show the ending date even if it's the same as the starting date"
+msgstr "Zobrazit datum ukončení, i když je stejné jako datum zahájení"
+
+#: wp-events.php:855 wp-events.php:918
+msgid "Character limit"
+msgstr "Nejvyšší počet znaků"
+
+#: wp-events.php:861
+msgid "Options for the page lists"
+msgstr "Volby pro seznamy na stránce"
+
+#: wp-events.php:924
+msgid "Global or other options"
+msgstr "Globální a další volby"
+
+#: wp-events.php:929
+msgid "Order events"
+msgstr "Seředit události"
+
+#: wp-events.php:935 wp-events.php:936 wp-events.php:950 wp-events.php:951
+msgid "by author"
+msgstr "podle autora"
+
+#: wp-events.php:939 wp-events.php:940 wp-events.php:954 wp-events.php:955
+msgid "by description"
+msgstr "podle popisu"
+
+#: wp-events.php:944
+msgid "Order archive"
+msgstr "Seřadit archiv"
+
+#: wp-events.php:959
+msgid "Links open in"
+msgstr "Odkazy se otevřou v"
+
+#: wp-events.php:961
+msgid "new window"
+msgstr "novém okně"
+
+#: wp-events.php:962
+msgid "same window"
+msgstr "stejném okně"
+
+#: wp-events.php:963
+msgid "parent window"
+msgstr "nadřazeném okně"
+
+#: wp-events.php:969
+msgid "User Access"
+msgstr "Přístup uživatelů"
+
+#: wp-events.php:974
+msgid ""
+"Set these options to prevent certain userlevels from editing, creating or "
+"deleting events. The options panel user level cannot be changed."
+msgstr ""
+"Nastavením těchto voleb zabráníte určitým úrovním uživatelů v úpravě, "
+"vytváření nebo odstraňování událostí. Úroveň uživatelů na panelu voleb nelze "
+"měnit."
+
+#: wp-events.php:974
+#, php-format
+msgid "For more information on user roles go to <a href=\"%s\">the codex</a>."
+msgstr ""
+"Další informace o uživatelských rolích najdete v <a href=\"%s\">kodexu</a>."
+
+#: wp-events.php:977
+msgid "Add Events"
+msgstr "Přidávání událostí"
+
+#: wp-events.php:979 wp-events.php:989 wp-events.php:999 wp-events.php:1009
+msgid "Administrator"
+msgstr "Administrátor"
+
+#: wp-events.php:980 wp-events.php:990 wp-events.php:1000 wp-events.php:1010
+msgid "Editor"
+msgstr "Editor"
+
+#: wp-events.php:981 wp-events.php:991 wp-events.php:1001 wp-events.php:1011
+msgid "Author"
+msgstr "Autor"
+
+#: wp-events.php:982 wp-events.php:992 wp-events.php:1002 wp-events.php:1012
+msgid "Contributor"
+msgstr "Přispěvatel"
+
+#: wp-events.php:983 wp-events.php:993 wp-events.php:1003 wp-events.php:1013
+msgid "Subscriber"
+msgstr "Přihlášený"
+
+#: wp-events.php:984
+msgid "Can add events and edit events they created."
+msgstr "Může přidávat události a upravovat události, které vytvořil."
+
+#: wp-events.php:987
+msgid "Edit events"
+msgstr "Upravit události"
+
+#: wp-events.php:994
+msgid "Can add/edit/review anyone's events."
+msgstr "Může přidat/upravit/posuzovat události kohokoli."
+
+#: wp-events.php:997
+msgid "Manage events"
+msgstr "Správa událostí"
+
+#: wp-events.php:1004
+msgid "Can add/edit/review/delete anyone's events."
+msgstr "Může přidat/upravit/posuzovat/odstraňovat události kohokoli."
+
+#: wp-events.php:1007
+msgid "Manage categories"
+msgstr "Správa kategorií"
+
+#: wp-events.php:1014
+msgid "Can add/remove categories."
+msgstr "Může přidávat/odstraňovat kategorie."
+
+#: wp-events.php:1018
+msgid "Update Options"
+msgstr "Aktualizace voleb"
+
+#: wp-events.php:1030
+msgid "Sidebar and widget"
+msgstr "Postranní panel a widget"
+
+#: wp-events.php:1035 wp-events.php:1053 wp-events.php:1076 wp-events.php:1099
+msgid "Header"
+msgstr "Hlavička"
+
+#: wp-events.php:1038 wp-events.php:1061 wp-events.php:1084 wp-events.php:1107
+msgid "Body"
+msgstr "Tělo"
+
+#: wp-events.php:1039 wp-events.php:1054 wp-events.php:1062 wp-events.php:1077
+#: wp-events.php:1085 wp-events.php:1100 wp-events.php:1108
+msgid "Options"
+msgstr "Volby"
+
+#: wp-events.php:1042 wp-events.php:1065 wp-events.php:1088 wp-events.php:1111
+msgid "Footer"
+msgstr "Patička"
+
+#: wp-events.php:1048 wp-events.php:1071 wp-events.php:1094
+msgid "Page"
+msgstr "Stránka"
+
+#: wp-events.php:1048
+msgid "main list"
+msgstr "hlavní seznam"
+
+#: wp-events.php:1048
+msgid "Week"
+msgstr "Týden"
+
+#: wp-events.php:1048
+msgid "7 days ahead"
+msgstr "7 dní předem"
+
+#: wp-events.php:1057 wp-events.php:1080 wp-events.php:1103
+msgid "Default title"
+msgstr "Výchozí název"
+
+#: wp-events.php:1058 wp-events.php:1081 wp-events.php:1104
+msgid "This only works if you use %category% in the header."
+msgstr "Toto funguje pouze tehdy, když v hlavičce použijete %category%."
+
+#: wp-events.php:1058 wp-events.php:1081 wp-events.php:1104
+msgid "No HTML allowed."
+msgstr "Není povoleno HTML."
+
+#: wp-events.php:1071
+msgid "archive list"
+msgstr "seznam archivu"
+
+#: wp-events.php:1094
+msgid "today's list"
+msgstr "seznam dnešních událostí"
+
+#: wp-events.php:1115
+msgid "Location separator"
+msgstr "Oddělovač místa"
+
+#: wp-events.php:1116
+msgid "Can be text also."
+msgstr "Může obsahovat i text."
+
+#: wp-events.php:1116
+msgid "Ending spaces allowed."
+msgstr "Povoleny koncové mezery."
+
+#: wp-events.php:1121
+msgid "Update Templates"
+msgstr "Aktualizovat šablony"
+
+#: wp-events.php:1131
+msgid "Today"
+msgstr "Dnes"
+
+#: wp-events.php:1135
+msgid "Hours"
+msgstr "hodin"
+
+#: wp-events.php:1147
+msgid "Days"
+msgstr "dnů"
+
+#: wp-events.php:1151
+msgid "And"
+msgstr "a"
+
+#: wp-events.php:1155
+msgid "On"
+msgstr "Na"
+
+#: wp-events.php:1159
+msgid "In"
+msgstr "Za jak dlouho"
+
+#: wp-events.php:1163
+msgid "Ago"
+msgstr "Uplynulo"
+
+#: wp-events.php:1167
+msgid "Sidebar link"
+msgstr "Odkaz postranního panelu"
+
+#: wp-events.php:1171
+msgid "Page link"
+msgstr "Odkaz stránky"
+
+#: wp-events.php:1175
+msgid "If there are no events to show"
+msgstr "Pokud nejsou žádné události, které by se měly zobrazit"
+
+#: wp-events.php:1179
+msgid "If the event already happened"
+msgstr "Pokud se událost již uskutečnila"
+
+#: wp-events.php:1183
+msgid "If there are no events today"
+msgstr "Pokud dnes nejsou žádné události"
+
+#: wp-events.php:1187
+msgid "If the archive is empty"
+msgstr "Pokud je archiv prázdný"
+
+#: wp-events.php:1191
+msgid "If there is an error"
+msgstr "Pokud došlo k chybě"
+
+#: wp-events.php:1195
+msgid "If no duration is set for an event"
+msgstr "Pokud pro událost nebylo nastaveno trvání"
+
+#: wp-events.php:1199
+msgid "If event is an all-day event"
+msgstr "Pokud je událost celodenní"
+
+#: wp-events.php:1205
+msgid "Update Language"
+msgstr "Aktualizovat jazyk"
+
+#: wp-events.php:1212
+msgid "Uninstaller"
+msgstr "Odinstalace"
+
+#: wp-events.php:1217
+msgid ""
+"Events installs a table in MySQL. When you disable the plugin the table will "
+"not be deleted. To delete the table use the button below."
+msgstr ""
+"Události vkládají tabulku do MySQL. Když plugin deaktivujete, tato tabulka "
+"nebude odstraněna. Chcete-li tabulku odstranit, použijte toto tlačítko."
+
+#: wp-events.php:1220
+msgid ""
+"This process is irreversible and will delete ALL scheduled events and "
+"associated options!"
+msgstr ""
+"Tento proces je nevratný a odstraní VŠECHNY naplánované události a příslušné "
+"volby!"
+
+#: wp-events.php:1225
+msgid "You are about to uninstall the events plugin"
+msgstr "Plugin událostí bude odinstalován"
+
+#: wp-events.php:1225
+msgid "All scheduled events will be lost!"
+msgstr "Všechny naplánované události budou ztracen!"
+
+#: wp-events.php:1225
+msgid "Uninstall Events"
+msgstr "Odinstalovat Události"
+
+#~ msgid "Find me on <a href=\"%s\">%s</a>."
+#~ msgstr "Hledejte na stránkách <a href=\"%s\">%s</a>."
+
+#~ msgid ""
+#~ "The plugin page at <a href=\"%s\">%s</a>. Getting started, manuals and "
+#~ "more..."
+#~ msgstr ""
+#~ "Stránka pluginu na adrese <a href=\"%s\">%s</a>. Začínáme, návody a "
+#~ "další..."
+
+#~ msgid "<a href=\"%s\">%s</a> for updates and notes about Events!"
+#~ msgstr ""
+#~ "Na adrese <a href=\"%s\">%s</a> najdete aktualizace a zprávy o pluginu "
+#~ "Události!"
+
+#~ msgid "Need help? <a href=\"%s\">%s</a>. Use the knowledgebase!"
+#~ msgstr ""
+#~ "Potřebujete nápovědu? <a href=\"%s\">%s</a>. Použijte informační základnu!"
+
+#~ msgid "Translation: ---"
+#~ msgstr ""
+#~ "Přeloženo do YOURLANGUAGE: YOURNAME | <a href=\"YOURURL\" target=\"_blank"
+#~ "\">YOURURL</a>"
+
+#~ msgid "Want Events in your language? Check <a href=\"%s\">here</a>!"
+#~ msgstr ""
+#~ "Potřebujete Události ve svém jazyce? Podívejte se <a href=\"%s\">sem</a>!"
+
+#~ msgid "Untitled"
+#~ msgstr "Bez názvu"
+
+#~ msgid ""
+#~ "The MySQL table was not properly upgraded! Events cannot work properly "
+#~ "without this upgrade. Check your MySQL permissions and see if you have "
+#~ "ALTER rights (rights to alter existing tables)."
+#~ msgstr ""
+#~ "Tabulka MySQL nebyla správně aktualizována! Události nemohou bez této "
+#~ "aktualizace správně fungovat. Zkontrolujte oprávnění k MySQL a ověřte, "
+#~ "zda máte práva ALTER (práva ke změně existujících tabulek)."
+
+#~ msgid "and mention any errors you saw/got and explain what you were doing!"
+#~ msgstr ""
+#~ "a uveďte veškeré chyby, které jste spatřili/obdrželi a vysvětlete, co "
+#~ "jste právě dělali!"
+
+#~ msgid "An unexpected error occured"
+#~ msgstr "Došlo k neočekávané chybě"
+
+#~ msgid "Duplicate event"
+#~ msgstr "Vytvořit kopii události"

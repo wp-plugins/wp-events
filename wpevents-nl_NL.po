@@ -1,0 +1,1207 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Events v2.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-04-22 23:19+0100\n"
+"PO-Revision-Date: 2015-04-22 23:20+0100\n"
+"Last-Translator: Arnan de Gans <info@ajdg.net>\n"
+"Language-Team: \n"
+"Language: nl_NL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;__ngettext_noop:1,2;_c\n"
+"X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 1.7.5\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: wp-events-functions.php:471
+msgid "Events for Excellent!"
+msgstr "Activiteiten voor Excellent!"
+
+#: wp-events-functions.php:477
+#, php-format
+msgid "Follow me on my blog <a href=\"%s\">%s</a>."
+msgstr ""
+
+#: wp-events-functions.php:478
+#, php-format
+msgid ""
+"The plugin page is <a href=\"%s\">%s</a>. Getting started, manuals and "
+"more..."
+msgstr ""
+
+#: wp-events-functions.php:479
+#, php-format
+msgid "Need help? <a href=\"%s\">%s</a>."
+msgstr ""
+
+#: wp-events-functions.php:480
+#, php-format
+msgid "Like my software? <a href=\"%s\">Show your appreciation</a>. Thanks!"
+msgstr ""
+"Bevalt mijn software? <a href=\"%s\">Toon je waardering</a>. Dankjewel!"
+
+#: wp-events-manage.php:248 wp-events-manage.php:251 wp-events-manage.php:255
+#: wp-events-manage.php:263 wp-events-manage.php:277 wp-events.php:1156
+msgid "on"
+msgstr "op"
+
+#: wp-events-manage.php:249 wp-events-manage.php:264
+msgid "Highlighted events"
+msgstr "Uitgelichte activiteiten"
+
+#: wp-events-manage.php:251 wp-events-manage.php:263
+msgid "Duration"
+msgstr "Tijdsduur"
+
+#: wp-events-manage.php:253
+msgid "Important events"
+msgstr "Belangrijke activiteiten"
+
+#: wp-events-manage.php:257 wp-events-widget.php:164
+msgid "Archive"
+msgstr "Archief"
+
+#: wp-events-manage.php:261
+msgid "Today's events"
+msgstr "Activiteiten van vandaag"
+
+#: wp-events-manage.php:266
+msgid "@"
+msgstr "@"
+
+#: wp-events-manage.php:271 wp-events.php:1132
+msgid "today"
+msgstr "vandaag"
+
+#: wp-events-manage.php:272 wp-events.php:1136
+msgid "hours"
+msgstr "uren"
+
+#: wp-events-manage.php:273 wp-events.php:1140
+msgid "minutes"
+msgstr "minuten"
+
+#: wp-events-manage.php:274 wp-events.php:1144
+msgid "day"
+msgstr "dag"
+
+#: wp-events-manage.php:275 wp-events.php:1148
+msgid "days"
+msgstr "dagen"
+
+#: wp-events-manage.php:276 wp-events.php:1152
+msgid "and"
+msgstr "en"
+
+#: wp-events-manage.php:278 wp-events.php:1160
+msgid "in"
+msgstr "over"
+
+#: wp-events-manage.php:279 wp-events.php:1164
+msgid "ago"
+msgstr "geleden"
+
+#: wp-events-manage.php:280 wp-events.php:1168
+msgid "more"
+msgstr "meer"
+
+#: wp-events-manage.php:281 wp-events.php:1172
+msgid "More information"
+msgstr "Meer informatie"
+
+#: wp-events-manage.php:282 wp-events.php:1176
+msgid "No events to show"
+msgstr "Geen activiteiten om weer te geven"
+
+#: wp-events-manage.php:283 wp-events.php:1184
+msgid "No events today"
+msgstr "Vandaag geen activiteiten"
+
+#: wp-events-manage.php:284 wp-events.php:1188
+msgid "No events in the archive"
+msgstr "Geen activiteiten in het archief"
+
+#: wp-events-manage.php:285 wp-events.php:1192
+msgid "A configuration error occurred"
+msgstr "Er is een fout opgetreden bij het configureren"
+
+#: wp-events-manage.php:286 wp-events.php:1196
+msgid "No duration!"
+msgstr "Geen tijdsduur!"
+
+#: wp-events-manage.php:287 wp-events.php:1200
+msgid "All-day event!"
+msgstr "Activiteit duurt de hele dag!"
+
+#: wp-events-manage.php:288 wp-events.php:1180
+msgid "Past event!"
+msgstr "Activiteit is geweest!"
+
+#: wp-events-setup.php:85 wp-events.php:1220
+msgid "WARNING!"
+msgstr "WAARSCHUWING!"
+
+#: wp-events-setup.php:85
+msgid ""
+"The MySQL table was not created! You cannot store events. See if you have "
+"the right MySQL access rights and check if you can create tables."
+msgstr ""
+"De MySQL-tabel is niet aangemaakt! Je kunt geen activiteiten opslaan. Kijk "
+"of je de juiste MySQL-toegangsrechten hebt en of je tabellen kunt aanmaken."
+
+#: wp-events-setup.php:85
+msgid "Contact your webhost/sysadmin if you must."
+msgstr "Neem contact op met je hostingprovider of webmaster indien nodig."
+
+#: wp-events-setup.php:85
+#, php-format
+msgid "If this brings no answers seek support at <a href=\"%s\">%s</a>"
+msgstr ""
+"Als dit het probleem niet oplost, neem dan contact op met <a href=\"%s\">%s</"
+"a>"
+
+#: wp-events-setup.php:85
+msgid "Please give as much information as you can related to your problem."
+msgstr "Geef zo veel mogelijk informatie met betrekking tot het probleem."
+
+#: wp-events-widget.php:41
+#, php-format
+msgid "Options are found <a href=\"%s\">here</a>"
+msgstr "Opties kun je <a href=\"%s\">hier</a> vinden"
+
+#: wp-events-widget.php:41
+msgid "Save your other widget settings first!"
+msgstr "Bewaar eerst je widgetinstellingen!"
+
+#: wp-events-widget.php:44
+msgid "Add a list of Events to your Sidebar"
+msgstr "Voeg een lijst met Activiteiten toe aan je Sidebar"
+
+#: wp-events-widget.php:45 wp-events-widget.php:46
+msgid "Events List"
+msgstr "Activiteitenkalender"
+
+#: wp-events-widget.php:60 wp-events.php:60 wp-events.php:61 wp-events.php:62
+#: wp-events.php:63 wp-events.php:65 wp-events.php:216
+msgid "Events"
+msgstr "Activiteiten"
+
+#: wp-events-widget.php:63
+msgid "Meandmymac.net RSS Feed"
+msgstr "Meandmymac.net RSS Feed"
+
+#: wp-events-widget.php:112 wp-events.php:119 wp-events.php:379
+msgid "Title"
+msgstr "Titel"
+
+#: wp-events-widget.php:117
+msgid "Event"
+msgstr "Activiteit"
+
+#: wp-events-widget.php:122
+msgid "When"
+msgstr "Wanneer"
+
+#: wp-events-widget.php:126 wp-events.php:408 wp-events.php:519
+msgid "January"
+msgstr "januari"
+
+#: wp-events-widget.php:127 wp-events.php:409 wp-events.php:520
+msgid "February"
+msgstr "februari"
+
+#: wp-events-widget.php:128 wp-events.php:410 wp-events.php:521
+msgid "March"
+msgstr "maart"
+
+#: wp-events-widget.php:129 wp-events.php:411 wp-events.php:522
+msgid "April"
+msgstr "april"
+
+#: wp-events-widget.php:130 wp-events.php:412 wp-events.php:523
+msgid "May"
+msgstr "mei"
+
+#: wp-events-widget.php:131 wp-events.php:413 wp-events.php:524
+msgid "June"
+msgstr "juni"
+
+#: wp-events-widget.php:132 wp-events.php:414 wp-events.php:525
+msgid "July"
+msgstr "juli"
+
+#: wp-events-widget.php:133 wp-events.php:415 wp-events.php:526
+msgid "August"
+msgstr "augustus"
+
+#: wp-events-widget.php:134 wp-events.php:416 wp-events.php:527
+msgid "September"
+msgstr "september"
+
+#: wp-events-widget.php:135 wp-events.php:417 wp-events.php:528
+msgid "October"
+msgstr "oktober"
+
+#: wp-events-widget.php:136 wp-events.php:418 wp-events.php:529
+msgid "November"
+msgstr "november"
+
+#: wp-events-widget.php:137 wp-events.php:419 wp-events.php:530
+msgid "December"
+msgstr "december"
+
+#: wp-events-widget.php:142 wp-events.php:120 wp-events.php:668
+msgid "Category"
+msgstr "Categorie"
+
+#: wp-events-widget.php:151
+msgid "Sidebar"
+msgstr "Sidebar"
+
+#: wp-events-widget.php:155 wp-events-widget.php:159
+msgid "Yes, show in the sidebar"
+msgstr "Ja, toon in de sidebar"
+
+#: wp-events-widget.php:156 wp-events-widget.php:158
+msgid "No, on the event page only"
+msgstr "Nee, alleen op de activiteitenpagina"
+
+#: wp-events-widget.php:168 wp-events-widget.php:172
+msgid "No, delete one day after the event ends"
+msgstr "Nee, verwijder deze de dag nadat de activiteit is afgelopen"
+
+#: wp-events-widget.php:169 wp-events-widget.php:171
+msgid "Yes, save event for the archive"
+msgstr "Ja, bewaar de activiteit in het archief"
+
+#: wp-events-widget.php:178 wp-events.php:713 wp-events.php:716
+msgid "Save event"
+msgstr "Bewaar activiteit"
+
+#: wp-events-widget.php:178 wp-events.php:336
+msgid "Add event"
+msgstr "Voeg activiteit toe"
+
+#: wp-events-widget.php:178 wp-events.php:826 wp-events.php:828
+#: wp-events.php:890 wp-events.php:892
+msgid "advanced"
+msgstr "geavanceerd"
+
+#: wp-events-widget.php:178 wp-events.php:61 wp-events.php:86
+#: wp-events.php:349
+msgid "Manage Events"
+msgstr "Beheer activiteiten"
+
+#: wp-events-widget.php:182 wp-events.php:726
+msgid "You should create at least one category before adding events!"
+msgstr ""
+"Je moet tenminste één categorie aanmaken voordat je activiteiten kunt "
+"toevoegen!"
+
+#: wp-events-widget.php:182 wp-events.php:726
+msgid "Add a category now"
+msgstr "Voeg nu een categorie toe"
+
+#: wp-events.php:61
+msgid "Manage"
+msgstr "Beheer"
+
+#: wp-events.php:62
+msgid "Add/Edit"
+msgstr "Voeg toe/Wijzig"
+
+#: wp-events.php:62
+msgid "Add|Edit Event"
+msgstr "Voeg activiteit toe/wijzig activiteit"
+
+#: wp-events.php:63 wp-events.php:181
+msgid "Categories"
+msgstr "Categorieën"
+
+#: wp-events.php:63
+msgid "Manage Categories"
+msgstr "Beheer categorieën"
+
+#: wp-events.php:89
+msgid "Event <strong>deleted</strong>"
+msgstr "Activiteit <strong>verwijderd</strong>"
+
+#: wp-events.php:91
+msgid "Event <strong>updated</strong>"
+msgstr "Activiteit <strong>gewijzigd</strong>"
+
+#: wp-events.php:93 wp-events.php:186 wp-events.php:353
+msgid "Action prohibited"
+msgstr "Bewerking niet toegestaan"
+
+#: wp-events.php:100
+msgid "You are about to delete one or more events!"
+msgstr "Je gaat nu één of meerdere activiteiten verwijderen!"
+
+#: wp-events.php:100 wp-events.php:199 wp-events.php:1225
+msgid "[OK] to continue, [Cancel] to stop."
+msgstr "[OK] om verder te gaan, [Annuleer] om te stoppen."
+
+#: wp-events.php:100
+msgid "Delete events"
+msgstr "Verwijder activiteiten"
+
+#: wp-events.php:102 wp-events.php:103 wp-events.php:931 wp-events.php:932
+#: wp-events.php:946 wp-events.php:947
+msgid "by date"
+msgstr "op datum"
+
+#: wp-events.php:102 wp-events.php:105 wp-events.php:202 wp-events.php:932
+#: wp-events.php:934 wp-events.php:947 wp-events.php:949
+msgid "descending"
+msgstr "aflopend"
+
+#: wp-events.php:102 wp-events.php:787 wp-events.php:792 wp-events.php:807
+#: wp-events.php:825 wp-events.php:829 wp-events.php:837 wp-events.php:856
+#: wp-events.php:872 wp-events.php:889 wp-events.php:893 wp-events.php:901
+#: wp-events.php:919 wp-events.php:980 wp-events.php:990 wp-events.php:999
+#: wp-events.php:1009 wp-events.php:1116 wp-events.php:1132 wp-events.php:1136
+#: wp-events.php:1140 wp-events.php:1144 wp-events.php:1148 wp-events.php:1152
+#: wp-events.php:1156 wp-events.php:1160 wp-events.php:1164 wp-events.php:1168
+#: wp-events.php:1172 wp-events.php:1176 wp-events.php:1180 wp-events.php:1184
+#: wp-events.php:1188 wp-events.php:1192 wp-events.php:1196 wp-events.php:1200
+msgid "default"
+msgstr "standaard"
+
+#: wp-events.php:103 wp-events.php:104 wp-events.php:201 wp-events.php:931
+#: wp-events.php:933 wp-events.php:946 wp-events.php:948
+msgid "ascending"
+msgstr "oplopend"
+
+#: wp-events.php:104 wp-events.php:105 wp-events.php:201 wp-events.php:202
+#: wp-events.php:933 wp-events.php:934 wp-events.php:948 wp-events.php:949
+msgid "in the order you made them"
+msgstr "op volgorde van aanmaken"
+
+#: wp-events.php:106 wp-events.php:107 wp-events.php:937 wp-events.php:938
+#: wp-events.php:952 wp-events.php:953
+msgid "by title"
+msgstr "op titel"
+
+#: wp-events.php:108 wp-events.php:109
+msgid "by category"
+msgstr "op categorie"
+
+#: wp-events.php:111 wp-events.php:206
+msgid "Sort"
+msgstr "Sorteer"
+
+#: wp-events.php:118
+msgid "Date"
+msgstr "Datum"
+
+#: wp-events.php:121
+msgid "Starts when"
+msgstr "Begint als"
+
+#: wp-events.php:136 wp-events.php:231
+msgid "Edit"
+msgstr "Wijzig"
+
+#: wp-events.php:142
+msgid "No Events yet!"
+msgstr "Nog geen activiteiten!"
+
+#: wp-events.php:146
+msgid "There was an error locating the main database table for Events."
+msgstr ""
+"Er is een fout opgetreden bij het zoeken naar de hoofddatabase met "
+"Activiteiten."
+
+#: wp-events.php:146 wp-events.php:238
+msgid "Please deactivate and re-activate Events from the plugin page!!"
+msgstr ""
+"Deactiveer en activeer vervolgens de Activiteitenplugin op de pluginpagina!"
+
+#: wp-events.php:146 wp-events.php:238
+#, php-format
+msgid ""
+"If this does not solve the issue please seek support at <a href=\"%s\">%s</"
+"a>."
+msgstr ""
+"Als dit het probleem niet oplost, neem dan contact op met <a href=\"%s\">%s</"
+"a>."
+
+#: wp-events.php:184
+msgid "Category <strong>deleted</strong>"
+msgstr "Categorie <strong>verwijderd</strong>"
+
+#: wp-events.php:188
+msgid "Category <strong>created</strong>"
+msgstr "Categorie <strong>toegevoegd</strong>"
+
+#: wp-events.php:188
+msgid "Add events now"
+msgstr "Voeg nu activiteiten toe"
+
+#: wp-events.php:190
+msgid "Category <strong>updated</strong>"
+msgstr "Categorie <strong>gewijzigd</strong>"
+
+#: wp-events.php:192
+msgid "No category name filled in"
+msgstr "Er is geen categorienaam ingevuld"
+
+#: wp-events.php:199
+msgid ""
+"You are about to delete one or more categories! Make sure there are no "
+"events in those categories or they will not show on the website"
+msgstr ""
+"Je gaat nu één of meerdere categorieën verwijderen! Wees er zeker van dat er "
+"geen activiteiten meer in deze categorie zitten, anders zullen deze niet "
+"meer zichtbaar zijn op de site"
+
+#: wp-events.php:199
+msgid "Delete category"
+msgstr "Verwijder categorie"
+
+#: wp-events.php:203 wp-events.php:204
+msgid "by name"
+msgstr "op naam"
+
+#: wp-events.php:214 wp-events.php:275
+msgid "ID"
+msgstr "ID"
+
+#: wp-events.php:215 wp-events.php:279
+msgid "Name"
+msgstr "Naam"
+
+#: wp-events.php:238
+msgid ""
+"There was an error locating the database table for the Events categories."
+msgstr ""
+"Er is een fout opgetreden bij het zoeken naar de databasetabel voor de "
+"Activiteitencategorieën."
+
+#: wp-events.php:242
+msgid "Add"
+msgstr "Voeg toe"
+
+#: wp-events.php:258
+msgid "Please fill in a name for your category!"
+msgstr "Vul een naam in voor de categorie!"
+
+#: wp-events.php:269
+msgid "You can change the name of the category here. The ID stays the same!"
+msgstr ""
+"Je kunt de naam van de categorie hier wijzigen. Het ID blijft hetzelfde!"
+
+#: wp-events.php:287
+msgid "Save Category"
+msgstr "Bewaar categorie"
+
+#: wp-events.php:288 wp-events.php:718
+msgid "Cancel"
+msgstr "Annuleer"
+
+#: wp-events.php:296
+msgid "Error!"
+msgstr "Fout!"
+
+#: wp-events.php:302
+msgid "No valid group ID specified!"
+msgstr "Geen geldige groeps-ID gekozen!"
+
+#: wp-events.php:302
+msgid "Continue"
+msgstr "Ga door"
+
+#: wp-events.php:341
+msgid "Edit event"
+msgstr "Wijzig activiteit"
+
+#: wp-events.php:349
+msgid "Event <strong>created</strong>"
+msgstr "Activiteit <strong>toegevoegd</strong>"
+
+#: wp-events.php:351
+msgid "Event <strong>duplicated</strong>"
+msgstr "Activiteit <strong>gekopieerd</strong>"
+
+#: wp-events.php:355
+msgid "Not all fields met the requirements"
+msgstr "Niet alle velden zijn correct ingevuld"
+
+#: wp-events.php:373
+msgid "Enter your event details below."
+msgstr "Omschrijf hieronder de details van de activiteit."
+
+#: wp-events.php:380 wp-events.php:700
+#, php-format
+msgid "Maximum %s characters."
+msgstr "Maximaal %s tekens."
+
+#: wp-events.php:381
+msgid "Make title a link."
+msgstr "Maak een link van de titel."
+
+#: wp-events.php:381
+msgid "Use the field below."
+msgstr "Gebruik het veld hieronder."
+
+#: wp-events.php:381
+msgid "All-day event."
+msgstr "Activiteit duurt de hele dag."
+
+#: wp-events.php:398
+msgid ""
+"Please note that the time field uses a 24 hour clock. This means that 22:00 "
+"hour is actually 10:00pm."
+msgstr ""
+"Realiseert u zich dat het tijdveld gebruikt maakt van een 24 uursklok. Dit "
+"betekent dat 22:00 uur eigenlijk 10:00 's avonds is."
+
+#: wp-events.php:398
+msgid ""
+"Hint: If you're used to the AM/PM system and the event takes place/starts "
+"after lunch just add 12 hours."
+msgstr ""
+"Tip: Als je gewend bent aan het AM/PM systeem en de activiteit is na de "
+"middag, voeg dan gewoon 12 uur toe aan de tijd."
+
+#: wp-events.php:404
+msgid "Startdate"
+msgstr "Begindatum"
+
+#: wp-events.php:404 wp-events.php:514 wp-events.php:805 wp-events.php:809
+#: wp-events.php:813 wp-events.php:869 wp-events.php:873 wp-events.php:877
+#: wp-events.php:1143
+msgid "Day"
+msgstr "Dag"
+
+#: wp-events.php:404 wp-events.php:514 wp-events.php:805 wp-events.php:809
+#: wp-events.php:813 wp-events.php:869 wp-events.php:873 wp-events.php:877
+msgid "Month"
+msgstr "Maand"
+
+#: wp-events.php:404 wp-events.php:514 wp-events.php:805 wp-events.php:809
+#: wp-events.php:813 wp-events.php:869 wp-events.php:873 wp-events.php:877
+msgid "Year"
+msgstr "Jaar"
+
+#: wp-events.php:423 wp-events.php:533
+msgid "Hour"
+msgstr "Uur"
+
+#: wp-events.php:423 wp-events.php:533 wp-events.php:1139
+msgid "Minutes"
+msgstr "Minuten"
+
+#: wp-events.php:423 wp-events.php:514 wp-events.php:533 wp-events.php:627
+#: wp-events.php:635 wp-events.php:666 wp-events.php:698 wp-events.php:703
+#: wp-events.php:1057 wp-events.php:1080 wp-events.php:1103
+msgid "optional"
+msgstr "optioneel"
+
+#: wp-events.php:514
+msgid "Enddate"
+msgstr "Einddatum"
+
+#: wp-events.php:627
+msgid "Repeat"
+msgstr "Herhalen"
+
+#: wp-events.php:629
+msgid "Don't repeat"
+msgstr "Herhaalt niet"
+
+#: wp-events.php:630
+msgid "Every day"
+msgstr "Elke dag"
+
+#: wp-events.php:631
+msgid "Every week"
+msgstr "Elke week"
+
+#: wp-events.php:632
+msgid "Every 4 Weeks"
+msgstr "Elke 4 weken"
+
+#: wp-events.php:633
+msgid "Every year"
+msgstr "Elk jaar"
+
+#: wp-events.php:635
+msgid "This many times"
+msgstr "Zo vaak"
+
+#: wp-events.php:666
+msgid "Location"
+msgstr "Locatie"
+
+#: wp-events.php:667
+msgid "Maximum 255 characters."
+msgstr "Maximaal 255 tekens."
+
+#: wp-events.php:676
+msgid "Show in the sidebar"
+msgstr "Toon in de sidebar"
+
+#: wp-events.php:679 wp-events.php:683 wp-events.php:689 wp-events.php:693
+msgid "Yes"
+msgstr "Ja"
+
+#: wp-events.php:680 wp-events.php:682 wp-events.php:690 wp-events.php:692
+msgid "No"
+msgstr "Nee"
+
+#: wp-events.php:686
+msgid "Archive this event"
+msgstr "Archiveer deze activiteit"
+
+#: wp-events.php:698
+msgid "Message when event ends"
+msgstr "Bericht als activiteit eindigt"
+
+#: wp-events.php:700
+msgid "HTML allowed"
+msgstr "HTML toegestaan"
+
+#: wp-events.php:703
+msgid "Link to page"
+msgstr "Link naar pagina"
+
+#: wp-events.php:705
+msgid "Include full url and http://, this can be any page."
+msgstr "Volledig adres inclusief http://, dit mag elke pagina zijn."
+
+#: wp-events.php:705
+msgid "Required if checkbox above is checked!"
+msgstr "Verplicht indien het vakje hierboven is aangevinkt!"
+
+#: wp-events.php:714
+msgid "Save as Duplicate"
+msgstr ""
+
+#: wp-events.php:726
+msgid ""
+"Tip: If you do not want to use categories create one \"uncategorized\" and "
+"put all events in there. You don't have to show the categories on your blog."
+msgstr ""
+"Tip: Als je geen gebruik wilt maken van categorieën, maak dan een categorie "
+"\"algemeen\" en stop daar alle activiteiten in. Je hoeft de categorieën "
+"namelijk niet op je site te tonen."
+
+#: wp-events.php:733
+msgid "This is not an event created by you. Therefor you cannot edit it."
+msgstr ""
+
+#: wp-events.php:761
+msgid "Events options"
+msgstr "Activiteitinstellingen"
+
+#: wp-events.php:766
+msgid "General"
+msgstr "Algemeen"
+
+#: wp-events.php:767 wp-events.php:1023
+msgid "Templates"
+msgstr "Sjablonen"
+
+#: wp-events.php:768 wp-events.php:1126
+msgid "Language"
+msgstr "Taal"
+
+#: wp-events.php:769
+msgid "Uninstall"
+msgstr "Ontinstalleren"
+
+#: wp-events.php:775
+msgid "Main config"
+msgstr "Hoofdconfiguratie"
+
+#: wp-events.php:781
+msgid "Options for the sidebar and widget"
+msgstr "Instellingen voor de sidebar en widget"
+
+#: wp-events.php:786
+msgid "Show this many events"
+msgstr "Toon zoveel activiteiten"
+
+#: wp-events.php:790
+msgid "Show"
+msgstr "Toon"
+
+#: wp-events.php:792
+msgid "Future events including events that happen today"
+msgstr "Activiteiten in de toekomst en die van vandaag"
+
+#: wp-events.php:793
+msgid "Events that didn't start yet"
+msgstr "Activiteiten die nog moeten beginnen"
+
+#: wp-events.php:794
+msgid "Events that didn't end yet"
+msgstr "Activiteiten die nog niet zijn afgelopen"
+
+#: wp-events.php:795
+msgid "The archive"
+msgstr "Het archief"
+
+#: wp-events.php:796
+msgid "Just today's events"
+msgstr "Alleen activiteiten van vandaag"
+
+#: wp-events.php:797
+msgid "The next 7 days"
+msgstr "De komende 7 dagen"
+
+#: wp-events.php:798
+msgid "Upcoming and/or Archived events"
+msgstr ""
+
+#: wp-events.php:802 wp-events.php:866
+msgid "Date format"
+msgstr "Datumweergave"
+
+#: wp-events.php:813 wp-events.php:877
+msgid "Weekday"
+msgstr "Dag van de week"
+
+#: wp-events.php:816 wp-events.php:842 wp-events.php:880 wp-events.php:906
+msgid "Preferred by locale"
+msgstr "Aanbevolen"
+
+#: wp-events.php:820 wp-events.php:884
+msgid "Careful what you put here!"
+msgstr "Weet wat je doet hier!"
+
+#: wp-events.php:820 wp-events.php:884
+msgid "Learn"
+msgstr "Info"
+
+#: wp-events.php:820 wp-events.php:884
+msgid "php manual"
+msgstr "PHP-handboek"
+
+#: wp-events.php:822 wp-events.php:886
+msgid "Date system"
+msgstr "Datumweergave"
+
+#: wp-events.php:831 wp-events.php:895
+msgid "Save options to see the result!"
+msgstr "Bewaar de instellingen om het resultaat te zien!"
+
+#: wp-events.php:834 wp-events.php:898
+msgid "Time format"
+msgstr "Tijdsweergave"
+
+#: wp-events.php:836 wp-events.php:900
+msgid "24-hour clock"
+msgstr "24 uursklok"
+
+#: wp-events.php:839 wp-events.php:903
+msgid "12-hour clock"
+msgstr "12 uursklok"
+
+#: wp-events.php:847 wp-events.php:911
+msgid "Date parsing"
+msgstr "Datumweergave"
+
+#: wp-events.php:849
+msgid "Never show the ending date/time (Default)"
+msgstr ""
+
+#: wp-events.php:850 wp-events.php:913
+msgid "Hide the ending date if it's the same as the starting date"
+msgstr "Verberg de einddatum als deze gelijk is aan de begindatum"
+
+#: wp-events.php:851 wp-events.php:914
+msgid "Show the ending date even if it's the same as the starting date"
+msgstr "Toon de einddatum zelfs als deze gelijk is aan de begindatum"
+
+#: wp-events.php:855 wp-events.php:918
+msgid "Character limit"
+msgstr "Aantal tekens"
+
+#: wp-events.php:861
+msgid "Options for the page lists"
+msgstr "Instellingen voor de pagina-overzichten"
+
+#: wp-events.php:924
+msgid "Global or other options"
+msgstr "Globale instellingen"
+
+#: wp-events.php:929
+msgid "Order events"
+msgstr "Sorteer activiteiten"
+
+#: wp-events.php:935 wp-events.php:936 wp-events.php:950 wp-events.php:951
+msgid "by author"
+msgstr "op auteur"
+
+#: wp-events.php:939 wp-events.php:940 wp-events.php:954 wp-events.php:955
+msgid "by description"
+msgstr "op omschrijving"
+
+#: wp-events.php:944
+msgid "Order archive"
+msgstr "Sorteer archief"
+
+#: wp-events.php:959
+msgid "Links open in"
+msgstr "Open links in"
+
+#: wp-events.php:961
+msgid "new window"
+msgstr "nieuw venster"
+
+#: wp-events.php:962
+msgid "same window"
+msgstr "zelfde venster"
+
+#: wp-events.php:963
+msgid "parent window"
+msgstr "moeder venster"
+
+#: wp-events.php:969
+msgid "User Access"
+msgstr "Gebruikersrechten"
+
+#: wp-events.php:974
+msgid ""
+"Set these options to prevent certain userlevels from editing, creating or "
+"deleting events. The options panel user level cannot be changed."
+msgstr ""
+"Stel dit in om bepaalde gebruikers niet het recht te geven activiteiten te "
+"wijzigen, toe te voegen of te verwijderen. De optie gebruikersniveau kan "
+"niet worden gewijzigd."
+
+#: wp-events.php:974
+#, php-format
+msgid "For more information on user roles go to <a href=\"%s\">the codex</a>."
+msgstr ""
+"Meer informatie over gebruikersrechten is te vinden in <a href=\"%s\">de "
+"Codex</a>."
+
+#: wp-events.php:977
+msgid "Add Events"
+msgstr ""
+
+#: wp-events.php:979 wp-events.php:989 wp-events.php:999 wp-events.php:1009
+msgid "Administrator"
+msgstr "Beheerder"
+
+#: wp-events.php:980 wp-events.php:990 wp-events.php:1000 wp-events.php:1010
+msgid "Editor"
+msgstr "Redacteur"
+
+#: wp-events.php:981 wp-events.php:991 wp-events.php:1001 wp-events.php:1011
+msgid "Author"
+msgstr "Auteur"
+
+#: wp-events.php:982 wp-events.php:992 wp-events.php:1002 wp-events.php:1012
+msgid "Contributor"
+msgstr "Schrijver"
+
+#: wp-events.php:983 wp-events.php:993 wp-events.php:1003 wp-events.php:1013
+msgid "Subscriber"
+msgstr "Abonnee"
+
+#: wp-events.php:984
+msgid "Can add events and edit events they created."
+msgstr ""
+
+#: wp-events.php:987
+msgid "Edit events"
+msgstr ""
+
+#: wp-events.php:994
+msgid "Can add/edit/review anyone's events."
+msgstr ""
+
+#: wp-events.php:997
+msgid "Manage events"
+msgstr ""
+
+#: wp-events.php:1004
+msgid "Can add/edit/review/delete anyone's events."
+msgstr ""
+
+#: wp-events.php:1007
+msgid "Manage categories"
+msgstr ""
+
+#: wp-events.php:1014
+msgid "Can add/remove categories."
+msgstr "Kan categorieën toevoegen/verwijderen."
+
+#: wp-events.php:1018
+msgid "Update Options"
+msgstr "Werk opties bij"
+
+#: wp-events.php:1030
+msgid "Sidebar and widget"
+msgstr "Sidebar en widget"
+
+#: wp-events.php:1035 wp-events.php:1053 wp-events.php:1076 wp-events.php:1099
+msgid "Header"
+msgstr "Kop"
+
+#: wp-events.php:1038 wp-events.php:1061 wp-events.php:1084 wp-events.php:1107
+msgid "Body"
+msgstr "Tekst"
+
+#: wp-events.php:1039 wp-events.php:1054 wp-events.php:1062 wp-events.php:1077
+#: wp-events.php:1085 wp-events.php:1100 wp-events.php:1108
+msgid "Options"
+msgstr "Opties"
+
+#: wp-events.php:1042 wp-events.php:1065 wp-events.php:1088 wp-events.php:1111
+msgid "Footer"
+msgstr "Voettekst"
+
+#: wp-events.php:1048 wp-events.php:1071 wp-events.php:1094
+msgid "Page"
+msgstr "Pagina"
+
+#: wp-events.php:1048
+msgid "main list"
+msgstr "hoofdlijst"
+
+#: wp-events.php:1048
+msgid "Week"
+msgstr "Week"
+
+#: wp-events.php:1048
+msgid "7 days ahead"
+msgstr "7 dagen vooruit"
+
+#: wp-events.php:1057 wp-events.php:1080 wp-events.php:1103
+msgid "Default title"
+msgstr "Standaardtitel"
+
+#: wp-events.php:1058 wp-events.php:1081 wp-events.php:1104
+msgid "This only works if you use %category% in the header."
+msgstr "Dit is alleen mogelijk als je %category% in de kop gebruikt."
+
+#: wp-events.php:1058 wp-events.php:1081 wp-events.php:1104
+msgid "No HTML allowed."
+msgstr "Geen HTML toegestaan."
+
+#: wp-events.php:1071
+msgid "archive list"
+msgstr "archieflijst"
+
+#: wp-events.php:1094
+msgid "today's list"
+msgstr "lijst van vandaag"
+
+#: wp-events.php:1115
+msgid "Location separator"
+msgstr "Locatie-scheidingsteken"
+
+#: wp-events.php:1116
+msgid "Can be text also."
+msgstr "Mag ook tekst zijn."
+
+#: wp-events.php:1116
+msgid "Ending spaces allowed."
+msgstr "Spaties aan het einde toegestaan."
+
+#: wp-events.php:1121
+msgid "Update Templates"
+msgstr "Werk sjablonen bij"
+
+#: wp-events.php:1131
+msgid "Today"
+msgstr "Vandaag"
+
+#: wp-events.php:1135
+msgid "Hours"
+msgstr "Uren"
+
+#: wp-events.php:1147
+msgid "Days"
+msgstr "Dagen"
+
+#: wp-events.php:1151
+msgid "And"
+msgstr "En"
+
+#: wp-events.php:1155
+msgid "On"
+msgstr "Op"
+
+#: wp-events.php:1159
+msgid "In"
+msgstr "Over"
+
+#: wp-events.php:1163
+msgid "Ago"
+msgstr "Geleden"
+
+#: wp-events.php:1167
+msgid "Sidebar link"
+msgstr "Koppeling naar Sidebar"
+
+#: wp-events.php:1171
+msgid "Page link"
+msgstr "Koppeling naar pagina"
+
+#: wp-events.php:1175
+msgid "If there are no events to show"
+msgstr "Als er geen activiteiten zijn"
+
+#: wp-events.php:1179
+msgid "If the event already happened"
+msgstr "Als de activiteit al voorbij is"
+
+#: wp-events.php:1183
+msgid "If there are no events today"
+msgstr "Als er vandaag geen activiteiten zijn"
+
+#: wp-events.php:1187
+msgid "If the archive is empty"
+msgstr "Als het archief leeg is"
+
+#: wp-events.php:1191
+msgid "If there is an error"
+msgstr "Als er een fout is opgetreden"
+
+#: wp-events.php:1195
+msgid "If no duration is set for an event"
+msgstr "Als er geen tijdsduur is opgegeven"
+
+#: wp-events.php:1199
+msgid "If event is an all-day event"
+msgstr "Als een activiteit de hele dag duurt"
+
+#: wp-events.php:1205
+msgid "Update Language"
+msgstr "Werk taal bij"
+
+#: wp-events.php:1212
+msgid "Uninstaller"
+msgstr "Ontinstalleerder"
+
+#: wp-events.php:1217
+msgid ""
+"Events installs a table in MySQL. When you disable the plugin the table will "
+"not be deleted. To delete the table use the button below."
+msgstr ""
+"Activiteiten installeert een tabel in MySQL. Wanneer u de plugin uitschakelt "
+"wordt de tabel niet verwijderd. Gebruik de knop hieronder om de tabel te "
+"verwijderen."
+
+#: wp-events.php:1220
+msgid ""
+"This process is irreversible and will delete ALL scheduled events and "
+"associated options!"
+msgstr ""
+"Deze actie is onomkeerbaar en zal <strong>alle</strong> geplande "
+"activiteiten en associaties verwijderen!"
+
+#: wp-events.php:1225
+msgid "You are about to uninstall the events plugin"
+msgstr "U staat op het punt de Activiteitenplugin te verwijderen"
+
+#: wp-events.php:1225
+msgid "All scheduled events will be lost!"
+msgstr "Alle geplande activiteiten zullen verloren gaan!"
+
+#: wp-events.php:1225
+msgid "Uninstall Events"
+msgstr "Ontinstalleer Activiteiten"
+
+#~ msgid "Find me on <a href=\"%s\">%s</a>."
+#~ msgstr "Bezoek mij op <a href=\"%s\">%s</a>."
+
+#~ msgid ""
+#~ "The plugin page at <a href=\"%s\">%s</a>. Getting started, manuals and "
+#~ "more..."
+#~ msgstr ""
+#~ "De plugin pagina vind je op <a href=\"%s\">%s</a>. Uitleg, handleidingen "
+#~ "en meer..."
+
+#~ msgid "<a href=\"%s\">%s</a> for updates and notes about Events!"
+#~ msgstr "<a href=\"%s\">%s</a> voor updates en berichten over Activiteiten!"
+
+#~ msgid "Need help? <a href=\"%s\">%s</a>. Now with a search function!"
+#~ msgstr "Hulp nodig? <a href=\"%s\">%s</a>. Nu met een zoekfunctie!"
+
+#~ msgid ""
+#~ "Do you require more help than the forum can offer? <a href=\"%s\">Premium "
+#~ "Support</a> is available!"
+#~ msgstr ""
+#~ "Heb je meer hulp nodig dan het forum kan bieden? <a href=\"%s\">Premium "
+#~ "Support</a> is beschikbaar!"
+
+#~ msgid "Translation: ---"
+#~ msgstr ""
+#~ "Vertaling: Admire <a href=\"http://www.admire.nl\" target=\"_blank"
+#~ "\">admire.nl</a> met correcties door Gurth <a href=\"http://www."
+#~ "understairs.nl\">www.understairs.nl</a>"
+
+#~ msgid "Untitled"
+#~ msgstr "Naamloos"
+
+#~ msgid ""
+#~ "The MySQL table was not properly upgrade! Events cannot work properly "
+#~ "without this upgrade. Check your MySQL permissions and see if you have "
+#~ "ALTER rights (rights to alter existing tables)."
+#~ msgstr ""
+#~ "De MySQL-tabel is niet goed bijgewerkt! Activiteiten worden niet goed "
+#~ "weergegeven zonder deze upgrade. Controleer je MySQL-rechten and kijk of "
+#~ "je &bdquo;ALTER&rdquo;-rechten hebt (rechten om bestaande tabellen te "
+#~ "wijzigen)."
+
+#~ msgid "and mention any errors you saw/got and explain what you were doing!"
+#~ msgstr ""
+#~ "en noem alle problemen die je tegenkwam en leg uit wat je hebt gedaan!"
+
+#~ msgid "An unexpected error occured"
+#~ msgstr "Er is een onverwachte fout opgetreden"
+
+#~ msgid "Duplicate event"
+#~ msgstr "Kopieer activiteit"
+
+#~ msgid "Can add/edit/review events."
+#~ msgstr "Kan activiteiten toevoegen/wijzigen/beoordelen."
+
+#~ msgid "Delete Events"
+#~ msgstr "Verwijder activiteiten"
+
+#~ msgid "Can review/delete events."
+#~ msgstr "Kan activiteiten beoordelen/verwijderen."
+
+#~ msgid "Global template values"
+#~ msgstr "Globale sjabloon-waarden"
+
+#~ msgid ""
+#~ "Localization can usually be en_US. Changing this value should translate "
+#~ "the dates to your language."
+#~ msgstr ""
+#~ "Lokalisatie is normaal gesproken nl_NL. Het wijzigen van deze waarde zal "
+#~ "de datum in jouw taal weergeven."
+
+#~ msgid ""
+#~ "On Linux/Mac Osx (Darwin) you should use 'en_US' in the field. For "
+#~ "windows just 'en' should suffice."
+#~ msgstr ""
+#~ "Voor Linux/Mac OS X (Darwin) dien je 'nl_NL' in te voeren. Voor Windows, "
+#~ "is 'nl' meestal voldoende."
+
+#~ msgid "Your server most likely uses %s."
+#~ msgstr "Jouw server gebruikt waarschijnlijk %s."
+
+#~ msgid "Date localization"
+#~ msgstr "Lokalisatie datum"
+
+#~ msgid "An error has occurred; the feed is probably down. Try again later."
+#~ msgstr ""
+#~ "Er is een fout opgetreden; de feed is waarschijnlijk niet beschikbaar. "
+#~ "Probeer het later nog eens."
+
+#~ msgid "This only works if you use %s in the header."
+#~ msgstr "Dit is alleen mogelijk als je %s in de header gebruikt."
