@@ -4,7 +4,7 @@ Donate link: http://meandmymac.net/donate/?pk_campaign=wpevents-readme&pk_kwd=do
 Tags: events, event, countdown, plugin, admin, theme, template, event, archive, dashboard, widget
 Requires at least: 3.5
 Tested up to: 4.2.2
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 
 Create a list with events/appointments/concerts/future happenings and show them on your site. Includes optional widget and advanced page options.
 
@@ -57,6 +57,10 @@ Find out how to implement Events on pages, without a widget and many more option
 For help, go to the [support](http://wordpress.org/support/plugin/wp-events) pages.
 
 == Upgrade Notice ==
+
+= 2.3.2 =
+* IMPORTANT: Resave/re-set your chosen date and time formats for scheduled events in Events Settings
+* Sidebar now correctly uses date_i18n
 
 = 2.3.1 =
 * IMPORTANT: Resave/re-set your chosen date and time formats for scheduled events in Events Settings
