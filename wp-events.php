@@ -1,10 +1,10 @@
 <?php 
 /*
 Plugin Name: Events
-Plugin URI: https://ajdg.solutions/?pk_campaign=wpevents-pluginpage&pk_kwd=pluginurl
-Author: Arnan de Gans from AJdG Solutions
-Author URI: http://meandmymac.net?pk_campaign=wpevents-pluginpage&pk_kwd=authorurl
-Description: Enables you to show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
+Plugin URI: https://www.arnandegans.nl/?pk_campaign=wordpressorg
+Author: Arnan de Gans
+Author URI: http://meandmymac.net?pk_campaign=wordpressorg
+Description: Show a list of events with a static countdown to date. Sidebar widget and page template options. And more...
 Version: 2.3.3
 */
 
